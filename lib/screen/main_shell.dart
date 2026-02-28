@@ -51,8 +51,6 @@ class _MainShellState extends State<MainShell> {
     }
   }
 
-  // ✅ Chamado pelo SimulationsScreen depois de fechar o detalhe.
-  // Recarrega stats e simulações para reflectir o progresso novo.
   Future<void> _onSimulationDone(String id) async {
     await _loadData();
   }
@@ -156,8 +154,9 @@ class _NavItem extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color:
-              isActive ? AppColors.accent.withOpacity(0.1) : Colors.transparent,
+          color: isActive
+              ? AppColors.accent.withValues(alpha: 0.1)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(

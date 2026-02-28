@@ -39,7 +39,6 @@ class _LoginScreenState extends State<LoginScreen>
     super.dispose();
   }
 
-  // ── Validações ─────────────────────────────────────────────────────────────
   String? _validateEmail(String email) {
     if (email.isEmpty) return 'O email é obrigatório.';
     final regex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
@@ -54,12 +53,10 @@ class _LoginScreenState extends State<LoginScreen>
     return null;
   }
 
-  // ── Login ──────────────────────────────────────────────────────────────────
   Future<void> _login() async {
     final email = _emailCtrl.text.trim();
     final password = _passwordCtrl.text;
 
-    // Validação local antes de chamar o servidor
     final emailError = _validateEmail(email);
     final passwordError = _validatePassword(password);
 
@@ -93,7 +90,6 @@ class _LoginScreenState extends State<LoginScreen>
         ApiService.currentUserId = UserSession.userId;
         if (mounted) Navigator.pushReplacementNamed(context, Routes.dashboard);
       } else {
-        // Servidor respondeu com erro (401, 400, etc.)
         setState(() {
           _error = data['detail'] ?? 'Email ou senha incorretos.';
           _loading = false;
@@ -131,7 +127,6 @@ class _LoginScreenState extends State<LoginScreen>
               padding: const EdgeInsets.symmetric(horizontal: 28),
               child: Column(
                 children: [
-                  // ── Logo ───────────────────────────────────────────────────
                   Container(
                     width: 88,
                     height: 88,
@@ -164,8 +159,6 @@ class _LoginScreenState extends State<LoginScreen>
                       style: GoogleFonts.inter(
                           fontSize: 14, color: AppColors.textMuted)),
                   const SizedBox(height: 40),
-
-                  // ── Campos ─────────────────────────────────────────────────
                   _Field(
                     controller: _emailCtrl,
                     hint: 'Email',
@@ -188,8 +181,6 @@ class _LoginScreenState extends State<LoginScreen>
                       onPressed: () => setState(() => _obscure = !_obscure),
                     ),
                   ),
-
-                  // ── Esqueceste a senha ──────────────────────────────────────
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
@@ -200,8 +191,6 @@ class _LoginScreenState extends State<LoginScreen>
                               color: AppColors.accent, fontSize: 12)),
                     ),
                   ),
-
-                  // ── Erro ───────────────────────────────────────────────────
                   if (_error != null) ...[
                     Container(
                       padding: const EdgeInsets.all(12),
@@ -223,8 +212,6 @@ class _LoginScreenState extends State<LoginScreen>
                     ),
                     const SizedBox(height: 14),
                   ],
-
-                  // ── Botão Entrar ────────────────────────────────────────────
                   SizedBox(
                     width: double.infinity,
                     height: 54,
@@ -249,8 +236,6 @@ class _LoginScreenState extends State<LoginScreen>
                     ),
                   ),
                   const SizedBox(height: 16),
-
-                  // ── Links Criar Conta / Convidado ───────────────────────────
                   Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                     TextButton(
                       onPressed: () =>
@@ -281,7 +266,6 @@ class _LoginScreenState extends State<LoginScreen>
   }
 }
 
-// ── Campo de texto reutilizável ───────────────────────────────────────────────
 class _Field extends StatelessWidget {
   final TextEditingController controller;
   final String hint;

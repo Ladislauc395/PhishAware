@@ -4,7 +4,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'app_models.dart';
 import 'api_service.dart';
 
-// ── Modelo de Notificação ─────────────────────────────────────────────────────
 class AppNotification {
   final String id;
   final NotifType type;
@@ -25,7 +24,6 @@ class AppNotification {
 
 enum NotifType { xp, warning, achievement, tip, system }
 
-// ── Serviço de Notificações (singleton simples) ───────────────────────────────
 class NotificationService {
   static final NotificationService _i = NotificationService._();
   factory NotificationService() => _i;
@@ -61,9 +59,7 @@ class NotificationService {
 
   void clear() => _notifications.clear();
 
-  // Gera notificações baseadas nos stats reais do utilizador
   void syncFromStats(UserStats stats) {
-    // Evita duplicar ao re-sincronizar
     if (_notifications.any((n) => n.id == 'stats_sync')) return;
 
     if (stats.xp > 0) {
@@ -81,14 +77,12 @@ class NotificationService {
       add(NotifType.achievement, 'Veterano! 🎯',
           'Respondeste a ${stats.answeredTotal} questões. Estás a crescer!');
     }
-    // Dica diária sempre presente
     add(NotifType.tip, 'Dica do Dia 💡',
         'Verifica sempre o domínio do remetente antes de clicar em qualquer link. Pequenas diferenças escondem grandes ameaças.');
 
     _notifications
         .firstWhere((n) => true, orElse: () => _notifications.first)
         .id;
-    // Marca o sync feito
     _notifications.add(AppNotification(
       id: 'stats_sync',
       type: NotifType.system,
@@ -97,9 +91,7 @@ class NotificationService {
       timestamp: DateTime(2000),
       read: true,
     ));
-    // Remove o marcador invisível imediatamente mas fica no ID
     _notifications.removeWhere((n) => n.id == 'stats_sync');
-    // Re-add com flag
     final marker = AppNotification(
       id: 'stats_sync',
       type: NotifType.system,
@@ -112,7 +104,6 @@ class NotificationService {
   }
 }
 
-// ── Ecrã de Notificações ──────────────────────────────────────────────────────
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
 
@@ -176,9 +167,7 @@ class _NotificationsScreenState extends State<NotificationsScreen>
         child: FadeTransition(
           opacity: _fade,
           child: Column(children: [
-            // ── Header ──────────────────────────────────────────────────────
             _buildHeader(unread),
-            // ── Lista ───────────────────────────────────────────────────────
             Expanded(
               child: notifications.isEmpty
                   ? _EmptyState()
@@ -276,7 +265,6 @@ class _NotificationsScreenState extends State<NotificationsScreen>
   }
 }
 
-// ── Card de Notificação ───────────────────────────────────────────────────────
 class _NotifCard extends StatefulWidget {
   final AppNotification notif;
   final VoidCallback onTap;
@@ -363,7 +351,6 @@ class _NotifCardState extends State<_NotifCard>
                     ],
             ),
             child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              // Ícone
               Container(
                 width: 42,
                 height: 42,
@@ -378,7 +365,6 @@ class _NotifCardState extends State<_NotifCard>
                 ),
               ),
               const SizedBox(width: 12),
-              // Conteúdo
               Expanded(
                 child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,

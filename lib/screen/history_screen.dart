@@ -7,18 +7,15 @@ class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
 
   @override
-  // ✅ CORRIGIDO: estado público para que o MainShell possa chamar reload()
   HistoryScreenState createState() => HistoryScreenState();
 }
 
-// ✅ CORRIGIDO: classe pública (sem underscore) para ser acessível via GlobalKey
 class HistoryScreenState extends State<HistoryScreen> with RouteAware {
   List<HistoryEntry> _entries = [];
   bool _loading = true;
   String? _error;
   String _filter = 'all';
 
-  // ✅ RouteObserver para detectar quando voltamos a esta rota via Navigator.pop
   static final routeObserver = RouteObserver<ModalRoute<void>>();
 
   @override
@@ -30,7 +27,6 @@ class HistoryScreenState extends State<HistoryScreen> with RouteAware {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // ✅ Subscreve o RouteObserver para receber didPopNext
     final route = ModalRoute.of(context);
     if (route != null) {
       routeObserver.subscribe(this, route);
@@ -43,13 +39,11 @@ class HistoryScreenState extends State<HistoryScreen> with RouteAware {
     super.dispose();
   }
 
-  // ✅ Chamado automaticamente quando voltamos a esta rota (ex: Navigator.pop de outra screen)
   @override
   void didPopNext() {
     _load();
   }
 
-  // ✅ NOVO: método público para o MainShell forçar reload via GlobalKey
   void reload() => _load();
 
   Future<void> _load() async {
@@ -101,7 +95,6 @@ class HistoryScreenState extends State<HistoryScreen> with RouteAware {
       backgroundColor: AppColors.bg,
       body: SafeArea(
         child: Column(children: [
-          // ── Header ──────────────────────────────────────────────────────────
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
             child:
@@ -167,7 +160,6 @@ class HistoryScreenState extends State<HistoryScreen> with RouteAware {
               const SizedBox(height: 16),
             ]),
           ),
-
           Expanded(
             child: _loading
                 ? const Center(
@@ -193,8 +185,6 @@ class HistoryScreenState extends State<HistoryScreen> with RouteAware {
     );
   }
 }
-
-// ── Widgets auxiliares ────────────────────────────────────────────────────────
 
 class _ErrorState extends StatelessWidget {
   final String message;

@@ -17,8 +17,8 @@ def _hash(password: str) -> str:
     return hashlib.sha256(f"{salt}{password}".encode()).hexdigest()
 
 def _send_email(to: str, code: str) -> bool:
-    gmail_user = os.getenv("GMAIL_USER")       # teu email Gmail
-    gmail_password = os.getenv("GMAIL_APP_PASSWORD")  # senha de aplicação
+    gmail_user = os.getenv("GMAIL_USER")       
+    gmail_password = os.getenv("GMAIL_APP_PASSWORD") 
 
     try:
         msg = MIMEMultipart("alternative")
@@ -106,11 +106,11 @@ def login(body: LoginBody, db: Session = Depends(get_db)):
 def forgot_password(body: ForgotBody, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == body.email).first()
     if not user:
-        # Respond OK to prevent email enumeration
+        
         return {"ok": True, "message": "Se o email existir, receberás um código."}
     code = "".join(random.choices(string.digits, k=6))
     expires = datetime.now() + timedelta(minutes=15)
-    # Invalidate old codes
+    
     db.query(PasswordResetCode).filter(
         PasswordResetCode.email == body.email, PasswordResetCode.used == False
     ).update({"used": True})
@@ -148,10 +148,6 @@ def reset_password(body: ResetPasswordBody, db: Session = Depends(get_db)):
     reset.used = True
     db.commit()
     return {"ok": True}
-## Adiciona este endpoint ao ficheiro auth.py do backend
-## (ou ao ficheiro onde tens os outros endpoints de autenticação)
-
-## 1. No ficheiro auth.py — adiciona no final:
 
 
 
@@ -166,26 +162,14 @@ def delete_account(user_id: int, db: Session = Depends(get_db)):
         from fastapi import HTTPException
         raise HTTPException(status_code=404, detail="Utilizador não encontrado")
 
-    # 1. Elimina histórico
+    
     db.query(QuizHistory).filter(QuizHistory.user_id == user_id).delete()
 
-    # 2. Elimina stats
+    
     db.query(UserStats).filter(UserStats.user_id == user_id).delete()
 
-    # 3. Elimina o utilizador
+    
     db.delete(user)
     db.commit()
 
     return {"success": True, "message": "Conta eliminada com sucesso"}
-
-
-## 2. No ficheiro api_service.dart do Flutter — adiciona este método:
-
-## static Future<void> deleteAccount(int userId) async {
-##   final res = await http.delete(
-##     Uri.parse('$_base/auth/delete-account/$userId'),
-##   );
-##   if (res.statusCode != 200) {
-##     throw Exception('Erro ao eliminar conta: ${res.statusCode}');
-##   }
-## }    

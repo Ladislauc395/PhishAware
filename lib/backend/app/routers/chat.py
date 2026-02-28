@@ -34,18 +34,18 @@ async def chat(body: ChatMessage):
 
         client = Groq(api_key=api_key)
 
-        # Começa sempre com o system prompt
+        
         messages = [{"role": "system", "content": SYSTEM_PROMPT}]
 
-        # Adiciona o histórico da conversa
+        
         for m in (body.history or []):
             role = m.get("role", "user")
-            # Groq aceita "user" e "assistant" (não "model")
+            
             if role == "model":
                 role = "assistant"
             messages.append({"role": role, "content": m.get("text", "")})
 
-        # Adiciona a mensagem atual do utilizador
+        
         messages.append({"role": "user", "content": body.message})
 
         response = client.chat.completions.create(

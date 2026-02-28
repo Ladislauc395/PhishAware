@@ -43,7 +43,6 @@ class _RankingScreenState extends State<RankingScreen> {
       backgroundColor: AppColors.bg,
       body: SafeArea(
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          // Header
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
             child: Row(children: [
@@ -75,7 +74,6 @@ class _RankingScreenState extends State<RankingScreen> {
               ),
             ]),
           ),
-
           Expanded(
             child: _loading
                 ? const Center(
@@ -89,21 +87,16 @@ class _RankingScreenState extends State<RankingScreen> {
                         child: ListView(
                           padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
                           children: [
-                            // Top 3 podium (if enough users)
                             if (_ranking.length >= 3) ...[
                               _Podium(users: _ranking.take(3).toList()),
                               const SizedBox(height: 24),
                             ],
-
-                            // My position badge
                             if (myIndex >= 0) ...[
                               _MyPositionBanner(
                                   position: myIndex + 1,
                                   user: _ranking[myIndex]),
                               const SizedBox(height: 16),
                             ],
-
-                            // Full list
                             Text('Classificação Completa',
                                 style: GoogleFonts.spaceGrotesk(
                                     color: Colors.white,
@@ -112,8 +105,6 @@ class _RankingScreenState extends State<RankingScreen> {
                             const SizedBox(height: 12),
                             ..._ranking.asMap().entries.map((e) => _RankingTile(
                                 position: e.key + 1, user: e.value)),
-
-                            // Medals section
                             const SizedBox(height: 28),
                             Text('Medalhas & Conquistas',
                                 style: GoogleFonts.spaceGrotesk(
@@ -132,14 +123,12 @@ class _RankingScreenState extends State<RankingScreen> {
   }
 }
 
-// ── Podium ────────────────────────────────────────────────────────────────────
 class _Podium extends StatelessWidget {
   final List<RankingUser> users;
   const _Podium({required this.users});
 
   @override
   Widget build(BuildContext context) {
-    // Order: 2nd, 1st, 3rd
     final order = [users[1], users[0], users[2]];
     final heights = [60.0, 90.0, 45.0];
     final medals = ['🥈', '🥇', '🥉'];
@@ -240,7 +229,6 @@ class _PodiumItem extends StatelessWidget {
   }
 }
 
-// ── My Position ───────────────────────────────────────────────────────────────
 class _MyPositionBanner extends StatelessWidget {
   final int position;
   final RankingUser user;
@@ -299,7 +287,6 @@ class _MyPositionBanner extends StatelessWidget {
   }
 }
 
-// ── Ranking Tile ──────────────────────────────────────────────────────────────
 class _RankingTile extends StatelessWidget {
   final int position;
   final RankingUser user;
@@ -395,7 +382,6 @@ class _RankingTile extends StatelessWidget {
   }
 }
 
-// ── Medals ────────────────────────────────────────────────────────────────────
 class _MedalsGrid extends StatelessWidget {
   static const _medals = [
     ('🏆', 'Sentinela Elite', AppColors.warn),

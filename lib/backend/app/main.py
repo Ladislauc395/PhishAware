@@ -4,12 +4,12 @@ load_dotenv()
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import engine, Base
-import app.db_models  # noqa
+import app.db_models  
 from app.routers import chat
-from app.routers import stats, simulations, quiz as quiz_router
+from app.routers import stats, simulations, quiz as quiz_router, ai_simulations
 from app import auth
 
-# Criar todas as tabelas
+
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="PhishAware API")
@@ -22,11 +22,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(auth.router,           prefix="/auth",        tags=["Auth"])
-app.include_router(chat.router,           prefix="/chat",        tags=["Chat"])
-app.include_router(quiz_router.router,    prefix="/quiz",        tags=["Quiz"])
-app.include_router(simulations.router,    prefix="/simulations", tags=["Simulations"])
-app.include_router(stats.router,          prefix="/stats",       tags=["Stats"])
+app.include_router(auth.router,              prefix="/auth",            tags=["Auth"])
+app.include_router(chat.router,              prefix="/chat",            tags=["Chat"])
+app.include_router(quiz_router.router,       prefix="/quiz",            tags=["Quiz"])
+app.include_router(simulations.router,       prefix="/simulations",     tags=["Simulations"])
+app.include_router(ai_simulations.router,    prefix="/ai-simulations",  tags=["AI Simulations"])
+app.include_router(stats.router,             prefix="/stats",           tags=["Stats"])
 
 @app.get("/")
 def root():

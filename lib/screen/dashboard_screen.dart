@@ -25,7 +25,7 @@ class _DashboardScreenState extends State<DashboardScreen>
   late AnimationController _ctrl;
   late Animation<double> _ringAnim;
   List<HistoryEntry> _recentActivity = [];
-  bool _activityLoading = false; // ✅ FIX: track loading state
+  bool _activityLoading = false;
 
   @override
   void initState() {
@@ -38,7 +38,6 @@ class _DashboardScreenState extends State<DashboardScreen>
   }
 
   Future<void> _loadActivity() async {
-    // ✅ FIX: guard against concurrent calls and update loading state
     if (_activityLoading) return;
     setState(() => _activityLoading = true);
     try {
@@ -58,9 +57,6 @@ class _DashboardScreenState extends State<DashboardScreen>
   @override
   void didUpdateWidget(DashboardScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // ✅ FIX: watch all meaningful stat changes, including answeredTotal
-    // (covers cases where user answers everything wrong: xp stays 0 but
-    // answeredTotal increments, so activity still reloads)
     if (oldWidget.stats.xp != widget.stats.xp ||
         oldWidget.stats.correctTotal != widget.stats.correctTotal ||
         oldWidget.stats.answeredTotal != widget.stats.answeredTotal) {
@@ -82,7 +78,6 @@ class _DashboardScreenState extends State<DashboardScreen>
         color: AppColors.accent,
         backgroundColor: AppColors.surface,
         onRefresh: () async {
-          // ✅ FIX: properly await both refresh operations in parallel
           await Future.wait([
             Future(widget.onRefresh),
             _loadActivity(),
@@ -97,7 +92,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                 onProfile: () =>
                     Navigator.pushNamed(context, Routes.profile).then((_) {
                       widget.onRefresh();
-                      _loadActivity(); // ✅ FIX: reload activity after returning from profile
+                      _loadActivity();
                     })),
             const SizedBox(height: 32),
             _RiskRing(stats: widget.stats, animation: _ringAnim),
@@ -106,13 +101,11 @@ class _DashboardScreenState extends State<DashboardScreen>
             const SizedBox(height: 28),
             _QuickActions(
               onNavigate: widget.onNavigate,
-              onReturnFromRoute:
-                  _loadActivity, // ✅ FIX: reload when returning from IA
+              onReturnFromRoute: _loadActivity,
             ),
             const SizedBox(height: 28),
             _CategoryBreakdown(stats: widget.stats),
             const SizedBox(height: 28),
-            // ✅ FIX: pass loading state so widget can show a subtle indicator
             _RecentActivity(
               entries: _recentActivity,
               isLoading: _activityLoading,
@@ -124,7 +117,6 @@ class _DashboardScreenState extends State<DashboardScreen>
   }
 }
 
-// ── Header ────────────────────────────────────────────────────────────────────
 class _Header extends StatelessWidget {
   final String userName, avatarLetter;
   final VoidCallback onProfile;
@@ -176,7 +168,6 @@ class _Header extends StatelessWidget {
   }
 }
 
-// ── Risk Ring ─────────────────────────────────────────────────────────────────
 class _RiskRing extends StatelessWidget {
   final UserStats stats;
   final Animation<double> animation;
@@ -339,7 +330,6 @@ class _ArcPainter extends CustomPainter {
       old.value != value || old.color != color;
 }
 
-// ── XP Bar ────────────────────────────────────────────────────────────────────
 class _XpBar extends StatelessWidget {
   final UserStats stats;
   const _XpBar({required this.stats});
@@ -402,7 +392,6 @@ class _XpBar extends StatelessWidget {
   }
 }
 
-// ── Quick Actions ─────────────────────────────────────────────────────────────
 class _QuickActions extends StatelessWidget {
   final ValueChanged<AppTab> onNavigate;
   final VoidCallback onReturnFromRoute; // ✅ FIX: callback for route returns
@@ -439,7 +428,6 @@ class _QuickActions extends StatelessWidget {
             icon: Icons.smart_toy_outlined,
             label: 'IA',
             color: AppColors.accent2,
-            // ✅ FIX: reload activity when returning from the IA assistant route
             onTap: () => Navigator.pushNamed(context, Routes.assistant)
                 .then((_) => onReturnFromRoute())),
       ]),
@@ -481,7 +469,6 @@ class _ActionBtn extends StatelessWidget {
       );
 }
 
-// ── Category Breakdown (real data from DB) ───────────────────────────────────
 class _CategoryBreakdown extends StatelessWidget {
   final UserStats stats;
   const _CategoryBreakdown({required this.stats});
@@ -548,10 +535,9 @@ class _CategoryBreakdown extends StatelessWidget {
   }
 }
 
-// ── Recent Activity (real data from DB) ───────────────────────────────────────
 class _RecentActivity extends StatelessWidget {
   final List<HistoryEntry> entries;
-  final bool isLoading; // ✅ FIX: show skeleton/spinner while reloading
+  final bool isLoading;
   const _RecentActivity({required this.entries, this.isLoading = false});
 
   @override
@@ -564,7 +550,6 @@ class _RecentActivity extends StatelessWidget {
                 fontSize: 16,
                 fontWeight: FontWeight.w600)),
         Row(children: [
-          // ✅ FIX: subtle loading indicator next to the title
           if (isLoading) ...[
             const SizedBox(
               width: 12,
@@ -604,7 +589,6 @@ class _RecentActivity extends StatelessWidget {
           ])),
         )
       else if (entries.isEmpty && isLoading)
-        // ✅ FIX: skeleton placeholder while first load is in progress
         Container(
           height: 80,
           decoration: BoxDecoration(

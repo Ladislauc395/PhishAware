@@ -46,8 +46,6 @@ class _TipsScreenState extends State<TipsScreen>
             const SizedBox(height: 16),
           ]),
         ),
-
-        // Tab bar
         Container(
           margin: const EdgeInsets.symmetric(horizontal: 24),
           decoration: BoxDecoration(
@@ -78,7 +76,6 @@ class _TipsScreenState extends State<TipsScreen>
           ),
         ),
         const SizedBox(height: 12),
-
         Expanded(
           child: TabBarView(
             controller: _tabCtrl,
@@ -95,7 +92,6 @@ class _TipsScreenState extends State<TipsScreen>
   }
 }
 
-// ── Tip Data ──────────────────────────────────────────────────────────────────
 const _emailTips = [
   _TipData(
       'Verifica sempre o remetente',
@@ -195,7 +191,6 @@ const _mobileTips = [
       AppColors.danger),
 ];
 
-// ── Widgets ───────────────────────────────────────────────────────────────────
 class _TipData {
   final String title, description;
   final IconData icon;
@@ -339,7 +334,6 @@ class _BestPracticesTab extends StatelessWidget {
           color: AppColors.accent2,
         ),
         const SizedBox(height: 20),
-        // Quick reference card
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(

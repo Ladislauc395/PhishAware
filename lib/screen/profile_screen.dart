@@ -29,7 +29,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _stats = UserStats.fromJson(data);
         _loading = false;
       });
-      // Sincroniza notificações com os stats reais
       NotificationService().syncFromStats(_stats);
     } catch (_) {
       if (!mounted) return;
@@ -50,7 +49,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => const NotificationsScreen()),
-    ).then((_) => setState(() {})); // refresh badge ao voltar
+    ).then((_) => setState(() {}));
   }
 
   void _openSettings() {
@@ -78,7 +77,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   physics: const AlwaysScrollableScrollPhysics(),
                   padding: const EdgeInsets.fromLTRB(24, 24, 24, 40),
                   child: Column(children: [
-                    // ── Header ──────────────────────────────────────────────
                     Row(children: [
                       GestureDetector(
                         onTap: () => Navigator.pop(context),
@@ -100,7 +98,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               fontSize: 18,
                               fontWeight: FontWeight.w600)),
                       const Spacer(),
-                      // Botão de configurações
                       GestureDetector(
                         onTap: _openSettings,
                         child: Container(
@@ -115,7 +112,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      // Botão de notificações com badge
                       GestureDetector(
                         onTap: _openNotifications,
                         child: Stack(clipBehavior: Clip.none, children: [
@@ -156,8 +152,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ]),
                     const SizedBox(height: 32),
-
-                    // ── Avatar ───────────────────────────────────────────────
                     Stack(alignment: Alignment.bottomRight, children: [
                       Container(
                         width: 96,
@@ -214,8 +208,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               color: AppColors.textMuted, fontSize: 12)),
                     ],
                     const SizedBox(height: 28),
-
-                    // ── Stats grid ───────────────────────────────────────────
                     Row(children: [
                       _StatCard(
                           icon: Icons.bolt,
@@ -237,8 +229,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           label: 'RESILIÊNCIA'),
                     ]),
                     const SizedBox(height: 12),
-
-                    // ── Category breakdown ───────────────────────────────────
                     Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
@@ -307,8 +297,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ]),
                     ),
                     const SizedBox(height: 12),
-
-                    // ── Menu items ───────────────────────────────────────────
                     Container(
                       decoration: BoxDecoration(
                         color: AppColors.surface,
@@ -343,8 +331,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ]),
                     ),
                     const SizedBox(height: 20),
-
-                    // ── Logout ───────────────────────────────────────────────
                     SizedBox(
                       width: double.infinity,
                       child: OutlinedButton.icon(
@@ -372,7 +358,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 }
 
-// ── Widgets auxiliares ────────────────────────────────────────────────────────
 class _StatCard extends StatelessWidget {
   final IconData icon;
   final Color iconColor;

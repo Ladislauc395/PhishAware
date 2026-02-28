@@ -1,29 +1,27 @@
 plugins {
     id("com.android.application")
-    id("kotlin-android")
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
+    id("org.jetbrains.kotlin.android")  // nome completo, como no novo
     id("dev.flutter.flutter-gradle-plugin")
 }
 
 android {
-    namespace = "com.example.phishing"
-    compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    namespace = "com.example.phishing"  // mude para o seu pacote real se quiser
+
+    compileSdk = flutter.compileSdkVersion     // ← volte para isso!
+    ndkVersion = flutter.ndkVersion            // mantenha se tiver
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
+    kotlinOptions {                            // correto, como você já tem
+        jvmTarget = "17"                       // ou JavaVersion.VERSION_17.toString() se preferir
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.phishing"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
+        applicationId = "com.example.phishing" // mude para único seu
+
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
@@ -31,9 +29,7 @@ android {
     }
 
     buildTypes {
-        release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
+        getByName("release") {                 // ou release { ... } se for Groovy
             signingConfig = signingConfigs.getByName("debug")
         }
     }

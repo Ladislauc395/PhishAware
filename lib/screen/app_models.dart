@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 
-// ── Navigation ────────────────────────────────────────────────────────────────
-// ✅ histórico NÃO é tab — é acedido via Navigator.push a partir do dashboard
 enum AppTab { dashboard, simulations, tips, ranking }
 
-// ── Colors ────────────────────────────────────────────────────────────────────
 class AppColors {
   AppColors._();
   static const Color bg = Color(0xFF0F1318);
@@ -21,7 +18,6 @@ class AppColors {
   static const Color text = Color(0xFFE2E8F0);
 }
 
-// ── Routes ────────────────────────────────────────────────────────────────────
 class Routes {
   Routes._();
   static const String login = '/';
@@ -35,7 +31,6 @@ class Routes {
   static const String history = '/history';
 }
 
-// ── Session ───────────────────────────────────────────────────────────────────
 class UserSession {
   static int userId = 1;
   static String userName = 'Utilizador';
@@ -50,7 +45,6 @@ class UserSession {
   }
 }
 
-// ── Models ────────────────────────────────────────────────────────────────────
 class UserStats {
   final int resilience;
   final int xp;

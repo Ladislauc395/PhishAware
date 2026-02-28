@@ -59,7 +59,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
         });
         return;
       }
-      // Auto-login after register
       UserSession.setFromLogin(data);
       ApiService.currentUserId = UserSession.userId;
       if (mounted) Navigator.pushReplacementNamed(context, Routes.dashboard);
@@ -81,7 +80,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Back button
               GestureDetector(
                 onTap: () => Navigator.pop(context),
                 child: Container(
@@ -96,7 +94,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
               ),
               const SizedBox(height: 32),
-
               Text('Criar Conta',
                   style: GoogleFonts.spaceGrotesk(
                       color: Colors.white,
@@ -107,8 +104,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   style: GoogleFonts.inter(
                       color: AppColors.textMuted, fontSize: 14)),
               const SizedBox(height: 36),
-
-              // Avatar preview
               Center(
                 child: Container(
                   width: 72,
@@ -136,7 +131,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
               ),
               const SizedBox(height: 28),
-
               _Label('Nome completo'),
               const SizedBox(height: 8),
               _Field(
@@ -146,7 +140,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 onChanged: (_) => setState(() {}),
               ),
               const SizedBox(height: 16),
-
               _Label('Email'),
               const SizedBox(height: 8),
               _Field(
@@ -156,7 +149,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 keyboardType: TextInputType.emailAddress,
               ),
               const SizedBox(height: 16),
-
               _Label('Senha'),
               const SizedBox(height: 8),
               _Field(
@@ -173,7 +165,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-
               _Label('Confirmar Senha'),
               const SizedBox(height: 8),
               _Field(
@@ -189,7 +180,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   onPressed: () => setState(() => _obscure2 = !_obscure2),
                 ),
               ),
-
               if (_error != null) ...[
                 const SizedBox(height: 16),
                 Container(
@@ -210,7 +200,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ]),
                 ),
               ],
-
               const SizedBox(height: 28),
               SizedBox(
                 width: double.infinity,
@@ -235,7 +224,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               fontSize: 16, fontWeight: FontWeight.w700)),
                 ),
               ),
-
               const SizedBox(height: 16),
               Center(
                 child: TextButton(

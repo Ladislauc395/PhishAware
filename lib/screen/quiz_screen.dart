@@ -166,7 +166,6 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
   }
 }
 
-// ── Quiz Header ───────────────────────────────────────────────────────────────
 class _QuizHeader extends StatelessWidget {
   final int currentIndex;
   final int total;
@@ -242,7 +241,6 @@ class _QuizHeader extends StatelessWidget {
   }
 }
 
-// ── Question Card ─────────────────────────────────────────────────────────────
 class _QuestionCard extends StatelessWidget {
   final QuizQuestion question;
   const _QuestionCard({required this.question});
@@ -312,7 +310,6 @@ class _QuestionCard extends StatelessWidget {
   }
 }
 
-// ── Option Tile ───────────────────────────────────────────────────────────────
 class _OptionTile extends StatelessWidget {
   final QuizOption option;
   final bool isSelected;
@@ -380,7 +377,6 @@ class _OptionTile extends StatelessWidget {
   }
 }
 
-// ── Explanation ───────────────────────────────────────────────────────────────
 class _ExplanationCard extends StatelessWidget {
   final bool isCorrect;
   final String explanation;
@@ -419,7 +415,6 @@ class _ExplanationCard extends StatelessWidget {
   }
 }
 
-// ── Next Button ───────────────────────────────────────────────────────────────
 class _NextBtn extends StatelessWidget {
   final bool isLast;
   final VoidCallback onTap;
@@ -455,7 +450,6 @@ class _NextBtn extends StatelessWidget {
   }
 }
 
-// ── Loading / Error Views ─────────────────────────────────────────────────────
 class _LoadingView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {

@@ -27,7 +27,6 @@ class ApiService {
     return jsonDecode(res.body);
   }
 
-  // ── Auth ────────────────────────────────────────────────────────────────────
   static Future<Map<String, dynamic>> register(
           String name, String email, String password) =>
       _post('/auth/register',
@@ -47,7 +46,6 @@ class ApiService {
       _post('/auth/reset-password',
           {'email': email, 'code': code, 'new_password': newPassword});
 
-  // ── Quiz ────────────────────────────────────────────────────────────────────
   static Future<List<dynamic>> getQuestions() async {
     final res = await http.get(Uri.parse('$_base/quiz/questions'));
     return jsonDecode(res.body);
@@ -61,7 +59,6 @@ class ApiService {
         'user_id': currentUserId,
       });
 
-  // ── Simulations ─────────────────────────────────────────────────────────────
   static Future<List<dynamic>> getSimulations() async {
     final res =
         await http.get(Uri.parse('$_base/simulations/?user_id=$currentUserId'));
@@ -78,7 +75,6 @@ class ApiService {
     });
   }
 
-  // ── Stats ───────────────────────────────────────────────────────────────────
   static Future<Map<String, dynamic>> getStats() =>
       _get('/stats/?user_id=$currentUserId');
 
@@ -124,7 +120,6 @@ class ApiService {
     );
   }
 
-  // ── Chat ────────────────────────────────────────────────────────────────────
   static Future<String> sendChatMessage(
       String message, List<Map<String, String>> history) async {
     final res =

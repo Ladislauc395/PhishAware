@@ -81,8 +81,6 @@ class _ResultScreenState extends State<ResultScreen>
             child: Column(
               children: [
                 const Spacer(),
-
-                // Animated trophy/emoji
                 ScaleTransition(
                   scale: _scaleAnim,
                   child: Container(
@@ -105,7 +103,6 @@ class _ResultScreenState extends State<ResultScreen>
                   ),
                 ),
                 const SizedBox(height: 28),
-
                 Text(title,
                     style: GoogleFonts.spaceGrotesk(
                         color: Colors.white,
@@ -116,8 +113,6 @@ class _ResultScreenState extends State<ResultScreen>
                     style: GoogleFonts.inter(
                         color: AppColors.textMuted, fontSize: 14)),
                 const SizedBox(height: 36),
-
-                // Score card
                 Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
@@ -132,7 +127,6 @@ class _ResultScreenState extends State<ResultScreen>
                     ],
                   ),
                   child: Column(children: [
-                    // Circular score
                     SizedBox(
                       width: 120,
                       height: 120,
@@ -170,10 +164,7 @@ class _ResultScreenState extends State<ResultScreen>
                     ),
                   ]),
                 ),
-
                 const Spacer(),
-
-                // Buttons
                 SizedBox(
                   width: double.infinity,
                   height: 54,
@@ -248,9 +239,7 @@ class _ScorePainter extends CustomPainter {
       ..strokeWidth = 8
       ..strokeCap = StrokeCap.round;
 
-    // Track
     canvas.drawCircle(c, r, paint..color = AppColors.surface2);
-    // Arc
     if (value > 0) {
       canvas.drawArc(
         Rect.fromCircle(center: c, radius: r),

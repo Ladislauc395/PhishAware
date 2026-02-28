@@ -135,15 +135,12 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.bg,
-      // ✅ CORRIGIDO: resizeToAvoidBottomInset evita overflow quando o teclado abre
       resizeToAvoidBottomInset: true,
       body: SafeArea(
         child: SingleChildScrollView(
-          // ✅ CORRIGIDO: SingleChildScrollView elimina o overflow de 26px
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           padding: const EdgeInsets.fromLTRB(28, 24, 28, 28),
           child: ConstrainedBox(
-            // altura mínima = ecrã disponível para o botão ficar sempre visível
             constraints: BoxConstraints(
               minHeight: MediaQuery.of(context).size.height -
                   MediaQuery.of(context).padding.top -
@@ -172,8 +169,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     ),
                   ),
                   const SizedBox(height: 32),
-
-                  // Step indicator
                   Row(
                     children: List.generate(
                         3,
@@ -191,7 +186,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                             )),
                   ),
                   const SizedBox(height: 28),
-
                   if (_step == 0)
                     _StepEmail(
                       emailCtrl: _emailCtrl,
@@ -236,7 +230,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   }
 }
 
-// ── Step 0: Email ─────────────────────────────────────────────────────────────
 class _StepEmail extends StatelessWidget {
   final TextEditingController emailCtrl;
   final bool loading;
@@ -280,7 +273,6 @@ class _StepEmail extends StatelessWidget {
   }
 }
 
-// ── Step 1: Code ──────────────────────────────────────────────────────────────
 class _StepCode extends StatelessWidget {
   final String email;
   final List<TextEditingController> digitCtrl;
@@ -456,7 +448,6 @@ class _StepNewPassword extends StatelessWidget {
   }
 }
 
-// ── Shared Widgets ────────────────────────────────────────────────────────────
 Widget _buildField(
   TextEditingController ctrl,
   String hint,
