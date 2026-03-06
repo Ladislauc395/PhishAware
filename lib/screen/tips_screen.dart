@@ -815,7 +815,6 @@ class _GoldenRulesCard extends StatelessWidget {
         border: Border.all(color: AppColors.accent.withAlpha(30)),
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        // Header
         Row(children: [
           Container(
             padding: const EdgeInsets.all(8),
@@ -827,19 +826,24 @@ class _GoldenRulesCard extends StatelessWidget {
                 color: AppColors.accent, size: 18),
           ),
           const SizedBox(width: 12),
-          Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text('REGRA DE OURO',
-                style: GoogleFonts.jetBrainsMono(
-                    color: AppColors.accent,
-                    fontSize: 9,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1.5)),
-            Text('Os 4 mandamentos de segurança',
-                style: GoogleFonts.syne(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700)),
-          ]),
+          Expanded(
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text('REGRA DE OURO',
+                  style: GoogleFonts.jetBrainsMono(
+                      color: AppColors.accent,
+                      fontSize: 9,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1.5)),
+              Text('Os 4 mandamentos de segurança',
+                  style: GoogleFonts.syne(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1),
+            ]),
+          ),
         ]),
         const SizedBox(height: 16),
         Container(height: 1, color: AppColors.accent.withAlpha(20)),
