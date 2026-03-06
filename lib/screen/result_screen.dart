@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:math' as math;
-import 'app_models.dart';
+import '../models/app_models.dart';
 
 class ResultScreen extends StatefulWidget {
   const ResultScreen({super.key});

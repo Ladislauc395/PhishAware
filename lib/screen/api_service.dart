@@ -12,16 +12,24 @@ class ApiService {
   static String get baseUrl => _base;
 
   static int currentUserId = 1;
+  static String authToken = '';
 
   static Future<Map<String, dynamic>> _get(String path) async {
-    final res = await http.get(Uri.parse('$_base$path'));
+    final res = await http.get(
+      Uri.parse('$_base$path'),
+      headers:
+          authToken.isNotEmpty ? {'Authorization': 'Bearer $authToken'} : {},
+    );
     return jsonDecode(res.body);
   }
 
   static Future<Map<String, dynamic>> _post(String path, Map body) async {
     final res = await http.post(
       Uri.parse('$_base$path'),
-      headers: {'Content-Type': 'application/json'},
+      headers: {
+        'Content-Type': 'application/json',
+        if (authToken.isNotEmpty) 'Authorization': 'Bearer $authToken',
+      },
       body: jsonEncode(body),
     );
     return jsonDecode(res.body);
@@ -126,4 +134,48 @@ class ApiService {
         await _post('/chat/message', {'message': message, 'history': history});
     return res['reply'] ?? 'Sem resposta.';
   }
+
+  /// Gera uma simulação AI via backend (a chave Groq fica segura no servidor).
+  /// Substitui a chamada direta ao GroqService no cliente.
+  static Future<Map<String, dynamic>> generateAiSimulation({
+    String? type,
+    String? difficulty,
+    bool? isPhishing,
+  }) async {
+    final body = <String, dynamic>{};
+    if (type != null && type.isNotEmpty) body['type'] = type;
+    if (difficulty != null && difficulty.isNotEmpty)
+      body['difficulty'] = difficulty;
+    if (isPhishing != null) body['is_phishing'] = isPhishing;
+    final res = await http.post(
+      Uri.parse('$_base/ai-simulations/generate'),
+      headers: {
+        'Content-Type': 'application/json',
+        if (authToken.isNotEmpty) 'Authorization': 'Bearer $authToken',
+      },
+      body: jsonEncode(body),
+    );
+    if (res.statusCode != 200) {
+      final msg = jsonDecode(res.body)['detail'] ?? 'Erro ${res.statusCode}';
+      throw Exception(msg);
+    }
+    return jsonDecode(res.body) as Map<String, dynamic>;
+  }
+
+  static Future<Map<String, dynamic>> getAdvancedSim(String simType) {
+    // 'search' type maps to 'search_phishing' on the backend
+    final endpoint = simType == 'search' ? 'search_phishing' : simType;
+    return _get('/advanced-sims/$endpoint/random');
+  }
+
+  static Future<Map<String, dynamic>> submitAdvancedSimAnswer(
+          String simType, String simId, bool isPhishing,
+          {int? timeSeconds}) =>
+      _post('/advanced-sims/answer', {
+        'sim_type': simType,
+        'sim_id': simId,
+        'user_answer': isPhishing,
+        'user_id': currentUserId,
+        if (timeSeconds != null) 'time_spent_seconds': timeSeconds,
+      });
 }

@@ -3,7 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'app_models.dart';
+import '../models/app_models.dart';
 import 'api_service.dart';
 import 'ai_lab_screen.dart';
 

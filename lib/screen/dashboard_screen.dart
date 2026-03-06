@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'app_models.dart';
+import '../models/app_models.dart';
 import 'api_service.dart';
 
 class DashboardScreen extends StatefulWidget {

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'app_models.dart';
+import '../models/app_models.dart';
 import 'api_service.dart';
 import 'simulation_screen.dart';
 
@@ -10,12 +10,18 @@ class AppPreferences {
   static bool hapticEnabled = true;
   static bool showXpAnimations = true;
   static bool showLeaderboard = true;
+  static bool darkMode = true;
+
+  static final _themeNotifier = ValueNotifier<bool>(true); // true = dark
+  static ValueNotifier<bool> get themeNotifier => _themeNotifier;
 
   static Future<void> load() async {
     final prefs = await SharedPreferences.getInstance();
     hapticEnabled = prefs.getBool('haptic') ?? true;
     showXpAnimations = prefs.getBool('xp_anim') ?? true;
     showLeaderboard = prefs.getBool('show_ranking') ?? true;
+    darkMode = prefs.getBool('dark_mode') ?? true;
+    _themeNotifier.value = darkMode;
   }
 
   static Future<void> _save() async {
@@ -23,6 +29,7 @@ class AppPreferences {
     await prefs.setBool('haptic', hapticEnabled);
     await prefs.setBool('xp_anim', showXpAnimations);
     await prefs.setBool('show_ranking', showLeaderboard);
+    await prefs.setBool('dark_mode', darkMode);
   }
 
   static Future<void> setHaptic(bool v) async {
@@ -40,6 +47,12 @@ class AppPreferences {
     showLeaderboard = v;
     await _save();
     await ApiService.updatePreferences(showInRanking: v);
+  }
+
+  static Future<void> setDarkMode(bool v) async {
+    darkMode = v;
+    _themeNotifier.value = v;
+    await _save();
   }
 }
 
@@ -248,6 +261,7 @@ class _SettingsScreenState extends State<SettingsScreen>
   bool _xpAnim = true;
   bool _ranking = true;
   bool _savingRanking = false;
+  bool _darkMode = true;
 
   @override
   void initState() {
@@ -274,6 +288,7 @@ class _SettingsScreenState extends State<SettingsScreen>
       _haptic = AppPreferences.hapticEnabled;
       _xpAnim = AppPreferences.showXpAnimations;
       _ranking = AppPreferences.showLeaderboard;
+      _darkMode = AppPreferences.darkMode;
       _prefsLoaded = true;
     });
   }
@@ -282,6 +297,13 @@ class _SettingsScreenState extends State<SettingsScreen>
   void dispose() {
     _ctrl.dispose();
     super.dispose();
+  }
+
+  Future<void> _toggleDarkMode(bool v) async {
+    setState(() => _darkMode = v);
+    await AppPreferences.setDarkMode(v);
+    _snack(
+        v ? 'Modo escuro activado' : 'Modo claro activado', AppColors.accent);
   }
 
   Future<void> _toggleHaptic(bool v) async {
@@ -406,6 +428,18 @@ class _SettingsScreenState extends State<SettingsScreen>
                               fontWeight: FontWeight.w700)),
                     ]),
                     const SizedBox(height: 28),
+                    _SectionLabel('Aparência'),
+                    const SizedBox(height: 10),
+                    _SettingsCard(children: [
+                      _ToggleRow(
+                          icon: '🌙',
+                          iconColor: const Color(0xFF8B5CF6),
+                          title: 'Modo Escuro',
+                          subtitle: 'Alterna entre tema escuro e claro',
+                          value: _darkMode,
+                          onChanged: _toggleDarkMode),
+                    ]),
+                    const SizedBox(height: 20),
                     _SectionLabel('Experiência'),
                     const SizedBox(height: 10),
                     _SettingsCard(children: [
