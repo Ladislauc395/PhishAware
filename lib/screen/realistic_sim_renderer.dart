@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'groq_service.dart';
+import '../models/app_models.dart';
 
 class RealisticSimRenderer extends StatelessWidget {
   final AiScenario scenario;
@@ -110,7 +111,8 @@ class _BrandMark extends StatelessWidget {
     Widget logo = ClipRRect(
       borderRadius: BorderRadius.circular(size * 0.2),
       child: url.isNotEmpty
-          ? Image.network(url,
+          ? Image.network(
+              url,
               width: size,
               height: size,
               fit: BoxFit.contain,
@@ -118,7 +120,8 @@ class _BrandMark extends StatelessWidget {
                   _FallbackBrand(scenario: scenario, size: size),
               loadingBuilder: (_, child, prog) => prog == null
                   ? child
-                  : _FallbackBrand(scenario: scenario, size: size))
+                  : _FallbackBrand(scenario: scenario, size: size),
+            )
           : _FallbackBrand(scenario: scenario, size: size),
     );
 
@@ -195,12 +198,14 @@ class _FallbackBrand extends StatelessWidget {
         borderRadius: BorderRadius.circular(size * 0.2),
       ),
       child: Center(
-        child: Text(label,
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: size * 0.38,
-              fontWeight: FontWeight.w800,
-            )),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: size * 0.38,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
       ),
     );
   }
@@ -295,59 +300,83 @@ class _FakeAttachment extends StatelessWidget {
             color: dangerBorder
                 ? const Color(0xFFFF4444).withAlpha(100)
                 : inspectMode && isTapped
-                    ? const Color(0xFFFFCC00)
-                    : _typeColor.withAlpha(60),
+                ? const Color(0xFFFFCC00)
+                : _typeColor.withAlpha(60),
             width: isTapped ? 2 : 1,
           ),
         ),
-        child: Row(mainAxisSize: MainAxisSize.min, children: [
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: _typeColor.withAlpha(30),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: _typeColor.withAlpha(80)),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: _typeColor.withAlpha(30),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: _typeColor.withAlpha(80)),
+              ),
+              child: Icon(_icon, color: _typeColor, size: 18),
             ),
-            child: Icon(_icon, color: _typeColor, size: 18),
-          ),
-          const SizedBox(width: 10),
-          Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(name,
-                style: GoogleFonts.inter(
+            const SizedBox(width: 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  style: GoogleFonts.inter(
                     color: Colors.white,
                     fontSize: 12,
-                    fontWeight: FontWeight.w600),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis),
-            const SizedBox(height: 2),
-            Row(children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-                decoration: BoxDecoration(
-                  color: _typeColor,
-                  borderRadius: BorderRadius.circular(4),
+                    fontWeight: FontWeight.w600,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                child: Text(_typeLabel,
-                    style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 8,
-                        fontWeight: FontWeight.w700)),
-              ),
-              const SizedBox(width: 6),
-              Text(size,
-                  style:
-                      GoogleFonts.inter(color: Colors.white38, fontSize: 10)),
-              if (dangerBorder) ...[
-                const SizedBox(width: 6),
-                const Icon(Icons.warning_amber,
-                    color: Color(0xFFFF4444), size: 12),
+                const SizedBox(height: 2),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 5,
+                        vertical: 1,
+                      ),
+                      decoration: BoxDecoration(
+                        color: _typeColor,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        _typeLabel,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 8,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      size,
+                      style: GoogleFonts.inter(
+                        color: Colors.white38,
+                        fontSize: 10,
+                      ),
+                    ),
+                    if (dangerBorder) ...[
+                      const SizedBox(width: 6),
+                      const Icon(
+                        Icons.warning_amber,
+                        color: Color(0xFFFF4444),
+                        size: 12,
+                      ),
+                    ],
+                  ],
+                ),
               ],
-            ]),
-          ]),
-          const SizedBox(width: 10),
-          Icon(Icons.download_outlined, color: Colors.white38, size: 18),
-        ]),
+            ),
+            const SizedBox(width: 10),
+            Icon(Icons.download_outlined, color: Colors.white38, size: 18),
+          ],
+        ),
       ),
     );
   }
@@ -391,22 +420,26 @@ class _ImagePhishingBanner extends StatelessWidget {
             color: revealed && s.isPhishing
                 ? const Color(0xFFFF4444).withAlpha(150)
                 : inspectMode && isTapped
-                    ? const Color(0xFFFFCC00)
-                    : Colors.white.withAlpha(15),
+                ? const Color(0xFFFFCC00)
+                : Colors.white.withAlpha(15),
             width: isTapped ? 2.5 : 1.5,
           ),
           boxShadow: revealed && s.isPhishing
               ? [
                   BoxShadow(
-                      color: const Color(0xFFFF4444).withAlpha(40),
-                      blurRadius: 12)
+                    color: const Color(0xFFFF4444).withAlpha(40),
+                    blurRadius: 12,
+                  ),
                 ]
               : [],
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(11),
           child: _FakeImageContent(
-              scenario: s, brandColor: brandColor, brand: brand),
+            scenario: s,
+            brandColor: brandColor,
+            brand: brand,
+          ),
         ),
       ),
     );
@@ -432,119 +465,162 @@ class _FakeImageContent extends StatelessWidget {
     return Container(
       width: double.infinity,
       color: Colors.white,
-      child: Stack(children: [
-        // Marca d'água "IMAGEM" — dica visual para o utilizador
-        Positioned.fill(
-          child: Center(
-            child: Transform.rotate(
-              angle: -0.3,
-              child: Text('IMAGEM',
+      child: Stack(
+        children: [
+          // Marca d'água "IMAGEM" — dica visual para o utilizador
+          Positioned.fill(
+            child: Center(
+              child: Transform.rotate(
+                angle: -0.3,
+                child: Text(
+                  'IMAGEM',
                   style: TextStyle(
                     color: Colors.black.withAlpha(8),
                     fontSize: 60,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 8,
-                  )),
+                  ),
+                ),
+              ),
             ),
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(20),
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
-            // Header da marca dentro da "imagem"
-            Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-              _BrandMark(scenario: s, size: 32),
-              const SizedBox(width: 8),
-              Text(brand.toUpperCase(),
-                  style: TextStyle(
-                      color: brandColor,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 1)),
-            ]),
-            const SizedBox(height: 16),
-            // Banner vermelho de urgência
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
-              color: const Color(0xFFD32F2F),
-              child: Text('⚠ AÇÃO URGENTE NECESSÁRIA ⚠',
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Header da marca dentro da "imagem"
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _BrandMark(scenario: s, size: 32),
+                    const SizedBox(width: 8),
+                    Text(
+                      brand.toUpperCase(),
+                      style: TextStyle(
+                        color: brandColor,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                // Banner vermelho de urgência
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 10,
+                    horizontal: 14,
+                  ),
+                  color: const Color(0xFFD32F2F),
+                  child: Text(
+                    '⚠ AÇÃO URGENTE NECESSÁRIA ⚠',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.inter(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Text(
+                  s.subject,
                   textAlign: TextAlign.center,
                   style: GoogleFonts.inter(
-                      color: Colors.white,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w800)),
-            ),
-            const SizedBox(height: 14),
-            Text(s.subject,
-                textAlign: TextAlign.center,
-                style: GoogleFonts.inter(
                     color: Colors.black87,
                     fontSize: 15,
-                    fontWeight: FontWeight.w700)),
-            const SizedBox(height: 10),
-            Text(
-              'A tua conta foi suspensa temporariamente.\n'
-              'Clica no botão abaixo para verificar a tua identidade\n'
-              'e reativar o acesso nas próximas 24 horas.',
-              textAlign: TextAlign.center,
-              style: GoogleFonts.inter(
-                  color: Colors.black54, fontSize: 12, height: 1.6),
-            ),
-            const SizedBox(height: 16),
-            // Botão CTA dentro da imagem
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-              decoration: BoxDecoration(
-                color: brandColor,
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Text(s.ctaText.isNotEmpty ? s.ctaText : 'VERIFICAR CONTA',
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  'A tua conta foi suspensa temporariamente.\n'
+                  'Clica no botão abaixo para verificar a tua identidade\n'
+                  'e reativar o acesso nas próximas 24 horas.',
+                  textAlign: TextAlign.center,
                   style: GoogleFonts.inter(
+                    color: Colors.black54,
+                    fontSize: 12,
+                    height: 1.6,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                // Botão CTA dentro da imagem
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 12,
+                  ),
+                  decoration: BoxDecoration(
+                    color: brandColor,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    s.ctaText.isNotEmpty ? s.ctaText : 'VERIFICAR CONTA',
+                    style: GoogleFonts.inter(
                       color: Colors.white,
                       fontSize: 13,
-                      fontWeight: FontWeight.w700)),
-            ),
-            const SizedBox(height: 12),
-            // URL suspeita visível dentro da imagem
-            Text(s.ctaUrl,
-                style: GoogleFonts.jetBrainsMono(
-                    color: Colors.black38, fontSize: 9),
-                overflow: TextOverflow.ellipsis),
-            const SizedBox(height: 12),
-            // Footer da "imagem"
-            Divider(color: Colors.black.withAlpha(20)),
-            const SizedBox(height: 6),
-            Text(
-                '© ${DateTime.now().year} $brand — Todos os direitos reservados',
-                style: GoogleFonts.inter(color: Colors.black26, fontSize: 9)),
-            Text('Clicando confirmas os nossos Termos de Serviço',
-                style: GoogleFonts.inter(color: Colors.black26, fontSize: 9)),
-          ]),
-        ),
-        // Overlay de "não é texto" — pulsating indicator
-        Positioned(
-          top: 8,
-          right: 8,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-            decoration: BoxDecoration(
-              color: const Color(0xFFFF6B35).withAlpha(220),
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: Row(mainAxisSize: MainAxisSize.min, children: [
-              const Icon(Icons.image, color: Colors.white, size: 10),
-              const SizedBox(width: 4),
-              Text('IMG',
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                // URL suspeita visível dentro da imagem
+                Text(
+                  s.ctaUrl,
                   style: GoogleFonts.jetBrainsMono(
+                    color: Colors.black38,
+                    fontSize: 9,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 12),
+                // Footer da "imagem"
+                Divider(color: Colors.black.withAlpha(20)),
+                const SizedBox(height: 6),
+                Text(
+                  '© ${DateTime.now().year} $brand — Todos os direitos reservados',
+                  style: GoogleFonts.inter(color: Colors.black26, fontSize: 9),
+                ),
+                Text(
+                  'Clicando confirmas os nossos Termos de Serviço',
+                  style: GoogleFonts.inter(color: Colors.black26, fontSize: 9),
+                ),
+              ],
+            ),
+          ),
+          // Overlay de "não é texto" — pulsating indicator
+          Positioned(
+            top: 8,
+            right: 8,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFF6B35).withAlpha(220),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.image, color: Colors.white, size: 10),
+                  const SizedBox(width: 4),
+                  Text(
+                    'IMG',
+                    style: GoogleFonts.jetBrainsMono(
                       color: Colors.white,
                       fontSize: 8,
-                      fontWeight: FontWeight.w700)),
-            ]),
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
-        ),
-      ]),
+        ],
+      ),
     );
   }
 }
@@ -580,20 +656,20 @@ class _TappableSpan extends StatelessWidget {
         decoration: BoxDecoration(
           color: revealed
               ? (element.isSuspicious
-                  ? const Color(0xFFFF4444).withAlpha(30)
-                  : const Color(0xFF00FF88).withAlpha(20))
+                    ? const Color(0xFFFF4444).withAlpha(30)
+                    : const Color(0xFF00FF88).withAlpha(20))
               : isTapped
-                  ? const Color(0xFFFFCC00).withAlpha(30)
-                  : const Color(0xFFFFCC00).withAlpha(12),
+              ? const Color(0xFFFFCC00).withAlpha(30)
+              : const Color(0xFFFFCC00).withAlpha(12),
           borderRadius: BorderRadius.circular(4),
           border: Border.all(
             color: revealed
                 ? (element.isSuspicious
-                    ? const Color(0xFFFF4444).withAlpha(100)
-                    : const Color(0xFF00FF88).withAlpha(80))
+                      ? const Color(0xFFFF4444).withAlpha(100)
+                      : const Color(0xFF00FF88).withAlpha(80))
                 : isTapped
-                    ? const Color(0xFFFFCC00)
-                    : const Color(0xFFFFCC00).withAlpha(80),
+                ? const Color(0xFFFFCC00)
+                : const Color(0xFFFFCC00).withAlpha(80),
             width: 1,
           ),
         ),
@@ -681,261 +757,345 @@ class _RealEmailRenderer extends StatelessWidget {
         border: Border.all(
           color: revealed
               ? s.isPhishing
-                  ? const Color(0xFFFF4444).withAlpha(120)
-                  : const Color(0xFF00FF88).withAlpha(120)
+                    ? const Color(0xFFFF4444).withAlpha(120)
+                    : const Color(0xFF00FF88).withAlpha(120)
               : Colors.white.withAlpha(20),
           width: revealed ? 1.5 : 1,
         ),
         boxShadow: revealed && s.isPhishing
             ? [
                 BoxShadow(
-                    color: const Color(0xFFFF4444).withAlpha(20),
-                    blurRadius: 24)
+                  color: const Color(0xFFFF4444).withAlpha(20),
+                  blurRadius: 24,
+                ),
               ]
             : [],
       ),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        // ── Barra de email client ──
-        _EmailClientBar(scenario: s, revealed: revealed),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // ── Barra de email client ──
+          _EmailClientBar(scenario: s, revealed: revealed),
 
-        // ── Header do email ──
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            // Assunto
-            Builder(builder: (_) {
-              final el = _el('subject');
-              final w = Text(s.subject,
-                  style: GoogleFonts.inter(
-                      color: Colors.white,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700));
-              return el != null
-                  ? _TappableSpan(
-                      element: el,
+          // ── Header do email ──
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Assunto
+                Builder(
+                  builder: (_) {
+                    final el = _el('subject');
+                    final w = Text(
+                      s.subject,
+                      style: GoogleFonts.inter(
+                        color: Colors.white,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    );
+                    return el != null
+                        ? _TappableSpan(
+                            element: el,
+                            inspectMode: inspectMode,
+                            isTapped: tappedElements.contains(el.id),
+                            revealed: revealed,
+                            onTap: () => onElementTap(el),
+                            child: w,
+                          )
+                        : w;
+                  },
+                ),
+                const SizedBox(height: 12),
+
+                // Remetente com logo real
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _BrandMark(
+                      scenario: s,
+                      size: 42,
                       inspectMode: inspectMode,
-                      isTapped: tappedElements.contains(el.id),
-                      revealed: revealed,
-                      onTap: () => onElementTap(el),
-                      child: w)
-                  : w;
-            }),
-            const SizedBox(height: 12),
-
-            // Remetente com logo real
-            Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              _BrandMark(
-                scenario: s,
-                size: 42,
-                inspectMode: inspectMode,
-                isTapped: tappedElements.contains('logo'),
-                onTap: () {
-                  final el = _el('logo');
-                  if (el != null) onElementTap(el);
-                },
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(s.senderName,
-                          style: GoogleFonts.inter(
+                      isTapped: tappedElements.contains('logo'),
+                      onTap: () {
+                        final el = _el('logo');
+                        if (el != null) onElementTap(el);
+                      },
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            s.senderName,
+                            style: GoogleFonts.inter(
                               color: Colors.white,
                               fontSize: 13,
-                              fontWeight: FontWeight.w600)),
-                      const SizedBox(height: 2),
-                      Builder(builder: (_) {
-                        final el = _el('sender');
-                        final w = Row(children: [
-                          const Text('<',
-                              style: TextStyle(
-                                  color: Colors.white38, fontSize: 10)),
-                          Expanded(
-                            child: Text(s.senderAddress,
-                                style: GoogleFonts.jetBrainsMono(
-                                    color: revealed && s.isPhishing
-                                        ? const Color(0xFFFF6B6B)
-                                        : Colors.white38,
-                                    fontSize: 10),
-                                overflow: TextOverflow.ellipsis),
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                          const Text('>',
-                              style: TextStyle(
-                                  color: Colors.white38, fontSize: 10)),
-                        ]);
-                        return el != null
-                            ? _TappableSpan(
-                                element: el,
-                                inspectMode: inspectMode,
-                                isTapped: tappedElements.contains(el.id),
-                                revealed: revealed,
-                                onTap: () => onElementTap(el),
-                                child: w)
-                            : w;
-                      }),
-                      const SizedBox(height: 2),
-                      Text('Para: eu@meumail.com',
+                          const SizedBox(height: 2),
+                          Builder(
+                            builder: (_) {
+                              final el = _el('sender');
+                              final w = Row(
+                                children: [
+                                  const Text(
+                                    '<',
+                                    style: TextStyle(
+                                      color: Colors.white38,
+                                      fontSize: 10,
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: Text(
+                                      s.senderAddress,
+                                      style: GoogleFonts.jetBrainsMono(
+                                        color: revealed && s.isPhishing
+                                            ? const Color(0xFFFF6B6B)
+                                            : Colors.white38,
+                                        fontSize: 10,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  const Text(
+                                    '>',
+                                    style: TextStyle(
+                                      color: Colors.white38,
+                                      fontSize: 10,
+                                    ),
+                                  ),
+                                ],
+                              );
+                              return el != null
+                                  ? _TappableSpan(
+                                      element: el,
+                                      inspectMode: inspectMode,
+                                      isTapped: tappedElements.contains(el.id),
+                                      revealed: revealed,
+                                      onTap: () => onElementTap(el),
+                                      child: w,
+                                    )
+                                  : w;
+                            },
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Para: eu@meumail.com',
+                            style: GoogleFonts.inter(
+                              color: Colors.white24,
+                              fontSize: 10,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          s.timestamp,
                           style: GoogleFonts.inter(
-                              color: Colors.white24, fontSize: 10)),
-                    ]),
-              ),
-              Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-                Text(s.timestamp,
-                    style:
-                        GoogleFonts.inter(color: Colors.white38, fontSize: 10)),
-                if (hasAttachment) ...[
-                  const SizedBox(height: 4),
-                  const Icon(Icons.attach_file,
-                      color: Colors.white38, size: 14),
-                ],
-              ]),
-            ]),
-
-            const SizedBox(height: 14),
-            Divider(color: Colors.white.withAlpha(12)),
-            const SizedBox(height: 12),
-          ]),
-        ),
-
-        // ── Corpo do email ──
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            // Preview text (se existir)
-            if (s.previewText.isNotEmpty) ...[
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: brandColor.withAlpha(12),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: brandColor.withAlpha(40)),
+                            color: Colors.white38,
+                            fontSize: 10,
+                          ),
+                        ),
+                        if (hasAttachment) ...[
+                          const SizedBox(height: 4),
+                          const Icon(
+                            Icons.attach_file,
+                            color: Colors.white38,
+                            size: 14,
+                          ),
+                        ],
+                      ],
+                    ),
+                  ],
                 ),
-                child: Text(s.previewText,
-                    style: GoogleFonts.inter(
+
+                const SizedBox(height: 14),
+                Divider(color: Colors.white.withAlpha(12)),
+                const SizedBox(height: 12),
+              ],
+            ),
+          ),
+
+          // ── Corpo do email ──
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Preview text (se existir)
+                if (s.previewText.isNotEmpty) ...[
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: brandColor.withAlpha(12),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: brandColor.withAlpha(40)),
+                    ),
+                    child: Text(
+                      s.previewText,
+                      style: GoogleFonts.inter(
                         color: brandColor,
                         fontSize: 11,
-                        fontWeight: FontWeight.w500)),
-              ),
-              const SizedBox(height: 12),
-            ],
-
-            // CORPO: texto normal OU imagem-como-phishing
-            if (useImageBody) ...[
-              // Label de alerta educativo (só aparece após reveal)
-              if (revealed && s.isPhishing)
-                Container(
-                  margin: const EdgeInsets.only(bottom: 8),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFF6B35).withAlpha(25),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                        color: const Color(0xFFFF6B35).withAlpha(80)),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
                   ),
-                  child: Row(children: [
-                    const Icon(Icons.image, color: Color(0xFFFF6B35), size: 13),
-                    const SizedBox(width: 6),
-                    Expanded(
-                        child: Text(
-                      '⚠ Todo o conteúdo é uma IMAGEM — técnica para evitar filtros de texto',
-                      style: GoogleFonts.inter(
-                          color: const Color(0xFFFF6B35), fontSize: 10),
-                    )),
-                  ]),
-                ),
-              _ImagePhishingBanner(
-                scenario: s,
-                revealed: revealed,
-                inspectMode: inspectMode,
-                isTapped: tappedElements.contains('body_image'),
-                onTap: () {
-                  final el =
-                      _el('body_image') ?? _el('body_text') ?? _el('cta_url');
-                  if (el != null) onElementTap(el);
-                },
-              ),
-            ] else ...[
-              // Texto do corpo
-              Builder(builder: (_) {
-                final el = _el('body_text');
-                final w = Text(s.body,
-                    style: GoogleFonts.inter(
-                        color: Colors.white70, fontSize: 13, height: 1.65));
-                return el != null
-                    ? _TappableSpan(
-                        element: el,
-                        inspectMode: inspectMode,
-                        isTapped: tappedElements.contains(el.id),
+                  const SizedBox(height: 12),
+                ],
+
+                // CORPO: texto normal OU imagem-como-phishing
+                if (useImageBody) ...[
+                  // Label de alerta educativo (só aparece após reveal)
+                  if (revealed && s.isPhishing)
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFF6B35).withAlpha(25),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: const Color(0xFFFF6B35).withAlpha(80),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.image,
+                            color: Color(0xFFFF6B35),
+                            size: 13,
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              '⚠ Todo o conteúdo é uma IMAGEM — técnica para evitar filtros de texto',
+                              style: GoogleFonts.inter(
+                                color: const Color(0xFFFF6B35),
+                                fontSize: 10,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  _ImagePhishingBanner(
+                    scenario: s,
+                    revealed: revealed,
+                    inspectMode: inspectMode,
+                    isTapped: tappedElements.contains('body_image'),
+                    onTap: () {
+                      final el =
+                          _el('body_image') ??
+                          _el('body_text') ??
+                          _el('cta_url');
+                      if (el != null) onElementTap(el);
+                    },
+                  ),
+                ] else ...[
+                  // Texto do corpo
+                  Builder(
+                    builder: (_) {
+                      final el = _el('body_text');
+                      final w = Text(
+                        s.body,
+                        style: GoogleFonts.inter(
+                          color: Colors.white70,
+                          fontSize: 13,
+                          height: 1.65,
+                        ),
+                      );
+                      return el != null
+                          ? _TappableSpan(
+                              element: el,
+                              inspectMode: inspectMode,
+                              isTapped: tappedElements.contains(el.id),
+                              revealed: revealed,
+                              onTap: () => onElementTap(el),
+                              child: w,
+                            )
+                          : w;
+                    },
+                  ),
+                ],
+
+                const SizedBox(height: 18),
+
+                // Botão CTA
+                if (s.ctaText.isNotEmpty && !useImageBody)
+                  Builder(
+                    builder: (_) {
+                      final el = _el('cta_url') ?? _el('cta');
+                      final btn = _RealCtaButton(
+                        text: s.ctaText,
+                        url: s.ctaUrl,
+                        brandColor: brandColor,
+                        isPhishing: s.isPhishing,
                         revealed: revealed,
-                        onTap: () => onElementTap(el),
-                        child: w)
-                    : w;
-              }),
-            ],
+                      );
+                      return el != null
+                          ? _TappableSpan(
+                              element: el,
+                              inspectMode: inspectMode,
+                              isTapped: tappedElements.contains(el.id),
+                              revealed: revealed,
+                              onTap: () => onElementTap(el),
+                              child: btn,
+                            )
+                          : btn;
+                    },
+                  ),
 
-            const SizedBox(height: 18),
+                // URL visível após reveal
+                if (s.ctaUrl.isNotEmpty && revealed) ...[
+                  const SizedBox(height: 8),
+                  _UrlRevealBar(url: s.ctaUrl, isPhishing: s.isPhishing),
+                ],
 
-            // Botão CTA
-            if (s.ctaText.isNotEmpty && !useImageBody)
-              Builder(builder: (_) {
-                final el = _el('cta_url') ?? _el('cta');
-                final btn = _RealCtaButton(
-                  text: s.ctaText,
-                  url: s.ctaUrl,
+                const SizedBox(height: 16),
+
+                // ── ANEXO FALSO ──
+                if (hasAttachment)
+                  Builder(
+                    builder: (_) {
+                      final el = _el('attachment');
+                      final attach = _FakeAttachment(
+                        type: _attachTypeFor(s),
+                        name: _attachName(s),
+                        size: '${(s.brand.length * 17 + 128) % 800 + 200} KB',
+                        isPhishing: s.isPhishing,
+                        revealed: revealed,
+                        inspectMode: inspectMode,
+                        isTapped: tappedElements.contains('attachment'),
+                        onTap: () {
+                          if (el != null) onElementTap(el);
+                        },
+                      );
+                      return attach;
+                    },
+                  ),
+
+                const SizedBox(height: 16),
+
+                // Footer do email
+                _EmailFooter(
+                  scenario: s,
                   brandColor: brandColor,
-                  isPhishing: s.isPhishing,
                   revealed: revealed,
-                );
-                return el != null
-                    ? _TappableSpan(
-                        element: el,
-                        inspectMode: inspectMode,
-                        isTapped: tappedElements.contains(el.id),
-                        revealed: revealed,
-                        onTap: () => onElementTap(el),
-                        child: btn)
-                    : btn;
-              }),
-
-            // URL visível após reveal
-            if (s.ctaUrl.isNotEmpty && revealed) ...[
-              const SizedBox(height: 8),
-              _UrlRevealBar(url: s.ctaUrl, isPhishing: s.isPhishing),
-            ],
-
-            const SizedBox(height: 16),
-
-            // ── ANEXO FALSO ──
-            if (hasAttachment)
-              Builder(builder: (_) {
-                final el = _el('attachment');
-                final attach = _FakeAttachment(
-                  type: _attachTypeFor(s),
-                  name: _attachName(s),
-                  size: '${(s.brand.length * 17 + 128) % 800 + 200} KB',
-                  isPhishing: s.isPhishing,
-                  revealed: revealed,
-                  inspectMode: inspectMode,
-                  isTapped: tappedElements.contains('attachment'),
-                  onTap: () {
-                    if (el != null) onElementTap(el);
-                  },
-                );
-                return attach;
-              }),
-
-            const SizedBox(height: 16),
-
-            // Footer do email
-            _EmailFooter(
-                scenario: s, brandColor: brandColor, revealed: revealed),
-          ]),
-        ),
-      ]),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -959,63 +1119,72 @@ class _EmailClientBar extends StatelessWidget {
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         border: Border(bottom: BorderSide(color: Colors.white.withAlpha(12))),
       ),
-      child: Row(children: [
-        Container(
-          width: 7,
-          height: 7,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: Colors.white.withAlpha(30),
-          ),
-        ),
-        const SizedBox(width: 5),
-        Container(
-          width: 7,
-          height: 7,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: Colors.white.withAlpha(30),
-          ),
-        ),
-        const SizedBox(width: 5),
-        Container(
-          width: 7,
-          height: 7,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: Colors.white.withAlpha(30),
-          ),
-        ),
-        const SizedBox(width: 10),
-        const Icon(Icons.mail_outline, color: Colors.white38, size: 14),
-        const SizedBox(width: 6),
-        Text('Gmail',
-            style: GoogleFonts.inter(color: Colors.white38, fontSize: 11)),
-        const Spacer(),
-        if (revealed)
+      child: Row(
+        children: [
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+            width: 7,
+            height: 7,
             decoration: BoxDecoration(
-              color: s.isPhishing
-                  ? const Color(0xFFFF4444).withAlpha(30)
-                  : const Color(0xFF00FF88).withAlpha(20),
-              borderRadius: BorderRadius.circular(4),
+              shape: BoxShape.circle,
+              color: Colors.white.withAlpha(30),
             ),
-            child: Text(
-              s.isPhishing ? '⚠ PHISHING DETETADO' : '✓ LEGÍTIMO',
-              style: GoogleFonts.jetBrainsMono(
+          ),
+          const SizedBox(width: 5),
+          Container(
+            width: 7,
+            height: 7,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white.withAlpha(30),
+            ),
+          ),
+          const SizedBox(width: 5),
+          Container(
+            width: 7,
+            height: 7,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white.withAlpha(30),
+            ),
+          ),
+          const SizedBox(width: 10),
+          const Icon(Icons.mail_outline, color: Colors.white38, size: 14),
+          const SizedBox(width: 6),
+          Text(
+            'Gmail',
+            style: GoogleFonts.inter(color: Colors.white38, fontSize: 11),
+          ),
+          const Spacer(),
+          if (revealed)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+              decoration: BoxDecoration(
+                color: s.isPhishing
+                    ? const Color(0xFFFF4444).withAlpha(30)
+                    : const Color(0xFF00FF88).withAlpha(20),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Text(
+                s.isPhishing ? '⚠ PHISHING DETETADO' : '✓ LEGÍTIMO',
+                style: GoogleFonts.jetBrainsMono(
                   color: s.isPhishing
                       ? const Color(0xFFFF4444)
                       : const Color(0xFF00FF88),
                   fontSize: 8,
-                  fontWeight: FontWeight.w700),
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          const SizedBox(width: 8),
+          Text(
+            '🔒 TLS',
+            style: GoogleFonts.jetBrainsMono(
+              color: Colors.white24,
+              fontSize: 9,
             ),
           ),
-        const SizedBox(width: 8),
-        Text('🔒 TLS',
-            style:
-                GoogleFonts.jetBrainsMono(color: Colors.white24, fontSize: 9)),
-      ]),
+        ],
+      ),
     );
   }
 }
@@ -1042,7 +1211,7 @@ class _RealCtaButton extends StatelessWidget {
           colors: danger
               ? [
                   const Color(0xFFFF4444).withAlpha(80),
-                  const Color(0xFFFF6B35).withAlpha(80)
+                  const Color(0xFFFF6B35).withAlpha(80),
                 ]
               : [brandColor.withAlpha(200), brandColor.withAlpha(160)],
         ),
@@ -1054,26 +1223,36 @@ class _RealCtaButton extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color:
-                (danger ? const Color(0xFFFF4444) : brandColor).withAlpha(40),
+            color: (danger ? const Color(0xFFFF4444) : brandColor).withAlpha(
+              40,
+            ),
             blurRadius: 12,
             spreadRadius: -3,
           ),
         ],
       ),
-      child: Row(mainAxisSize: MainAxisSize.min, children: [
-        if (danger)
-          const Icon(Icons.warning_amber, color: Color(0xFFFF6B6B), size: 14),
-        if (danger) const SizedBox(width: 6),
-        Text(text,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (danger)
+            const Icon(Icons.warning_amber, color: Color(0xFFFF6B6B), size: 14),
+          if (danger) const SizedBox(width: 6),
+          Text(
+            text,
             style: GoogleFonts.inter(
-                color: danger ? const Color(0xFFFF6B6B) : Colors.white,
-                fontSize: 13,
-                fontWeight: FontWeight.w700)),
-        const SizedBox(width: 6),
-        Icon(Icons.arrow_forward,
-            size: 13, color: danger ? const Color(0xFFFF6B6B) : Colors.white70),
-      ]),
+              color: danger ? const Color(0xFFFF6B6B) : Colors.white,
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(width: 6),
+          Icon(
+            Icons.arrow_forward,
+            size: 13,
+            color: danger ? const Color(0xFFFF6B6B) : Colors.white70,
+          ),
+        ],
+      ),
     );
   }
 }
@@ -1098,23 +1277,32 @@ class _UrlRevealBar extends StatelessWidget {
               : const Color(0xFF00FF88).withAlpha(50),
         ),
       ),
-      child: Row(children: [
-        Icon(
-          isPhishing ? Icons.warning_amber_rounded : Icons.check_circle_outline,
-          color: isPhishing ? const Color(0xFFFF4444) : const Color(0xFF00FF88),
-          size: 13,
-        ),
-        const SizedBox(width: 7),
-        Expanded(
-          child: Text(url,
+      child: Row(
+        children: [
+          Icon(
+            isPhishing
+                ? Icons.warning_amber_rounded
+                : Icons.check_circle_outline,
+            color: isPhishing
+                ? const Color(0xFFFF4444)
+                : const Color(0xFF00FF88),
+            size: 13,
+          ),
+          const SizedBox(width: 7),
+          Expanded(
+            child: Text(
+              url,
               style: GoogleFonts.jetBrainsMono(
-                  color: isPhishing
-                      ? const Color(0xFFFF6B6B)
-                      : const Color(0xFF00FF88),
-                  fontSize: 10),
-              overflow: TextOverflow.ellipsis),
-        ),
-      ]),
+                color: isPhishing
+                    ? const Color(0xFFFF6B6B)
+                    : const Color(0xFF00FF88),
+                fontSize: 10,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -1123,10 +1311,11 @@ class _EmailFooter extends StatelessWidget {
   final AiScenario scenario;
   final Color brandColor;
   final bool revealed;
-  const _EmailFooter(
-      {required this.scenario,
-      required this.brandColor,
-      required this.revealed});
+  const _EmailFooter({
+    required this.scenario,
+    required this.brandColor,
+    required this.revealed,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -1137,55 +1326,81 @@ class _EmailFooter extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: Colors.white.withAlpha(8)),
       ),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
-        _BrandMark(scenario: scenario, size: 24),
-        const SizedBox(height: 8),
-        Text(scenario.brand,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          _BrandMark(scenario: scenario, size: 24),
+          const SizedBox(height: 8),
+          Text(
+            scenario.brand,
             style: GoogleFonts.inter(
-                color: brandColor, fontSize: 11, fontWeight: FontWeight.w700)),
-        const SizedBox(height: 6),
-        Text(
-          'Este email foi enviado para tu@meumail.com\nSe não reconheces esta atividade, ignora esta mensagem.',
-          textAlign: TextAlign.center,
-          style: GoogleFonts.inter(
-              color: Colors.white24, fontSize: 9, height: 1.5),
-        ),
-        const SizedBox(height: 6),
-        Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-          Text('Cancelar subscrição',
-              style: GoogleFonts.inter(
-                  color: Colors.white24,
-                  fontSize: 9,
-                  decoration: TextDecoration.underline)),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 6),
-            child:
-                Text('·', style: TextStyle(color: Colors.white24, fontSize: 9)),
-          ),
-          Text('Política de Privacidade',
-              style: GoogleFonts.inter(
-                  color: Colors.white24,
-                  fontSize: 9,
-                  decoration: TextDecoration.underline)),
-        ]),
-        if (revealed && scenario.isPhishing) ...[
-          const SizedBox(height: 10),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-              color: const Color(0xFFFF4444).withAlpha(20),
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: const Color(0xFFFF4444).withAlpha(60)),
-            ),
-            child: Text(
-              '🚩 Footer genérico — sem endereço físico da empresa (sinal de phishing)',
-              style: GoogleFonts.inter(
-                  color: const Color(0xFFFF6B6B), fontSize: 9),
-              textAlign: TextAlign.center,
+              color: brandColor,
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
             ),
           ),
+          const SizedBox(height: 6),
+          Text(
+            'Este email foi enviado para tu@meumail.com\nSe não reconheces esta atividade, ignora esta mensagem.',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(
+              color: Colors.white24,
+              fontSize: 9,
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'Cancelar subscrição',
+                style: GoogleFonts.inter(
+                  color: Colors.white24,
+                  fontSize: 9,
+                  decoration: TextDecoration.underline,
+                ),
+              ),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 6),
+                child: Text(
+                  '·',
+                  style: TextStyle(color: Colors.white24, fontSize: 9),
+                ),
+              ),
+              Text(
+                'Política de Privacidade',
+                style: GoogleFonts.inter(
+                  color: Colors.white24,
+                  fontSize: 9,
+                  decoration: TextDecoration.underline,
+                ),
+              ),
+            ],
+          ),
+          if (revealed && scenario.isPhishing) ...[
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFF4444).withAlpha(20),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(
+                  color: const Color(0xFFFF4444).withAlpha(60),
+                ),
+              ),
+              child: Text(
+                '🚩 Footer genérico — sem endereço físico da empresa (sinal de phishing)',
+                style: GoogleFonts.inter(
+                  color: const Color(0xFFFF6B6B),
+                  fontSize: 9,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ],
         ],
-      ]),
+      ),
     );
   }
 }
@@ -1226,169 +1441,110 @@ class _RealSmsRenderer extends StatelessWidget {
         border: Border.all(
           color: revealed
               ? s.isPhishing
-                  ? const Color(0xFFFF4444).withAlpha(100)
-                  : const Color(0xFF00FF88).withAlpha(100)
+                    ? const Color(0xFFFF4444).withAlpha(100)
+                    : const Color(0xFF00FF88).withAlpha(100)
               : Colors.white.withAlpha(15),
         ),
       ),
-      child: Column(children: [
-        // ── Status bar ──
-        Container(
-          padding: const EdgeInsets.fromLTRB(16, 10, 16, 8),
-          decoration: const BoxDecoration(
-            color: Color(0xFF000000),
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          child: Row(children: [
-            Text(timeStr,
-                style: GoogleFonts.inter(
+      child: Column(
+        children: [
+          // ── Status bar ──
+          Container(
+            padding: const EdgeInsets.fromLTRB(16, 10, 16, 8),
+            decoration: const BoxDecoration(
+              color: Color(0xFF000000),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            child: Row(
+              children: [
+                Text(
+                  timeStr,
+                  style: GoogleFonts.inter(
                     color: Colors.white,
                     fontSize: 13,
-                    fontWeight: FontWeight.w600)),
-            const Spacer(),
-            const Icon(Icons.signal_cellular_alt,
-                color: Colors.white, size: 13),
-            const SizedBox(width: 5),
-            const Icon(Icons.wifi, color: Colors.white, size: 13),
-            const SizedBox(width: 5),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.white, width: 1.5),
-                borderRadius: BorderRadius.circular(3),
-              ),
-              child: Row(children: [
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const Spacer(),
+                const Icon(
+                  Icons.signal_cellular_alt,
+                  color: Colors.white,
+                  size: 13,
+                ),
+                const SizedBox(width: 5),
+                const Icon(Icons.wifi, color: Colors.white, size: 13),
+                const SizedBox(width: 5),
                 Container(
-                  width: 14,
-                  height: 7,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 5,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
-                    color: Colors.green,
-                    borderRadius: BorderRadius.circular(1),
+                    border: Border.all(color: Colors.white, width: 1.5),
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 14,
+                        height: 7,
+                        decoration: BoxDecoration(
+                          color: Colors.green,
+                          borderRadius: BorderRadius.circular(1),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ]),
+              ],
             ),
-          ]),
-        ),
-
-        // ── Navigation bar ──
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          decoration: BoxDecoration(
-            color: const Color(0xFF1C1C1E),
-            border:
-                Border(bottom: BorderSide(color: Colors.white.withAlpha(10))),
           ),
-          child: Row(children: [
-            Text('< Mensagens',
-                style: GoogleFonts.inter(
-                    color: const Color(0xFF007AFF), fontSize: 14)),
-            const Spacer(),
-            _BrandMark(
-              scenario: s,
-              size: 36,
-              inspectMode: inspectMode,
-              isTapped: tappedElements.contains('logo'),
-              onTap: () {
-                final el = _el('logo');
-                if (el != null) onElementTap(el);
-              },
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Builder(builder: (_) {
-                      final el = _el('sender');
-                      final w = Text(s.senderName,
-                          style: GoogleFonts.inter(
-                              color: Colors.white,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600));
-                      return el != null
-                          ? _TappableSpan(
-                              element: el,
-                              inspectMode: inspectMode,
-                              isTapped: tappedElements.contains(el.id),
-                              revealed: revealed,
-                              onTap: () => onElementTap(el),
-                              child: w)
-                          : w;
-                    }),
-                    Text(s.phoneNumber ?? s.senderAddress,
-                        style: GoogleFonts.jetBrainsMono(
-                            color: revealed && s.isPhishing
-                                ? const Color(0xFFFF6B6B)
-                                : Colors.white38,
-                            fontSize: 10)),
-                  ]),
-            ),
-            const SizedBox(width: 8),
-            const Icon(Icons.info_outline, color: Color(0xFF007AFF), size: 20),
-          ]),
-        ),
 
-        // ── Mensagem ──
-        Container(
-          color: const Color(0xFF000000),
-          padding: const EdgeInsets.all(16),
-          child: Column(children: [
-            // Data/hora
-            Center(
-              child: Text(s.timestamp,
-                  style:
-                      GoogleFonts.inter(color: Colors.white38, fontSize: 10)),
+          // ── Navigation bar ──
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: const Color(0xFF1C1C1E),
+              border: Border(
+                bottom: BorderSide(color: Colors.white.withAlpha(10)),
+              ),
             ),
-            const SizedBox(height: 12),
-
-            // Bolha de mensagem
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Container(
-                constraints: BoxConstraints(
-                    maxWidth: MediaQuery.of(context).size.width * 0.75),
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF2C2C2E),
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(4),
-                    topRight: Radius.circular(16),
-                    bottomLeft: Radius.circular(16),
-                    bottomRight: Radius.circular(16),
+            child: Row(
+              children: [
+                Text(
+                  '< Mensagens',
+                  style: GoogleFonts.inter(
+                    color: const Color(0xFF007AFF),
+                    fontSize: 14,
                   ),
                 ),
-                child: Column(
+                const Spacer(),
+                _BrandMark(
+                  scenario: s,
+                  size: 36,
+                  inspectMode: inspectMode,
+                  isTapped: tappedElements.contains('logo'),
+                  onTap: () {
+                    final el = _el('logo');
+                    if (el != null) onElementTap(el);
+                  },
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Builder(builder: (_) {
-                        final el = _el('body_text');
-                        final w = Text(s.body,
+                      Builder(
+                        builder: (_) {
+                          final el = _el('sender');
+                          final w = Text(
+                            s.senderName,
                             style: GoogleFonts.inter(
-                                color: Colors.white,
-                                fontSize: 13,
-                                height: 1.5));
-                        return el != null
-                            ? _TappableSpan(
-                                element: el,
-                                inspectMode: inspectMode,
-                                isTapped: tappedElements.contains(el.id),
-                                revealed: revealed,
-                                onTap: () => onElementTap(el),
-                                child: w)
-                            : w;
-                      }),
-                      if (s.ctaUrl.isNotEmpty) ...[
-                        const SizedBox(height: 8),
-                        Builder(builder: (_) {
-                          final el = _el('cta_url');
-                          final w = Text(s.ctaUrl,
-                              style: GoogleFonts.jetBrainsMono(
-                                  color: revealed && s.isPhishing
-                                      ? const Color(0xFFFF6B6B)
-                                      : const Color(0xFF007AFF),
-                                  fontSize: 11),
-                              overflow: TextOverflow.ellipsis);
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          );
                           return el != null
                               ? _TappableSpan(
                                   element: el,
@@ -1396,79 +1552,220 @@ class _RealSmsRenderer extends StatelessWidget {
                                   isTapped: tappedElements.contains(el.id),
                                   revealed: revealed,
                                   onTap: () => onElementTap(el),
-                                  child: w)
+                                  child: w,
+                                )
                               : w;
-                        }),
-                      ],
-                      const SizedBox(height: 6),
-                      Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                        Text(timeStr,
-                            style: GoogleFonts.inter(
-                                color: Colors.white24, fontSize: 9)),
-                      ]),
-                    ]),
-              ),
-            ),
-
-            // Aviso de phishing (após reveal)
-            if (revealed && s.isPhishing) ...[
-              const SizedBox(height: 12),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFF4444).withAlpha(20),
-                  borderRadius: BorderRadius.circular(10),
-                  border:
-                      Border.all(color: const Color(0xFFFF4444).withAlpha(60)),
+                        },
+                      ),
+                      Text(
+                        s.phoneNumber ?? s.senderAddress,
+                        style: GoogleFonts.jetBrainsMono(
+                          color: revealed && s.isPhishing
+                              ? const Color(0xFFFF6B6B)
+                              : Colors.white38,
+                          fontSize: 10,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                child: Row(children: [
-                  const Text('🚨', style: TextStyle(fontSize: 14)),
-                  const SizedBox(width: 8),
-                  Expanded(
-                      child: Text(
-                    'Número desconhecido a enviar link. Operadoras legítimas não pedem dados via SMS.',
-                    style: GoogleFonts.inter(
-                        color: const Color(0xFFFF6B6B),
-                        fontSize: 10,
-                        height: 1.4),
-                  )),
-                ]),
-              ),
-            ],
-          ]),
-        ),
-
-        // ── Input bar ──
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          decoration: BoxDecoration(
-            color: const Color(0xFF1C1C1E),
-            borderRadius:
-                const BorderRadius.vertical(bottom: Radius.circular(20)),
+                const SizedBox(width: 8),
+                const Icon(
+                  Icons.info_outline,
+                  color: Color(0xFF007AFF),
+                  size: 20,
+                ),
+              ],
+            ),
           ),
-          child: Row(children: [
-            const Icon(Icons.add_circle_outline,
-                color: Color(0xFF007AFF), size: 22),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF2C2C2E),
-                  borderRadius: BorderRadius.circular(20),
+
+          // ── Mensagem ──
+          Container(
+            color: const Color(0xFF000000),
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                // Data/hora
+                Center(
+                  child: Text(
+                    s.timestamp,
+                    style: GoogleFonts.inter(
+                      color: Colors.white38,
+                      fontSize: 10,
+                    ),
+                  ),
                 ),
-                child: Text('Mensagem de texto',
-                    style:
-                        GoogleFonts.inter(color: Colors.white24, fontSize: 12)),
+                const SizedBox(height: 12),
+
+                // Bolha de mensagem
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Container(
+                    constraints: BoxConstraints(
+                      maxWidth: MediaQuery.of(context).size.width * 0.75,
+                    ),
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF2C2C2E),
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(4),
+                        topRight: Radius.circular(16),
+                        bottomLeft: Radius.circular(16),
+                        bottomRight: Radius.circular(16),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Builder(
+                          builder: (_) {
+                            final el = _el('body_text');
+                            final w = Text(
+                              s.body,
+                              style: GoogleFonts.inter(
+                                color: Colors.white,
+                                fontSize: 13,
+                                height: 1.5,
+                              ),
+                            );
+                            return el != null
+                                ? _TappableSpan(
+                                    element: el,
+                                    inspectMode: inspectMode,
+                                    isTapped: tappedElements.contains(el.id),
+                                    revealed: revealed,
+                                    onTap: () => onElementTap(el),
+                                    child: w,
+                                  )
+                                : w;
+                          },
+                        ),
+                        if (s.ctaUrl.isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          Builder(
+                            builder: (_) {
+                              final el = _el('cta_url');
+                              final w = Text(
+                                s.ctaUrl,
+                                style: GoogleFonts.jetBrainsMono(
+                                  color: revealed && s.isPhishing
+                                      ? const Color(0xFFFF6B6B)
+                                      : const Color(0xFF007AFF),
+                                  fontSize: 11,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              );
+                              return el != null
+                                  ? _TappableSpan(
+                                      element: el,
+                                      inspectMode: inspectMode,
+                                      isTapped: tappedElements.contains(el.id),
+                                      revealed: revealed,
+                                      onTap: () => onElementTap(el),
+                                      child: w,
+                                    )
+                                  : w;
+                            },
+                          ),
+                        ],
+                        const SizedBox(height: 6),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Text(
+                              timeStr,
+                              style: GoogleFonts.inter(
+                                color: Colors.white24,
+                                fontSize: 9,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // Aviso de phishing (após reveal)
+                if (revealed && s.isPhishing) ...[
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFF4444).withAlpha(20),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: const Color(0xFFFF4444).withAlpha(60),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        const Text('🚨', style: TextStyle(fontSize: 14)),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Número desconhecido a enviar link. Operadoras legítimas não pedem dados via SMS.',
+                            style: GoogleFonts.inter(
+                              color: const Color(0xFFFF6B6B),
+                              fontSize: 10,
+                              height: 1.4,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+
+          // ── Input bar ──
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+              color: const Color(0xFF1C1C1E),
+              borderRadius: const BorderRadius.vertical(
+                bottom: Radius.circular(20),
               ),
             ),
-            const SizedBox(width: 8),
-            const Icon(Icons.mic, color: Color(0xFF007AFF), size: 22),
-          ]),
-        ),
-      ]),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.add_circle_outline,
+                  color: Color(0xFF007AFF),
+                  size: 22,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF2C2C2E),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      'Mensagem de texto',
+                      style: GoogleFonts.inter(
+                        color: Colors.white24,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                const Icon(Icons.mic, color: Color(0xFF007AFF), size: 22),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -1513,219 +1810,276 @@ class _RealWhatsAppRenderer extends StatelessWidget {
         border: Border.all(
           color: revealed
               ? s.isPhishing
-                  ? const Color(0xFFFF4444).withAlpha(100)
-                  : waGreen.withAlpha(100)
+                    ? const Color(0xFFFF4444).withAlpha(100)
+                    : waGreen.withAlpha(100)
               : Colors.white.withAlpha(20),
         ),
       ),
-      child: Column(children: [
-        // ── WhatsApp Header ──
-        Container(
-          padding: const EdgeInsets.fromLTRB(10, 14, 16, 14),
-          decoration: const BoxDecoration(
-            color: Color(0xFF1F2C34),
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          child: Row(children: [
-            const Icon(Icons.arrow_back, color: waGreen, size: 20),
-            const SizedBox(width: 8),
-            _BrandMark(
-              scenario: s,
-              size: 38,
-              inspectMode: inspectMode,
-              isTapped: tappedElements.contains('logo'),
-              onTap: () {
-                final el = _el('logo');
-                if (el != null) onElementTap(el);
-              },
+      child: Column(
+        children: [
+          // ── WhatsApp Header ──
+          Container(
+            padding: const EdgeInsets.fromLTRB(10, 14, 16, 14),
+            decoration: const BoxDecoration(
+              color: Color(0xFF1F2C34),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
             ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Builder(builder: (_) {
-                      final el = _el('sender');
-                      final w = Text(s.senderName,
-                          style: GoogleFonts.inter(
-                              color: Colors.white,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600));
-                      return el != null
-                          ? _TappableSpan(
-                              element: el,
-                              inspectMode: inspectMode,
-                              isTapped: tappedElements.contains(el.id),
-                              revealed: revealed,
-                              onTap: () => onElementTap(el),
-                              child: w)
-                          : w;
-                    }),
-                    Text(s.phoneNumber ?? s.senderAddress,
-                        style: GoogleFonts.inter(
-                            color: revealed && s.isPhishing
-                                ? const Color(0xFFFF6B6B)
-                                : Colors.white38,
-                            fontSize: 11)),
-                  ]),
-            ),
-            const Icon(Icons.videocam, color: waGreen, size: 20),
-            const SizedBox(width: 16),
-            const Icon(Icons.call, color: waGreen, size: 18),
-            const SizedBox(width: 8),
-            const Icon(Icons.more_vert, color: Colors.white54, size: 18),
-          ]),
-        ),
-
-        // ── Chat area ──
-        Container(
-          padding: const EdgeInsets.all(12),
-          color: const Color(0xFF0B141A),
-          child: Column(children: [
-            Center(
-              child: Container(
-                margin: const EdgeInsets.only(bottom: 10),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF182229),
-                  borderRadius: BorderRadius.circular(8),
+            child: Row(
+              children: [
+                const Icon(Icons.arrow_back, color: waGreen, size: 20),
+                const SizedBox(width: 8),
+                _BrandMark(
+                  scenario: s,
+                  size: 38,
+                  inspectMode: inspectMode,
+                  isTapped: tappedElements.contains('logo'),
+                  onTap: () {
+                    final el = _el('logo');
+                    if (el != null) onElementTap(el);
+                  },
                 ),
-                child: Text(s.timestamp,
-                    style:
-                        GoogleFonts.inter(color: Colors.white38, fontSize: 10)),
-              ),
-            ),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Container(
-                constraints: BoxConstraints(
-                    maxWidth: MediaQuery.of(context).size.width * 0.72),
-                decoration: BoxDecoration(
-                  color: waBubble,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(2),
-                    topRight: Radius.circular(12),
-                    bottomLeft: Radius.circular(12),
-                    bottomRight: Radius.circular(12),
-                  ),
-                ),
-                child: Column(
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Se hard difficulty: imagem dentro da bolha
-                      if (hasImageContent)
-                        ClipRRect(
-                          borderRadius: const BorderRadius.vertical(
-                              top: Radius.circular(12)),
-                          child: _FakeImageContent(
-                            scenario: s,
-                            brandColor: s.brandColorParsed,
-                            brand: s.brand,
-                          ),
+                      Builder(
+                        builder: (_) {
+                          final el = _el('sender');
+                          final w = Text(
+                            s.senderName,
+                            style: GoogleFonts.inter(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          );
+                          return el != null
+                              ? _TappableSpan(
+                                  element: el,
+                                  inspectMode: inspectMode,
+                                  isTapped: tappedElements.contains(el.id),
+                                  revealed: revealed,
+                                  onTap: () => onElementTap(el),
+                                  child: w,
+                                )
+                              : w;
+                        },
+                      ),
+                      Text(
+                        s.phoneNumber ?? s.senderAddress,
+                        style: GoogleFonts.inter(
+                          color: revealed && s.isPhishing
+                              ? const Color(0xFFFF6B6B)
+                              : Colors.white38,
+                          fontSize: 11,
                         ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(12, 10, 12, 6),
-                        child: Column(
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.videocam, color: waGreen, size: 20),
+                const SizedBox(width: 16),
+                const Icon(Icons.call, color: waGreen, size: 18),
+                const SizedBox(width: 8),
+                const Icon(Icons.more_vert, color: Colors.white54, size: 18),
+              ],
+            ),
+          ),
+
+          // ── Chat area ──
+          Container(
+            padding: const EdgeInsets.all(12),
+            color: const Color(0xFF0B141A),
+            child: Column(
+              children: [
+                Center(
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF182229),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      s.timestamp,
+                      style: GoogleFonts.inter(
+                        color: Colors.white38,
+                        fontSize: 10,
+                      ),
+                    ),
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Container(
+                    constraints: BoxConstraints(
+                      maxWidth: MediaQuery.of(context).size.width * 0.72,
+                    ),
+                    decoration: BoxDecoration(
+                      color: waBubble,
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(2),
+                        topRight: Radius.circular(12),
+                        bottomLeft: Radius.circular(12),
+                        bottomRight: Radius.circular(12),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Se hard difficulty: imagem dentro da bolha
+                        if (hasImageContent)
+                          ClipRRect(
+                            borderRadius: const BorderRadius.vertical(
+                              top: Radius.circular(12),
+                            ),
+                            child: _FakeImageContent(
+                              scenario: s,
+                              brandColor: s.brandColorParsed,
+                              brand: s.brand,
+                            ),
+                          ),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(12, 10, 12, 6),
+                          child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(s.senderName,
-                                  style: GoogleFonts.inter(
-                                      color: waGreen,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600)),
+                              Text(
+                                s.senderName,
+                                style: GoogleFonts.inter(
+                                  color: waGreen,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                               const SizedBox(height: 4),
                               if (!hasImageContent)
-                                Builder(builder: (_) {
-                                  final el = _el('body_text');
-                                  final w = Text(s.body,
+                                Builder(
+                                  builder: (_) {
+                                    final el = _el('body_text');
+                                    final w = Text(
+                                      s.body,
                                       style: GoogleFonts.inter(
-                                          color: Colors.white70,
-                                          fontSize: 13,
-                                          height: 1.5));
-                                  return el != null
-                                      ? _TappableSpan(
-                                          element: el,
-                                          inspectMode: inspectMode,
-                                          isTapped:
-                                              tappedElements.contains(el.id),
-                                          revealed: revealed,
-                                          onTap: () => onElementTap(el),
-                                          child: w)
-                                      : w;
-                                }),
+                                        color: Colors.white70,
+                                        fontSize: 13,
+                                        height: 1.5,
+                                      ),
+                                    );
+                                    return el != null
+                                        ? _TappableSpan(
+                                            element: el,
+                                            inspectMode: inspectMode,
+                                            isTapped: tappedElements.contains(
+                                              el.id,
+                                            ),
+                                            revealed: revealed,
+                                            onTap: () => onElementTap(el),
+                                            child: w,
+                                          )
+                                        : w;
+                                  },
+                                ),
                               if (s.ctaUrl.isNotEmpty) ...[
                                 const SizedBox(height: 6),
-                                Builder(builder: (_) {
-                                  final el = _el('cta_url');
-                                  final w = Text(s.ctaUrl,
+                                Builder(
+                                  builder: (_) {
+                                    final el = _el('cta_url');
+                                    final w = Text(
+                                      s.ctaUrl,
                                       style: GoogleFonts.jetBrainsMono(
-                                          color: revealed && s.isPhishing
-                                              ? const Color(0xFFFF6B6B)
-                                              : const Color(0xFF53BDEB),
-                                          fontSize: 11),
-                                      overflow: TextOverflow.ellipsis);
-                                  return el != null
-                                      ? _TappableSpan(
-                                          element: el,
-                                          inspectMode: inspectMode,
-                                          isTapped:
-                                              tappedElements.contains(el.id),
-                                          revealed: revealed,
-                                          onTap: () => onElementTap(el),
-                                          child: w)
-                                      : w;
-                                }),
+                                        color: revealed && s.isPhishing
+                                            ? const Color(0xFFFF6B6B)
+                                            : const Color(0xFF53BDEB),
+                                        fontSize: 11,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    );
+                                    return el != null
+                                        ? _TappableSpan(
+                                            element: el,
+                                            inspectMode: inspectMode,
+                                            isTapped: tappedElements.contains(
+                                              el.id,
+                                            ),
+                                            revealed: revealed,
+                                            onTap: () => onElementTap(el),
+                                            child: w,
+                                          )
+                                        : w;
+                                  },
+                                ),
                               ],
                               const SizedBox(height: 4),
                               Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    Text(timeStr,
-                                        style: GoogleFonts.inter(
-                                            color: Colors.white24,
-                                            fontSize: 9)),
-                                  ]),
-                            ]),
-                      ),
-                    ]),
-              ),
-            ),
-          ]),
-        ),
-
-        // ── Input bar ──
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-          decoration: const BoxDecoration(
-            color: Color(0xFF1F2C34),
-            borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
-          ),
-          child: Row(children: [
-            Expanded(
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF2A3942),
-                  borderRadius: BorderRadius.circular(24),
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    timeStr,
+                                    style: GoogleFonts.inter(
+                                      color: Colors.white24,
+                                      fontSize: 9,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-                child: Text('Mensagem',
-                    style:
-                        GoogleFonts.inter(color: Colors.white38, fontSize: 12)),
-              ),
+              ],
             ),
-            const SizedBox(width: 8),
-            Container(
-              width: 40,
-              height: 40,
-              decoration:
-                  const BoxDecoration(shape: BoxShape.circle, color: waGreen),
-              child: const Icon(Icons.mic, color: Colors.white, size: 18),
+          ),
+
+          // ── Input bar ──
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            decoration: const BoxDecoration(
+              color: Color(0xFF1F2C34),
+              borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
             ),
-          ]),
-        ),
-      ]),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF2A3942),
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    child: Text(
+                      'Mensagem',
+                      style: GoogleFonts.inter(
+                        color: Colors.white38,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: waGreen,
+                  ),
+                  child: const Icon(Icons.mic, color: Colors.white, size: 18),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -1770,232 +2124,311 @@ class _RealLoginRenderer extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withAlpha(50),
-              blurRadius: 20,
-              spreadRadius: -4),
+            color: Colors.black.withAlpha(50),
+            blurRadius: 20,
+            spreadRadius: -4,
+          ),
         ],
       ),
-      child: Column(children: [
-        // ── Browser chrome ──
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          decoration: BoxDecoration(
-            color: const Color(0xFFF2F2F2),
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-            border:
-                Border(bottom: BorderSide(color: Colors.black.withAlpha(20))),
-          ),
-          child: Column(children: [
-            // Tab bar
-            Row(children: [
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(6),
-                  boxShadow: [
-                    BoxShadow(color: Colors.black.withAlpha(20), blurRadius: 4)
+      child: Column(
+        children: [
+          // ── Browser chrome ──
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF2F2F2),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(20),
+              ),
+              border: Border(
+                bottom: BorderSide(color: Colors.black.withAlpha(20)),
+              ),
+            ),
+            child: Column(
+              children: [
+                // Tab bar
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(6),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withAlpha(20),
+                            blurRadius: 4,
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _BrandMark(scenario: s, size: 14),
+                          const SizedBox(width: 5),
+                          Text(
+                            s.pageTitle?.split(' ').take(2).join(' ') ??
+                                s.brand,
+                            style: const TextStyle(
+                              color: Colors.black87,
+                              fontSize: 10,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(width: 6),
+                          const Icon(
+                            Icons.close,
+                            size: 10,
+                            color: Colors.black38,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Spacer(),
                   ],
                 ),
-                child: Row(mainAxisSize: MainAxisSize.min, children: [
-                  _BrandMark(scenario: s, size: 14),
-                  const SizedBox(width: 5),
-                  Text(
-                    s.pageTitle?.split(' ').take(2).join(' ') ?? s.brand,
-                    style: const TextStyle(color: Colors.black87, fontSize: 10),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(width: 6),
-                  const Icon(Icons.close, size: 10, color: Colors.black38),
-                ]),
-              ),
-              const Spacer(),
-            ]),
-            const SizedBox(height: 8),
-            // URL bar
-            Row(children: [
-              const Icon(Icons.arrow_back, size: 16, color: Colors.black38),
-              const SizedBox(width: 4),
-              const Icon(Icons.arrow_forward, size: 16, color: Colors.black26),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: isInsecure
-                          ? const Color(0xFFFF4444).withAlpha(150)
-                          : Colors.black.withAlpha(30),
+                const SizedBox(height: 8),
+                // URL bar
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.arrow_back,
+                      size: 16,
+                      color: Colors.black38,
                     ),
-                  ),
-                  child: Row(children: [
-                    Icon(
-                      isInsecure ? Icons.lock_open : Icons.lock,
-                      size: 11,
-                      color: isInsecure
-                          ? const Color(0xFFCC0000)
-                          : const Color(0xFF4CAF50),
+                    const SizedBox(width: 4),
+                    const Icon(
+                      Icons.arrow_forward,
+                      size: 16,
+                      color: Colors.black26,
                     ),
-                    const SizedBox(width: 5),
+                    const SizedBox(width: 8),
                     Expanded(
-                      child: Builder(builder: (_) {
-                        final el = _el('cta_url') ?? _el('page_url');
-                        final w = Text(
-                          s.ctaUrl,
-                          style: TextStyle(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: isInsecure
+                                ? const Color(0xFFFF4444).withAlpha(150)
+                                : Colors.black.withAlpha(30),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              isInsecure ? Icons.lock_open : Icons.lock,
+                              size: 11,
                               color: isInsecure
                                   ? const Color(0xFFCC0000)
-                                  : Colors.black87,
-                              fontSize: 10,
-                              fontFamily: 'monospace'),
-                          overflow: TextOverflow.ellipsis,
-                        );
-                        return el != null
-                            ? _TappableSpan(
-                                element: el,
-                                inspectMode: inspectMode,
-                                isTapped: tappedElements.contains(el.id),
-                                revealed: revealed,
-                                onTap: () => onElementTap(el),
-                                child: w)
-                            : w;
-                      }),
+                                  : const Color(0xFF4CAF50),
+                            ),
+                            const SizedBox(width: 5),
+                            Expanded(
+                              child: Builder(
+                                builder: (_) {
+                                  final el = _el('cta_url') ?? _el('page_url');
+                                  final w = Text(
+                                    s.ctaUrl,
+                                    style: TextStyle(
+                                      color: isInsecure
+                                          ? const Color(0xFFCC0000)
+                                          : Colors.black87,
+                                      fontSize: 10,
+                                      fontFamily: 'monospace',
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  );
+                                  return el != null
+                                      ? _TappableSpan(
+                                          element: el,
+                                          inspectMode: inspectMode,
+                                          isTapped: tappedElements.contains(
+                                            el.id,
+                                          ),
+                                          revealed: revealed,
+                                          onTap: () => onElementTap(el),
+                                          child: w,
+                                        )
+                                      : w;
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                  ]),
+                    const SizedBox(width: 8),
+                    const Icon(Icons.refresh, size: 16, color: Colors.black38),
+                  ],
                 ),
-              ),
-              const SizedBox(width: 8),
-              const Icon(Icons.refresh, size: 16, color: Colors.black38),
-            ]),
-          ]),
-        ),
-
-        // ── Page content ──
-        Container(
-          padding: const EdgeInsets.all(28),
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
-          ),
-          child: Column(children: [
-            _BrandMark(
-              scenario: s,
-              size: 64,
-              inspectMode: inspectMode,
-              isTapped: tappedElements.contains('logo'),
-              onTap: () {
-                final el = _el('logo');
-                if (el != null) onElementTap(el);
-              },
+              ],
             ),
-            const SizedBox(height: 10),
-            Builder(builder: (_) {
-              final el = _el('logo') ?? _el('header');
-              final w = Text(s.logoAltText,
-                  style: TextStyle(
-                      color: brandColor,
-                      fontSize: 22,
-                      fontWeight: FontWeight.w800));
-              return el != null
-                  ? _TappableSpan(
-                      element: el,
-                      inspectMode: inspectMode,
-                      isTapped: tappedElements.contains(el.id),
-                      revealed: revealed,
-                      onTap: () => onElementTap(el),
-                      child: w)
-                  : w;
-            }),
-            const SizedBox(height: 4),
-            Text(s.pageTitle ?? 'Iniciar Sessão',
-                style: const TextStyle(color: Colors.black54, fontSize: 13)),
-            const SizedBox(height: 24),
-            // Form fields
-            ...s.formFields.map((field) {
-              final isPwd = field.toLowerCase().contains('senha') ||
-                  field.toLowerCase().contains('password');
-              final isSuspect = s.formFields.length > 2;
-              return Container(
-                margin: const EdgeInsets.only(bottom: 12),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF5F5F5),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: revealed && s.isPhishing && isSuspect
-                        ? const Color(0xFFFF4444).withAlpha(100)
-                        : const Color(0xFFDDDDDD),
-                  ),
+          ),
+
+          // ── Page content ──
+          Container(
+            padding: const EdgeInsets.all(28),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
+            ),
+            child: Column(
+              children: [
+                _BrandMark(
+                  scenario: s,
+                  size: 64,
+                  inspectMode: inspectMode,
+                  isTapped: tappedElements.contains('logo'),
+                  onTap: () {
+                    final el = _el('logo');
+                    if (el != null) onElementTap(el);
+                  },
                 ),
-                child: Row(children: [
-                  Icon(isPwd ? Icons.lock_outline : Icons.person_outline,
-                      size: 16, color: Colors.black38),
-                  const SizedBox(width: 10),
-                  Expanded(
-                      child: Text(field,
+                const SizedBox(height: 10),
+                Builder(
+                  builder: (_) {
+                    final el = _el('logo') ?? _el('header');
+                    final w = Text(
+                      s.logoAltText,
+                      style: TextStyle(
+                        color: brandColor,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    );
+                    return el != null
+                        ? _TappableSpan(
+                            element: el,
+                            inspectMode: inspectMode,
+                            isTapped: tappedElements.contains(el.id),
+                            revealed: revealed,
+                            onTap: () => onElementTap(el),
+                            child: w,
+                          )
+                        : w;
+                  },
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  s.pageTitle ?? 'Iniciar Sessão',
+                  style: const TextStyle(color: Colors.black54, fontSize: 13),
+                ),
+                const SizedBox(height: 24),
+                // Form fields
+                ...s.formFields.map((field) {
+                  final isPwd =
+                      field.toLowerCase().contains('senha') ||
+                      field.toLowerCase().contains('password');
+                  final isSuspect = s.formFields.length > 2;
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 14,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF5F5F5),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: revealed && s.isPhishing && isSuspect
+                            ? const Color(0xFFFF4444).withAlpha(100)
+                            : const Color(0xFFDDDDDD),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          isPwd ? Icons.lock_outline : Icons.person_outline,
+                          size: 16,
+                          color: Colors.black38,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            field,
+                            style: const TextStyle(
+                              color: Colors.black38,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }),
+                const SizedBox(height: 4),
+                // Submit button
+                Builder(
+                  builder: (_) {
+                    final el = _el('cta');
+                    final btn = Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      decoration: BoxDecoration(
+                        color: isInsecure
+                            ? const Color(0xFFCC0000)
+                            : brandColor,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Center(
+                        child: Text(
+                          isInsecure
+                              ? '⚠ Página Falsa!'
+                              : (s.ctaText.isNotEmpty ? s.ctaText : 'Entrar'),
                           style: const TextStyle(
-                              color: Colors.black38, fontSize: 13))),
-                ]),
-              );
-            }),
-            const SizedBox(height: 4),
-            // Submit button
-            Builder(builder: (_) {
-              final el = _el('cta');
-              final btn = Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                decoration: BoxDecoration(
-                  color: isInsecure ? const Color(0xFFCC0000) : brandColor,
-                  borderRadius: BorderRadius.circular(10),
+                            color: Colors.white,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    );
+                    return el != null
+                        ? _TappableSpan(
+                            element: el,
+                            inspectMode: inspectMode,
+                            isTapped: tappedElements.contains(el.id),
+                            revealed: revealed,
+                            onTap: () => onElementTap(el),
+                            child: btn,
+                          )
+                        : btn;
+                  },
                 ),
-                child: Center(
+                if (isInsecure) ...[
+                  const SizedBox(height: 10),
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFF4444).withAlpha(15),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: const Color(0xFFFF4444).withAlpha(60),
+                      ),
+                    ),
                     child: Text(
-                  isInsecure
-                      ? '⚠ Página Falsa!'
-                      : (s.ctaText.isNotEmpty ? s.ctaText : 'Entrar'),
-                  style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700),
-                )),
-              );
-              return el != null
-                  ? _TappableSpan(
-                      element: el,
-                      inspectMode: inspectMode,
-                      isTapped: tappedElements.contains(el.id),
-                      revealed: revealed,
-                      onTap: () => onElementTap(el),
-                      child: btn)
-                  : btn;
-            }),
-            if (isInsecure) ...[
-              const SizedBox(height: 10),
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFF4444).withAlpha(15),
-                  borderRadius: BorderRadius.circular(8),
-                  border:
-                      Border.all(color: const Color(0xFFFF4444).withAlpha(60)),
-                ),
-                child: Text(
-                  '🚩 URL não corresponde ao domínio oficial — as tuas credenciais seriam roubadas',
-                  style:
-                      const TextStyle(color: Color(0xFFCC0000), fontSize: 10),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ],
-          ]),
-        ),
-      ]),
+                      '🚩 URL não corresponde ao domínio oficial — as tuas credenciais seriam roubadas',
+                      style: const TextStyle(
+                        color: Color(0xFFCC0000),
+                        fontSize: 10,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -2031,20 +2464,32 @@ class _RealUrlRenderer extends StatelessWidget {
       final domain = _extractDomain(host);
 
       if (u.scheme.isNotEmpty) {
-        parts.add(_UrlPart(u.scheme + '://',
-            isPhishing ? _UrlPartType.danger : _UrlPartType.safe));
+        parts.add(
+          _UrlPart(
+            u.scheme + '://',
+            isPhishing ? _UrlPartType.danger : _UrlPartType.safe,
+          ),
+        );
       }
       if (host.isNotEmpty) {
         // Subdomain
         final hostParts = host.split('.');
         if (hostParts.length > 2) {
           final sub = hostParts.take(hostParts.length - 2).join('.');
-          parts.add(_UrlPart(sub + '.',
-              isPhishing ? _UrlPartType.warning : _UrlPartType.neutral));
+          parts.add(
+            _UrlPart(
+              sub + '.',
+              isPhishing ? _UrlPartType.warning : _UrlPartType.neutral,
+            ),
+          );
         }
         // Domain
-        parts.add(_UrlPart(
-            domain, isPhishing ? _UrlPartType.danger : _UrlPartType.safe));
+        parts.add(
+          _UrlPart(
+            domain,
+            isPhishing ? _UrlPartType.danger : _UrlPartType.safe,
+          ),
+        );
       }
       if (u.path.isNotEmpty && u.path != '/') {
         parts.add(_UrlPart(u.path, _UrlPartType.neutral));
@@ -2075,119 +2520,153 @@ class _RealUrlRenderer extends StatelessWidget {
         border: Border.all(
           color: revealed
               ? s.isPhishing
-                  ? const Color(0xFFFF4444).withAlpha(120)
-                  : const Color(0xFF00FF88).withAlpha(120)
+                    ? const Color(0xFFFF4444).withAlpha(120)
+                    : const Color(0xFF00FF88).withAlpha(120)
               : Colors.white.withAlpha(20),
         ),
       ),
-      child: Column(children: [
-        // Header
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          decoration: BoxDecoration(
-            color: const Color(0xFF161E2E),
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-            border:
-                Border(bottom: BorderSide(color: Colors.white.withAlpha(10))),
-          ),
-          child: Row(children: [
-            _BrandMark(scenario: s, size: 32),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(s.brand,
-                        style: GoogleFonts.inter(
-                            color: Colors.white,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600)),
-                    Text('Análise de Link',
-                        style: GoogleFonts.inter(
-                            color: Colors.white38, fontSize: 10)),
-                  ]),
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: s.isPhishing
-                    ? const Color(0xFFFF4444).withAlpha(20)
-                    : const Color(0xFF00FF88).withAlpha(20),
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(
-                  color: s.isPhishing
-                      ? const Color(0xFFFF4444).withAlpha(60)
-                      : const Color(0xFF00FF88).withAlpha(60),
-                ),
+      child: Column(
+        children: [
+          // Header
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: const Color(0xFF161E2E),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(20),
               ),
-              child: Text(
-                s.isPhishing ? '🔴 SUSPEITO' : '🟢 SEGURO',
-                style: GoogleFonts.jetBrainsMono(
-                    color: s.isPhishing
-                        ? const Color(0xFFFF4444)
-                        : const Color(0xFF00FF88),
-                    fontSize: 9,
-                    fontWeight: FontWeight.w700),
+              border: Border(
+                bottom: BorderSide(color: Colors.white.withAlpha(10)),
               ),
             ),
-          ]),
-        ),
-
-        // Body
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            // Contexto
-            Text(s.body,
-                style: GoogleFonts.inter(
-                    color: Colors.white70, fontSize: 13, height: 1.5)),
-            const SizedBox(height: 16),
-
-            // URL com highlighting
-            Text('Link recebido:',
-                style: GoogleFonts.inter(
-                    color: Colors.white38,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600)),
-            const SizedBox(height: 6),
-            Builder(builder: (_) {
-              final el = _el('cta_url');
-              Widget urlWidget = Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF161E2E),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: revealed && s.isPhishing
-                        ? const Color(0xFFFF4444).withAlpha(80)
-                        : Colors.white.withAlpha(15),
+            child: Row(
+              children: [
+                _BrandMark(scenario: s, size: 32),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        s.brand,
+                        style: GoogleFonts.inter(
+                          color: Colors.white,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      Text(
+                        'Análise de Link',
+                        style: GoogleFonts.inter(
+                          color: Colors.white38,
+                          fontSize: 10,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                child: Wrap(
-                    children:
-                        urlParts.map((p) => _UrlPartChip(part: p)).toList()),
-              );
-              return el != null
-                  ? _TappableSpan(
-                      element: el,
-                      inspectMode: inspectMode,
-                      isTapped: tappedElements.contains(el.id),
-                      revealed: revealed,
-                      onTap: () => onElementTap(el),
-                      child: urlWidget)
-                  : urlWidget;
-            }),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: s.isPhishing
+                        ? const Color(0xFFFF4444).withAlpha(20)
+                        : const Color(0xFF00FF88).withAlpha(20),
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(
+                      color: s.isPhishing
+                          ? const Color(0xFFFF4444).withAlpha(60)
+                          : const Color(0xFF00FF88).withAlpha(60),
+                    ),
+                  ),
+                  child: Text(
+                    s.isPhishing ? '🔴 SUSPEITO' : '🟢 SEGURO',
+                    style: GoogleFonts.jetBrainsMono(
+                      color: s.isPhishing
+                          ? const Color(0xFFFF4444)
+                          : const Color(0xFF00FF88),
+                      fontSize: 9,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
 
-            if (revealed) ...[
-              const SizedBox(height: 16),
-              // Análise detalhada da URL
-              _UrlAnalysisCards(scenario: s),
-            ],
-          ]),
-        ),
-      ]),
+          // Body
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Contexto
+                Text(
+                  s.body,
+                  style: GoogleFonts.inter(
+                    color: Colors.white70,
+                    fontSize: 13,
+                    height: 1.5,
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // URL com highlighting
+                Text(
+                  'Link recebido:',
+                  style: GoogleFonts.inter(
+                    color: Colors.white38,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Builder(
+                  builder: (_) {
+                    final el = _el('cta_url');
+                    Widget urlWidget = Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF161E2E),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: revealed && s.isPhishing
+                              ? const Color(0xFFFF4444).withAlpha(80)
+                              : Colors.white.withAlpha(15),
+                        ),
+                      ),
+                      child: Wrap(
+                        children: urlParts
+                            .map((p) => _UrlPartChip(part: p))
+                            .toList(),
+                      ),
+                    );
+                    return el != null
+                        ? _TappableSpan(
+                            element: el,
+                            inspectMode: inspectMode,
+                            isTapped: tappedElements.contains(el.id),
+                            revealed: revealed,
+                            onTap: () => onElementTap(el),
+                            child: urlWidget,
+                          )
+                        : urlWidget;
+                  },
+                ),
+
+                if (revealed) ...[
+                  const SizedBox(height: 16),
+                  // Análise detalhada da URL
+                  _UrlAnalysisCards(scenario: s),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -2219,10 +2698,13 @@ class _UrlPartChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Text(
-        part.text,
-        style: GoogleFonts.jetBrainsMono(
-            color: _color, fontSize: 11, fontWeight: FontWeight.w600),
-      );
+    part.text,
+    style: GoogleFonts.jetBrainsMono(
+      color: _color,
+      fontSize: 11,
+      fontWeight: FontWeight.w600,
+    ),
+  );
 }
 
 class _UrlAnalysisCards extends StatelessWidget {
@@ -2236,48 +2718,58 @@ class _UrlAnalysisCards extends StatelessWidget {
       (
         'Domínio registado',
         s.isPhishing ? '⚠ Domínio suspeito' : '✓ Domínio verificado',
-        s.isPhishing ? const Color(0xFFFF4444) : const Color(0xFF00FF88)
+        s.isPhishing ? const Color(0xFFFF4444) : const Color(0xFF00FF88),
       ),
       (
         'Certificado SSL',
         s.isPhishing ? '⚠ Pode ser falso' : '✓ SSL válido',
-        s.isPhishing ? const Color(0xFFFFCC00) : const Color(0xFF00FF88)
+        s.isPhishing ? const Color(0xFFFFCC00) : const Color(0xFF00FF88),
       ),
       (
         'Redirecionamento',
         s.isPhishing ? '⚠ Múltiplos redirects' : '✓ Direto ao destino',
-        s.isPhishing ? const Color(0xFFFF4444) : const Color(0xFF00FF88)
+        s.isPhishing ? const Color(0xFFFF4444) : const Color(0xFF00FF88),
       ),
       (
         'Reputação',
         s.isPhishing ? '🔴 Reportado como phishing' : '✓ Boa reputação',
-        s.isPhishing ? const Color(0xFFFF4444) : const Color(0xFF00FF88)
+        s.isPhishing ? const Color(0xFFFF4444) : const Color(0xFF00FF88),
       ),
     ];
 
     return Column(
       children: checks
-          .map((c) => Container(
-                margin: const EdgeInsets.only(bottom: 8),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                decoration: BoxDecoration(
-                  color: c.$3.withAlpha(12),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: c.$3.withAlpha(50)),
-                ),
-                child: Row(children: [
-                  Text(c.$1,
-                      style: GoogleFonts.inter(
-                          color: Colors.white54, fontSize: 11)),
+          .map(
+            (c) => Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: c.$3.withAlpha(12),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: c.$3.withAlpha(50)),
+              ),
+              child: Row(
+                children: [
+                  Text(
+                    c.$1,
+                    style: GoogleFonts.inter(
+                      color: Colors.white54,
+                      fontSize: 11,
+                    ),
+                  ),
                   const Spacer(),
-                  Text(c.$2,
-                      style: GoogleFonts.inter(
-                          color: c.$3,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600)),
-                ]),
-              ))
+                  Text(
+                    c.$2,
+                    style: GoogleFonts.inter(
+                      color: c.$3,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          )
           .toList(),
     );
   }

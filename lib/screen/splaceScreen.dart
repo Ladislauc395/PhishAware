@@ -44,21 +44,24 @@ class _SplashScreenState extends State<SplashScreen>
       duration: const Duration(milliseconds: 900),
     );
     _logoFade = CurvedAnimation(parent: _logoCtrl, curve: Curves.easeOut);
-    _logoScale = Tween<double>(begin: 0.6, end: 1.0).animate(
-      CurvedAnimation(parent: _logoCtrl, curve: Curves.easeOutBack),
-    );
+    _logoScale = Tween<double>(
+      begin: 0.6,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _logoCtrl, curve: Curves.easeOutBack));
 
     // ── Pulse ─────────────────────────────────────────────
     _pulseCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1800),
     );
-    _pulseScale = Tween<double>(begin: 1.0, end: 2.2).animate(
-      CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeOut),
-    );
-    _pulseOpacity = Tween<double>(begin: 0.5, end: 0.0).animate(
-      CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeOut),
-    );
+    _pulseScale = Tween<double>(
+      begin: 1.0,
+      end: 2.2,
+    ).animate(CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeOut));
+    _pulseOpacity = Tween<double>(
+      begin: 0.5,
+      end: 0.0,
+    ).animate(CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeOut));
 
     // ── Tagline ───────────────────────────────────────────
     _tagCtrl = AnimationController(
@@ -82,9 +85,10 @@ class _SplashScreenState extends State<SplashScreen>
       vsync: this,
       duration: const Duration(milliseconds: 500),
     );
-    _exitFade = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _exitCtrl, curve: Curves.easeIn),
-    );
+    _exitFade = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _exitCtrl, curve: Curves.easeIn));
 
     _runSequence();
   }
@@ -128,8 +132,13 @@ class _SplashScreenState extends State<SplashScreen>
     return Scaffold(
       backgroundColor: const Color(0xFF0F172A), // Slate-900
       body: AnimatedBuilder(
-        animation: Listenable.merge(
-            [_logoCtrl, _pulseCtrl, _tagCtrl, _orbCtrl, _exitCtrl]),
+        animation: Listenable.merge([
+          _logoCtrl,
+          _pulseCtrl,
+          _tagCtrl,
+          _orbCtrl,
+          _exitCtrl,
+        ]),
         builder: (context, _) {
           return Stack(
             fit: StackFit.expand,
@@ -339,11 +348,7 @@ class _LogoBadge extends StatelessWidget {
         ],
       ),
       child: const Center(
-        child: Icon(
-          Icons.shield_outlined,
-          color: Colors.black,
-          size: 40,
-        ),
+        child: Icon(Icons.shield_outlined, color: Colors.black, size: 40),
       ),
     );
   }
@@ -403,7 +408,7 @@ class _LoadingBarState extends State<_LoadingBar>
                     BoxShadow(
                       color: const Color(0xFF00E5A0).withAlpha(80),
                       blurRadius: 6,
-                    )
+                    ),
                   ],
                 ),
               ),

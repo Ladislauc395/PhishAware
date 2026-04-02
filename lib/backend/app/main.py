@@ -8,11 +8,22 @@ import app.db_models
 from app.routers import chat, stats, simulations, ai_simulations, auth
 from app.routers.quiz import router as quiz_router
 from app.routers.advanced_sims import router as advanced_sims_router
-
+from app.routers import avatar_call
+from app.routers.voice_clone import router as voice_clone_router
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="PhishAware API")
+import logging, traceback
+from fastapi import Request
+from fastapi.responses import JSONResponse
 
+logging.basicConfig(level=logging.ERROR)
+logger = logging.getLogger(__name__)
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    logger.error(f"500 em {request.url}:\n{traceback.format_exc()}")
+    return JSONResponse(status_code=500, content={"detail": str(exc)})
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -20,7 +31,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
+app.include_router(avatar_call.router)
 app.include_router(auth.router,              prefix="/auth",            tags=["Auth"])
 app.include_router(chat.router,              prefix="/chat",            tags=["Chat"])
 app.include_router(quiz_router,       prefix="/quiz",            tags=["Quiz"])
@@ -28,6 +39,7 @@ app.include_router(simulations.router,       prefix="/simulations",     tags=["S
 app.include_router(ai_simulations.router,    prefix="/ai-simulations",  tags=["AI Simulations"])
 app.include_router(stats.router,             prefix="/stats",           tags=["Stats"])
 app.include_router(advanced_sims_router)
+app.include_router(voice_clone_router)
 @app.get("/")
 def root():
     return {"status": "PhishAware API online"}

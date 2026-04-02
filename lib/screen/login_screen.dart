@@ -47,13 +47,13 @@ class _LoginScreenState extends State<LoginScreen>
       parent: _enterCtrl,
       curve: const Interval(0.0, 0.7, curve: Curves.easeOut),
     );
-    _headerSlide = Tween<Offset>(
-      begin: const Offset(0, -0.15),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _enterCtrl,
-      curve: const Interval(0.0, 0.7, curve: Curves.easeOut),
-    ));
+    _headerSlide =
+        Tween<Offset>(begin: const Offset(0, -0.15), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _enterCtrl,
+            curve: const Interval(0.0, 0.7, curve: Curves.easeOut),
+          ),
+        );
 
     _orbCtrl = AnimationController(
       vsync: this,
@@ -133,8 +133,10 @@ class _LoginScreenState extends State<LoginScreen>
               SafeArea(
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 20,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -184,10 +186,12 @@ class _LoginScreenState extends State<LoginScreen>
             height: 340,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              gradient: RadialGradient(colors: [
-                const Color(0xFF00E5A0).withAlpha(40),
-                Colors.transparent,
-              ]),
+              gradient: RadialGradient(
+                colors: [
+                  const Color(0xFF00E5A0).withAlpha(40),
+                  Colors.transparent,
+                ],
+              ),
             ),
           ),
         ),
@@ -199,10 +203,12 @@ class _LoginScreenState extends State<LoginScreen>
             height: 360,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              gradient: RadialGradient(colors: [
-                const Color(0xFF3B82F6).withAlpha(35),
-                Colors.transparent,
-              ]),
+              gradient: RadialGradient(
+                colors: [
+                  const Color(0xFF3B82F6).withAlpha(35),
+                  Colors.transparent,
+                ],
+              ),
             ),
           ),
         ),
@@ -213,10 +219,12 @@ class _LoginScreenState extends State<LoginScreen>
             width: size.width * 0.8,
             height: 200,
             decoration: BoxDecoration(
-              gradient: RadialGradient(colors: [
-                const Color(0xFF8B5CF6).withAlpha(18),
-                Colors.transparent,
-              ]),
+              gradient: RadialGradient(
+                colors: [
+                  const Color(0xFF8B5CF6).withAlpha(18),
+                  Colors.transparent,
+                ],
+              ),
             ),
           ),
         ),
@@ -332,7 +340,9 @@ class _LoginScreenState extends State<LoginScreen>
                     const Spacer(),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 4),
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(8),
                         color: const Color(0xFF00E5A0).withAlpha(18),
@@ -489,17 +499,14 @@ class _GlassFieldState extends State<_GlassField> {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(14),
             color: Colors.white.withAlpha(_focused ? 12 : 7),
-            border: Border.all(
-              color: borderColor,
-              width: _focused ? 1.5 : 1.0,
-            ),
+            border: Border.all(color: borderColor, width: _focused ? 1.5 : 1.0),
             boxShadow: _focused
                 ? [
                     BoxShadow(
                       color: focusColor.withAlpha(25),
                       blurRadius: 16,
                       spreadRadius: -2,
-                    )
+                    ),
                   ]
                 : [],
           ),
@@ -509,10 +516,7 @@ class _GlassFieldState extends State<_GlassField> {
               controller: widget.controller,
               obscureText: widget.obscure,
               keyboardType: widget.keyboardType,
-              style: GoogleFonts.dmSans(
-                color: Colors.white,
-                fontSize: 15,
-              ),
+              style: GoogleFonts.dmSans(color: Colors.white, fontSize: 15),
               decoration: InputDecoration(
                 hintText: widget.hint,
                 hintStyle: GoogleFonts.dmSans(
@@ -527,19 +531,25 @@ class _GlassFieldState extends State<_GlassField> {
                     size: 18,
                   ),
                 ),
-                prefixIconConstraints:
-                    const BoxConstraints(minWidth: 48, minHeight: 48),
+                prefixIconConstraints: const BoxConstraints(
+                  minWidth: 48,
+                  minHeight: 48,
+                ),
                 suffixIcon: widget.suffix != null
                     ? Padding(
                         padding: const EdgeInsets.only(right: 14),
                         child: widget.suffix,
                       )
                     : null,
-                suffixIconConstraints:
-                    const BoxConstraints(minWidth: 40, minHeight: 48),
+                suffixIconConstraints: const BoxConstraints(
+                  minWidth: 40,
+                  minHeight: 48,
+                ),
                 border: InputBorder.none,
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 0, vertical: 16),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 0,
+                  vertical: 16,
+                ),
               ),
             ),
           ),
@@ -593,10 +603,7 @@ class _GradientButtonState extends State<_GradientButton> {
                     const Color(0xFF00E5A0).withAlpha(120),
                     const Color(0xFF0EA5E9).withAlpha(120),
                   ]
-                : [
-                    const Color(0xFF00E5A0),
-                    const Color(0xFF0EA5E9),
-                  ],
+                : [const Color(0xFF00E5A0), const Color(0xFF0EA5E9)],
           ),
           boxShadow: widget.loading
               ? []
@@ -632,8 +639,11 @@ class _GradientButtonState extends State<_GradientButton> {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    const Icon(Icons.arrow_forward_rounded,
-                        color: Colors.black, size: 18),
+                    const Icon(
+                      Icons.arrow_forward_rounded,
+                      color: Colors.black,
+                      size: 18,
+                    ),
                   ],
                 ),
         ),
@@ -659,8 +669,11 @@ class _ErrorBanner extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(Icons.error_outline_rounded,
-              color: Color(0xFFEF4444), size: 16),
+          const Icon(
+            Icons.error_outline_rounded,
+            color: Color(0xFFEF4444),
+            size: 16,
+          ),
           const SizedBox(width: 10),
           Expanded(
             child: Text(

@@ -59,8 +59,10 @@ class _RegisterScreenState extends State<RegisterScreen>
       vsync: this,
       duration: const Duration(milliseconds: 400),
     );
-    _avatarScale =
-        CurvedAnimation(parent: _avatarCtrl, curve: Curves.easeOutBack);
+    _avatarScale = CurvedAnimation(
+      parent: _avatarCtrl,
+      curve: Curves.easeOutBack,
+    );
 
     _enterCtrl.forward();
   }
@@ -138,8 +140,12 @@ class _RegisterScreenState extends State<RegisterScreen>
       backgroundColor: const Color(0xFF0F172A),
       resizeToAvoidBottomInset: true,
       body: AnimatedBuilder(
-        animation:
-            Listenable.merge([_enterCtrl, _orbCtrl, _shakeCtrl, _avatarCtrl]),
+        animation: Listenable.merge([
+          _enterCtrl,
+          _orbCtrl,
+          _shakeCtrl,
+          _avatarCtrl,
+        ]),
         builder: (context, _) {
           return Stack(
             fit: StackFit.expand,
@@ -149,8 +155,10 @@ class _RegisterScreenState extends State<RegisterScreen>
               SafeArea(
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 20,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -165,11 +173,15 @@ class _RegisterScreenState extends State<RegisterScreen>
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(12),
                               color: Colors.white.withAlpha(10),
-                              border:
-                                  Border.all(color: Colors.white.withAlpha(22)),
+                              border: Border.all(
+                                color: Colors.white.withAlpha(22),
+                              ),
                             ),
-                            child: const Icon(Icons.arrow_back_rounded,
-                                color: Colors.white, size: 18),
+                            child: const Icon(
+                              Icons.arrow_back_rounded,
+                              color: Colors.white,
+                              size: 18,
+                            ),
                           ),
                         ),
                       ),
@@ -177,10 +189,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                       const SizedBox(height: 28),
 
                       // Header
-                      FadeTransition(
-                        opacity: _cardFade,
-                        child: _buildHeader(),
-                      ),
+                      FadeTransition(opacity: _cardFade, child: _buildHeader()),
 
                       const SizedBox(height: 28),
 
@@ -233,10 +242,12 @@ class _RegisterScreenState extends State<RegisterScreen>
             height: 300,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              gradient: RadialGradient(colors: [
-                const Color(0xFF00E5A0).withAlpha(38),
-                Colors.transparent,
-              ]),
+              gradient: RadialGradient(
+                colors: [
+                  const Color(0xFF00E5A0).withAlpha(38),
+                  Colors.transparent,
+                ],
+              ),
             ),
           ),
         ),
@@ -248,10 +259,9 @@ class _RegisterScreenState extends State<RegisterScreen>
             height: 320,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              gradient: RadialGradient(colors: [
-                const Color(0xFF3B82F6).withAlpha(30),
-                Colors.transparent,
-              ]),
+              gradient: RadialGradient(
+                colors: [AppColors.blue.withAlpha(30), Colors.transparent],
+              ),
             ),
           ),
         ),
@@ -279,7 +289,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                 decoration: const BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: LinearGradient(
-                    colors: [Color(0xFF00E5A0), Color(0xFF0EA5E9)],
+                    colors: [Color(0xFF00E5A0), Color(0xFF818CF8)],
                   ),
                 ),
                 child: const Icon(Icons.shield, color: Colors.black, size: 12),
@@ -321,8 +331,9 @@ class _RegisterScreenState extends State<RegisterScreen>
   }
 
   Widget _buildAvatar() {
-    final initial =
-        _nameCtrl.text.isEmpty ? '?' : _nameCtrl.text.trim()[0].toUpperCase();
+    final initial = _nameCtrl.text.isEmpty
+        ? '?'
+        : _nameCtrl.text.trim()[0].toUpperCase();
     final hasName = _nameCtrl.text.isNotEmpty;
 
     return ScaleTransition(
@@ -336,7 +347,7 @@ class _RegisterScreenState extends State<RegisterScreen>
               ? const LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: [Color(0xFF00E5A0), Color(0xFF0EA5E9)],
+                  colors: [Color(0xFF00E5A0), Color(0xFF818CF8)],
                 )
               : null,
           color: hasName ? null : Colors.white.withAlpha(10),
@@ -349,7 +360,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                     color: const Color(0xFF00E5A0).withAlpha(60),
                     blurRadius: 24,
                     spreadRadius: -4,
-                  )
+                  ),
                 ]
               : [],
         ),
@@ -545,17 +556,14 @@ class _RegisterGlassFieldState extends State<_RegisterGlassField> {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(14),
             color: Colors.white.withAlpha(_focused ? 12 : 7),
-            border: Border.all(
-              color: borderColor,
-              width: _focused ? 1.5 : 1.0,
-            ),
+            border: Border.all(color: borderColor, width: _focused ? 1.5 : 1.0),
             boxShadow: _focused
                 ? [
                     BoxShadow(
                       color: focusColor.withAlpha(25),
                       blurRadius: 16,
                       spreadRadius: -2,
-                    )
+                    ),
                   ]
                 : [],
           ),
@@ -566,10 +574,7 @@ class _RegisterGlassFieldState extends State<_RegisterGlassField> {
               obscureText: widget.obscure,
               keyboardType: widget.keyboardType,
               onChanged: widget.onChanged,
-              style: GoogleFonts.dmSans(
-                color: Colors.white,
-                fontSize: 15,
-              ),
+              style: GoogleFonts.dmSans(color: Colors.white, fontSize: 15),
               decoration: InputDecoration(
                 hintText: widget.hint,
                 hintStyle: GoogleFonts.dmSans(
@@ -584,19 +589,25 @@ class _RegisterGlassFieldState extends State<_RegisterGlassField> {
                     size: 18,
                   ),
                 ),
-                prefixIconConstraints:
-                    const BoxConstraints(minWidth: 48, minHeight: 48),
+                prefixIconConstraints: const BoxConstraints(
+                  minWidth: 48,
+                  minHeight: 48,
+                ),
                 suffixIcon: widget.suffix != null
                     ? Padding(
                         padding: const EdgeInsets.only(right: 14),
                         child: widget.suffix,
                       )
                     : null,
-                suffixIconConstraints:
-                    const BoxConstraints(minWidth: 40, minHeight: 48),
+                suffixIconConstraints: const BoxConstraints(
+                  minWidth: 40,
+                  minHeight: 48,
+                ),
                 border: InputBorder.none,
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 0, vertical: 16),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 0,
+                  vertical: 16,
+                ),
               ),
             ),
           ),
@@ -648,12 +659,9 @@ class _GradientButtonState extends State<_GradientButton> {
             colors: widget.loading
                 ? [
                     const Color(0xFF00E5A0).withAlpha(120),
-                    const Color(0xFF0EA5E9).withAlpha(120),
+                    const Color(0xFF818CF8).withAlpha(120),
                   ]
-                : [
-                    const Color(0xFF00E5A0),
-                    const Color(0xFF0EA5E9),
-                  ],
+                : [const Color(0xFF00E5A0), const Color(0xFF818CF8)],
           ),
           boxShadow: widget.loading
               ? []
@@ -689,8 +697,11 @@ class _GradientButtonState extends State<_GradientButton> {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    const Icon(Icons.arrow_forward_rounded,
-                        color: Colors.black, size: 18),
+                    const Icon(
+                      Icons.arrow_forward_rounded,
+                      color: Colors.black,
+                      size: 18,
+                    ),
                   ],
                 ),
         ),
@@ -716,8 +727,11 @@ class _ErrorBanner extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(Icons.error_outline_rounded,
-              color: Color(0xFFEF4444), size: 16),
+          const Icon(
+            Icons.error_outline_rounded,
+            color: Color(0xFFEF4444),
+            size: 16,
+          ),
           const SizedBox(width: 10),
           Expanded(
             child: Text(

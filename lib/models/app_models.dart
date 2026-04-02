@@ -1,23 +1,62 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 enum AppTab { dashboard, simulations, tips, ranking }
 
+// ─── CORES DINÂMICAS (suportam light & dark mode) ────────────────────────────
 class AppColors {
   AppColors._();
-  static const Color bg = Color(0xFF0F1318);
-  static const Color surface = Color(0xFF1A2030);
-  static const Color surface2 = Color(0xFF242D3E);
-  static const Color border = Color(0x1AFFFFFF);
-  static const Color accent = Color(0xFF00E5A0);
-  static const Color accentAlt = Color(0xFF00C87A);
-  static const Color blue = Color(0xFF3B82F6);
-  static const Color warn = Color(0xFFF59E0B);
-  static const Color danger = Color(0xFFEF4444);
-  static const Color accent2 = Color(0xFFF57C6B);
-  static const Color textMuted = Color(0xFF64748B);
-  static const Color text = Color(0xFFE2E8F0);
+
+  // Valores mutáveis — alterados por apply()
+  static Color bg = const Color(0xFF0F1318);
+  static Color surface = const Color(0xFF1A2030);
+  static Color surface2 = const Color(0xFF242D3E);
+  static Color border = const Color(0x1AFFFFFF);
+  static Color accent = const Color(0xFF00E5A0);
+  static Color accentAlt = const Color(0xFF00C87A);
+  static Color blue = const Color(0xFF818CF8);
+  static Color warn = const Color(0xFFF59E0B);
+  static Color danger = const Color(0xFFEF4444);
+  static Color accent2 = const Color(0xFFF57C6B);
+  static Color textMuted = const Color(0xFF64748B);
+  static Color text = const Color(0xFFE2E8F0);
+
+  /// Chama este método sempre que o tema mudar.
+  static void apply(bool isDark) {
+    if (isDark) {
+      bg = const Color(0xFF0F1318);
+      surface = const Color(0xFF1A2030);
+      surface2 = const Color(0xFF242D3E);
+      border = const Color(0x1AFFFFFF);
+      text = const Color(0xFFE2E8F0);
+      textMuted = const Color(0xFF64748B);
+      accent = const Color(0xFF00E5A0);
+      accentAlt = const Color(0xFF00C87A);
+      blue = const Color(0xFF818CF8);
+      warn = const Color(0xFFF59E0B);
+      danger = const Color(0xFFEF4444);
+      accent2 = const Color(0xFFF57C6B);
+    } else {
+      // ── LIGHT MODE — tons verdes-menta com fundo quente ──────────────────
+      bg = const Color(0xFFF4F7F5); // fundo geral: branco com toque menta
+      surface = const Color(0xFFFFFFFF); // cards brancos
+      surface2 = const Color(0xFFEAF2EE); // destaque suave
+      border = const Color(0xFFCDD9D4); // divisórias neutras
+      text = const Color(0xFF0D1F1A); // texto escuro com toque verde
+      textMuted = const Color(0xFF4B6858); // texto secundário esverdeado
+      accent = const Color(
+        0xFF00A374,
+      ); // verde principal (mais escuro p/ contraste)
+      accentAlt = const Color(0xFF008A62); // verde hover/press
+      blue = const Color(0xFF6366F1);
+      warn = const Color(0xFFD97706); // âmbar
+      danger = const Color(0xFFDC2626); // vermelho
+      accent2 = const Color(0xFFE04F3A); // coral
+    }
+  }
 }
 
+// ─── ROTAS ───────────────────────────────────────────────────────────────────
 class Routes {
   Routes._();
   static const String splash = '/';
@@ -34,6 +73,7 @@ class Routes {
   static const String settings = '/settings';
 }
 
+// ─── SESSÃO DO UTILIZADOR ────────────────────────────────────────────────────
 class UserSession {
   static int userId = 1;
   static String userName = 'Utilizador';
@@ -48,6 +88,50 @@ class UserSession {
   }
 }
 
+// ─── PREFERÊNCIAS (tema, etc.) ───────────────────────────────────────────────
+class AppPreferences {
+  static late SharedPreferences _prefs;
+  static final ValueNotifier<bool> themeNotifier = ValueNotifier(true);
+
+  static Future<void> load() async {
+    _prefs = await SharedPreferences.getInstance();
+    final isDark = _prefs.getBool('isDarkMode') ?? true;
+    AppColors.apply(isDark);
+    themeNotifier.value = isDark;
+  }
+
+  static Future<void> setDarkMode(bool value) async {
+    await _prefs.setBool('isDarkMode', value);
+    AppColors.apply(value);
+    themeNotifier.value = value;
+  }
+
+  static bool get isDarkMode => themeNotifier.value;
+
+  // ── Aliases & extra prefs used by settings_screen ──────────────────────────
+  /// Alias for isDarkMode (used by settings_screen)
+  static bool get darkMode => themeNotifier.value;
+
+  static bool get hapticEnabled => _prefs.getBool('hapticEnabled') ?? true;
+
+  static bool get showXpAnimations =>
+      _prefs.getBool('showXpAnimations') ?? true;
+
+  static bool get showLeaderboard => _prefs.getBool('showLeaderboard') ?? true;
+
+  static set showLeaderboard(bool v) => _prefs.setBool('showLeaderboard', v);
+
+  static Future<void> setHaptic(bool v) async =>
+      _prefs.setBool('hapticEnabled', v);
+
+  static Future<void> setXpAnimations(bool v) async =>
+      _prefs.setBool('showXpAnimations', v);
+
+  static Future<void> setShowLeaderboard(bool v) async =>
+      _prefs.setBool('showLeaderboard', v);
+}
+
+// ─── ESTATÍSTICAS DO UTILIZADOR ──────────────────────────────────────────────
 class UserStats {
   final int resilience;
   final int xp;
@@ -79,6 +163,7 @@ class UserStats {
   );
 }
 
+// ─── HISTÓRICO ───────────────────────────────────────────────────────────────
 class HistoryEntry {
   final int id;
   final String questionId;
@@ -117,7 +202,6 @@ class HistoryEntry {
 
   factory HistoryEntry.fromJson(Map<String, dynamic> j) {
     debugPrint('[HistoryEntry.fromJson] raw=$j');
-
     return HistoryEntry(
       id: (j['id'] as num?)?.toInt() ?? 0,
       questionId:
@@ -179,6 +263,7 @@ class HistoryEntry {
   }
 }
 
+// ─── RANKING ─────────────────────────────────────────────────────────────────
 class RankingUser {
   final int userId;
   final String name;
@@ -210,6 +295,7 @@ class RankingUser {
       );
 }
 
+// ─── SIMULAÇÕES ──────────────────────────────────────────────────────────────
 class PhishSimulation {
   final String id;
   final String title;
@@ -292,6 +378,7 @@ class PhishSimulation {
   }
 }
 
+// ─── QUIZ ─────────────────────────────────────────────────────────────────────
 class QuizOption {
   final String id;
   final String text;
@@ -379,4 +466,203 @@ class QuizQuestion {
         return 'Fácil';
     }
   }
+}
+
+// ─── MODELO DE CENÁRIO DE IA (ai_simulations) ─────────────────────────────────
+class SuspiciousElement {
+  final String id;
+  final String label;
+  final String hint;
+  final bool isSuspicious;
+  final String elementType;
+
+  const SuspiciousElement({
+    required this.id,
+    required this.label,
+    required this.hint,
+    required this.isSuspicious,
+    required this.elementType,
+  });
+
+  factory SuspiciousElement.fromJson(Map<String, dynamic> j) =>
+      SuspiciousElement(
+        id: j['id'] ?? '',
+        label: j['label'] ?? '',
+        hint: j['hint'] ?? '',
+        isSuspicious: j['is_suspicious'] == true,
+        elementType: j['element_type'] ?? 'body_text',
+      );
+}
+
+class AiScenario {
+  final String type;
+  final bool isPhishing;
+  final String difficulty;
+  final String brand;
+  final String brandColor;
+  final String logoUrl;
+  final String logoAltText;
+  final String senderName;
+  final String senderAddress;
+  final String subject;
+  final String previewText;
+  final String body;
+  final String ctaText;
+  final String ctaUrl;
+  final String timestamp;
+  final String? phoneNumber;
+  final String? pageTitle;
+  final List<String> formFields;
+  final List<SuspiciousElement> suspiciousElements;
+  final List<String> redFlags;
+  final List<String> greenFlags;
+  final String explanation;
+  final String attackTechnique;
+  final String realWorldReference;
+  final String potentialDamage;
+  final String forensicTip;
+  final String difficultyReason;
+
+  const AiScenario({
+    required this.type,
+    required this.isPhishing,
+    required this.difficulty,
+    required this.brand,
+    required this.brandColor,
+    required this.logoUrl,
+    required this.logoAltText,
+    required this.senderName,
+    required this.senderAddress,
+    required this.subject,
+    required this.previewText,
+    required this.body,
+    required this.ctaText,
+    required this.ctaUrl,
+    required this.timestamp,
+    this.phoneNumber,
+    this.pageTitle,
+    required this.formFields,
+    required this.suspiciousElements,
+    required this.redFlags,
+    required this.greenFlags,
+    required this.explanation,
+    required this.attackTechnique,
+    required this.realWorldReference,
+    required this.potentialDamage,
+    required this.forensicTip,
+    required this.difficultyReason,
+  });
+
+  factory AiScenario.fromJson(Map<String, dynamic> j) => AiScenario(
+    type: j['type'] ?? 'email',
+    isPhishing: j['is_phishing'] == true,
+    difficulty: j['difficulty'] ?? 'medium',
+    brand: j['brand'] ?? '',
+    brandColor: j['brand_color'] ?? '#000000',
+    logoUrl: j['logo_url'] ?? '',
+    logoAltText: j['logo_alt_text'] ?? '',
+    senderName: j['sender_name'] ?? '',
+    senderAddress: j['sender_address'] ?? '',
+    subject: j['subject'] ?? '',
+    previewText: j['preview_text'] ?? '',
+    body: j['body'] ?? '',
+    ctaText: j['cta_text'] ?? '',
+    ctaUrl: j['cta_url'] ?? '',
+    timestamp: j['timestamp'] ?? '',
+    phoneNumber: j['phone_number'],
+    pageTitle: j['page_title'],
+    formFields: List<String>.from(j['form_fields'] ?? []),
+    suspiciousElements: (j['suspicious_elements'] as List? ?? [])
+        .map((e) => SuspiciousElement.fromJson(e))
+        .toList(),
+    redFlags: List<String>.from(j['red_flags'] ?? []),
+    greenFlags: List<String>.from(j['green_flags'] ?? []),
+    explanation: j['explanation'] ?? '',
+    attackTechnique: j['attack_technique'] ?? '',
+    realWorldReference: j['real_world_reference'] ?? '',
+    potentialDamage: j['potential_damage'] ?? '',
+    forensicTip: j['forensic_tip'] ?? '',
+    difficultyReason: j['difficulty_reason'] ?? '',
+  );
+
+  /// Parses [brandColor] hex string (e.g. "#FF0000") to a Flutter [Color].
+  Color get brandColorParsed {
+    try {
+      final hex = brandColor.replaceAll('#', '').trim();
+      if (hex.length == 6) {
+        return Color(int.parse('FF$hex', radix: 16));
+      } else if (hex.length == 8) {
+        return Color(int.parse(hex, radix: 16));
+      }
+    } catch (_) {}
+    return AppColors.accent;
+  }
+
+  /// Human-readable label for [type].
+  String get typeLabel {
+    switch (type) {
+      case 'sms':
+        return 'SMS';
+      case 'url':
+      case 'website':
+        return 'Website';
+      case 'call':
+      case 'vishing':
+        return 'Chamada';
+      case 'qr':
+        return 'QR Code';
+      default:
+        return 'E-mail';
+    }
+  }
+
+  /// Human-readable label for [difficulty].
+  String get difficultyLabel {
+    switch (difficulty) {
+      case 'hard':
+        return 'Difícil';
+      case 'medium':
+        return 'Médio';
+      default:
+        return 'Fácil';
+    }
+  }
+}
+
+// ─── CASO FORENSE ─────────────────────────────────────────────────────────────
+class ForensicCase {
+  final String id;
+  final String title;
+  final String year;
+  final String target;
+  final String country;
+  final String attackType;
+  final String attackVector;
+  final String emoji;
+  // ignore: non_constant_identifier_names
+  final String threat_actor;
+  final String summary;
+  final String howItWorked;
+  final List<String> redFlags;
+  final String outcome;
+  final String financialImpact;
+  final List<String> lessons;
+
+  const ForensicCase({
+    required this.id,
+    required this.title,
+    required this.year,
+    required this.target,
+    required this.country,
+    required this.attackType,
+    required this.attackVector,
+    required this.emoji,
+    required this.threat_actor,
+    required this.summary,
+    required this.howItWorked,
+    required this.redFlags,
+    required this.outcome,
+    required this.financialImpact,
+    required this.lessons,
+  });
 }

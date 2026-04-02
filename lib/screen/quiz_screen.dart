@@ -30,11 +30,17 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _slideCtrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 400));
-    _slideAnim = Tween<Offset>(begin: const Offset(1, 0), end: Offset.zero)
-        .animate(CurvedAnimation(parent: _slideCtrl, curve: Curves.easeOut));
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    );
+    _slideAnim = Tween<Offset>(
+      begin: const Offset(1, 0),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _slideCtrl, curve: Curves.easeOut));
     _progressCtrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 500));
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
     _loadQuestions();
   }
 
@@ -71,8 +77,10 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
       _selectedOptionId = optionId;
     });
 
-    final result =
-        await ApiService.submitAnswer(_questions[_currentIndex].id, optionId);
+    final result = await ApiService.submitAnswer(
+      _questions[_currentIndex].id,
+      optionId,
+    );
     await ApiService.addXp(
       result['points'] ?? 0,
       result['correct'] ?? false,
@@ -100,10 +108,11 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
       _slideCtrl.forward(from: 0);
       _progressCtrl.animateTo((_currentIndex + 1) / _questions.length);
     } else {
-      Navigator.pushReplacementNamed(context, Routes.result, arguments: {
-        'score': _score,
-        'total': _questions.length,
-      });
+      Navigator.pushReplacementNamed(
+        context,
+        Routes.result,
+        arguments: {'score': _score, 'total': _questions.length},
+      );
     }
   }
 
@@ -114,7 +123,9 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
       return _ErrorView(message: _error!, onRetry: _loadQuestions);
     if (_questions.isEmpty)
       return _ErrorView(
-          message: 'Nenhuma pergunta disponível.', onRetry: _loadQuestions);
+        message: 'Nenhuma pergunta disponível.',
+        onRetry: _loadQuestions,
+      );
 
     final q = _questions[_currentIndex];
 
@@ -138,17 +149,21 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
                   children: [
                     _QuestionCard(question: q),
                     const SizedBox(height: 20),
-                    ...q.options.map((opt) => _OptionTile(
-                          option: opt,
-                          isSelected: _selectedOptionId == opt.id,
-                          isAnswered: _answered,
-                          isCorrect: _correctOptionId == opt.id,
-                          onTap: () => _selectOption(opt.id),
-                        )),
+                    ...q.options.map(
+                      (opt) => _OptionTile(
+                        option: opt,
+                        isSelected: _selectedOptionId == opt.id,
+                        isAnswered: _answered,
+                        isCorrect: _correctOptionId == opt.id,
+                        onTap: () => _selectOption(opt.id),
+                      ),
+                    ),
                     if (_answered) ...[
                       const SizedBox(height: 16),
                       _ExplanationCard(
-                          isCorrect: _isCorrect, explanation: _explanation),
+                        isCorrect: _isCorrect,
+                        explanation: _explanation,
+                      ),
                       const SizedBox(height: 16),
                       _NextBtn(
                         isLast: _currentIndex == _questions.length - 1,
@@ -185,7 +200,7 @@ class _QuizHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.fromLTRB(8, 8, 20, 12),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         border: Border(bottom: BorderSide(color: AppColors.border)),
       ),
       child: Column(
@@ -193,9 +208,13 @@ class _QuizHeader extends StatelessWidget {
           Row(
             children: [
               IconButton(
-                  icon: const Icon(Icons.chevron_left,
-                      color: Colors.white, size: 28),
-                  onPressed: onBack),
+                icon: const Icon(
+                  Icons.chevron_left,
+                  color: Colors.white,
+                  size: 28,
+                ),
+                onPressed: onBack,
+              ),
               Expanded(
                 child: AnimatedBuilder(
                   animation: progressCtrl,
@@ -205,16 +224,21 @@ class _QuizHeader extends StatelessWidget {
                       value: progressCtrl.value,
                       minHeight: 6,
                       backgroundColor: AppColors.surface2,
-                      valueColor:
-                          const AlwaysStoppedAnimation(AppColors.accent),
+                      valueColor: AlwaysStoppedAnimation(
+                        AppColors.accent,
+                      ),
                     ),
                   ),
                 ),
               ),
               const SizedBox(width: 12),
-              Text('${currentIndex + 1}/$total',
-                  style: GoogleFonts.inter(
-                      color: AppColors.textMuted, fontSize: 12)),
+              Text(
+                '${currentIndex + 1}/$total',
+                style: GoogleFonts.inter(
+                  color: AppColors.textMuted,
+                  fontSize: 12,
+                ),
+              ),
             ],
           ),
           Padding(
@@ -222,16 +246,22 @@ class _QuizHeader extends StatelessWidget {
             child: Align(
               alignment: Alignment.centerLeft,
               child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 3,
+                ),
                 decoration: BoxDecoration(
-                    color: AppColors.accent.withAlpha(15),
-                    borderRadius: BorderRadius.circular(10)),
-                child: Text('$score XP',
-                    style: GoogleFonts.inter(
-                        color: AppColors.accent,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600)),
+                  color: AppColors.accent.withAlpha(15),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  '$score XP',
+                  style: GoogleFonts.inter(
+                    color: AppColors.accent,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
             ),
           ),
@@ -261,9 +291,13 @@ class _QuestionCard extends StatelessWidget {
             children: [
               Text(question.categoryIcon, style: const TextStyle(fontSize: 20)),
               const SizedBox(width: 8),
-              Text('${question.categoryLabel} · ${question.difficultyLabel}',
-                  style: GoogleFonts.inter(
-                      color: AppColors.textMuted, fontSize: 12)),
+              Text(
+                '${question.categoryLabel} · ${question.difficultyLabel}',
+                style: GoogleFonts.inter(
+                  color: AppColors.textMuted,
+                  fontSize: 12,
+                ),
+              ),
               const Spacer(),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -271,18 +305,26 @@ class _QuestionCard extends StatelessWidget {
                   color: question.difficultyColor.withAlpha(20),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Text('+${question.points} XP',
-                    style: GoogleFonts.inter(
-                        color: question.difficultyColor,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700)),
+                child: Text(
+                  '+${question.points} XP',
+                  style: GoogleFonts.inter(
+                    color: question.difficultyColor,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ),
             ],
           ),
           const SizedBox(height: 14),
-          Text(question.scenario,
-              style: GoogleFonts.inter(
-                  color: AppColors.text, fontSize: 14, height: 1.7)),
+          Text(
+            question.scenario,
+            style: GoogleFonts.inter(
+              color: AppColors.text,
+              fontSize: 14,
+              height: 1.7,
+            ),
+          ),
           if (question.clue.isNotEmpty) ...[
             const SizedBox(height: 12),
             Container(
@@ -297,9 +339,14 @@ class _QuestionCard extends StatelessWidget {
                   const Text('💡', style: TextStyle(fontSize: 14)),
                   const SizedBox(width: 8),
                   Expanded(
-                      child: Text(question.clue,
-                          style: GoogleFonts.inter(
-                              color: AppColors.warn, fontSize: 12))),
+                    child: Text(
+                      question.clue,
+                      style: GoogleFonts.inter(
+                        color: AppColors.warn,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -351,25 +398,28 @@ class _OptionTile extends StatelessWidget {
           color: _bg,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-              color: _border,
-              width: isAnswered && (isCorrect || isSelected) ? 1.5 : 1),
+            color: _border,
+            width: isAnswered && (isCorrect || isSelected) ? 1.5 : 1,
+          ),
         ),
         child: Row(
           children: [
             Expanded(
-              child: Text(option.text,
-                  style: GoogleFonts.inter(
-                    color: isAnswered && (isCorrect || isSelected)
-                        ? Colors.white
-                        : AppColors.text,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  )),
+              child: Text(
+                option.text,
+                style: GoogleFonts.inter(
+                  color: isAnswered && (isCorrect || isSelected)
+                      ? Colors.white
+                      : AppColors.text,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
             ),
             if (isAnswered && isCorrect)
-              const Icon(Icons.check_circle, color: AppColors.accent, size: 20),
+              Icon(Icons.check_circle, color: AppColors.accent, size: 20),
             if (isAnswered && isSelected && !isCorrect)
-              const Icon(Icons.cancel, color: AppColors.danger, size: 20),
+              Icon(Icons.cancel, color: AppColors.danger, size: 20),
           ],
         ),
       ),
@@ -392,9 +442,9 @@ class _ExplanationCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         border: Border(
           left: BorderSide(color: color, width: 3),
-          right: const BorderSide(color: AppColors.border),
-          top: const BorderSide(color: AppColors.border),
-          bottom: const BorderSide(color: AppColors.border),
+          right: BorderSide(color: AppColors.border),
+          top: BorderSide(color: AppColors.border),
+          bottom: BorderSide(color: AppColors.border),
         ),
       ),
       child: Column(
@@ -403,12 +453,20 @@ class _ExplanationCard extends StatelessWidget {
           Text(
             isCorrect ? '✅ Correto!' : '❌ Incorreto',
             style: GoogleFonts.spaceGrotesk(
-                color: color, fontSize: 13, fontWeight: FontWeight.w700),
+              color: color,
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+            ),
           ),
           const SizedBox(height: 8),
-          Text(explanation,
-              style: GoogleFonts.inter(
-                  color: AppColors.text, fontSize: 13, height: 1.6)),
+          Text(
+            explanation,
+            style: GoogleFonts.inter(
+              color: AppColors.text,
+              fontSize: 13,
+              height: 1.6,
+            ),
+          ),
         ],
       ),
     );
@@ -428,21 +486,26 @@ class _NextBtn extends StatelessWidget {
         width: double.infinity,
         height: 54,
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-              colors: [AppColors.accent, AppColors.accentAlt]),
+          gradient: LinearGradient(
+            colors: [AppColors.accent, AppColors.accentAlt],
+          ),
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-                color: AppColors.accent.withAlpha(60),
-                blurRadius: 16,
-                offset: const Offset(0, 6))
+              color: AppColors.accent.withAlpha(60),
+              blurRadius: 16,
+              offset: const Offset(0, 6),
+            ),
           ],
         ),
         child: Center(
           child: Text(
             isLast ? 'Ver Resultado →' : 'Próxima →',
             style: GoogleFonts.spaceGrotesk(
-                color: Colors.black, fontSize: 16, fontWeight: FontWeight.w700),
+              color: Colors.black,
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ),
       ),
@@ -453,7 +516,7 @@ class _NextBtn extends StatelessWidget {
 class _LoadingView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
       backgroundColor: AppColors.bg,
       body: Center(child: CircularProgressIndicator(color: AppColors.accent)),
     );
@@ -475,19 +538,27 @@ class _ErrorView extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.wifi_off_outlined,
-                  color: AppColors.textMuted, size: 64),
+              Icon(
+                Icons.wifi_off_outlined,
+                color: AppColors.textMuted,
+                size: 64,
+              ),
               const SizedBox(height: 16),
-              Text(message,
-                  style: GoogleFonts.inter(
-                      color: AppColors.textMuted, fontSize: 14),
-                  textAlign: TextAlign.center),
+              Text(
+                message,
+                style: GoogleFonts.inter(
+                  color: AppColors.textMuted,
+                  fontSize: 14,
+                ),
+                textAlign: TextAlign.center,
+              ),
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: onRetry,
                 style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.accent,
-                    foregroundColor: Colors.black),
+                  backgroundColor: AppColors.accent,
+                  foregroundColor: Colors.black,
+                ),
                 child: const Text('Tentar novamente'),
               ),
             ],

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/app_models.dart';
 import 'api_service.dart';
+import '../widgets/staggered_animations.dart';
 
 class AppNotification {
   final String id;
@@ -32,19 +33,22 @@ class NotificationService {
   final List<AppNotification> _notifications = [];
   static int _idCounter = 0;
 
-  List<AppNotification> get all => List.from(_notifications)
-    ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+  List<AppNotification> get all =>
+      List.from(_notifications)
+        ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
 
   int get unreadCount => _notifications.where((n) => !n.read).length;
 
   void add(NotifType type, String title, String body) {
-    _notifications.add(AppNotification(
-      id: '${++_idCounter}',
-      type: type,
-      title: title,
-      body: body,
-      timestamp: DateTime.now(),
-    ));
+    _notifications.add(
+      AppNotification(
+        id: '${++_idCounter}',
+        type: type,
+        title: title,
+        body: body,
+        timestamp: DateTime.now(),
+      ),
+    );
   }
 
   void markAllRead() {
@@ -63,35 +67,38 @@ class NotificationService {
     if (_notifications.any((n) => n.id == 'stats_sync')) return;
 
     if (stats.xp > 0) {
-      add(NotifType.xp, 'XP Acumulado! 🔥',
-          'Tens ${stats.xp} XP — continua a treinar para subir de nível!');
+      add(
+        NotifType.xp,
+        'XP Acumulado! 🔥',
+        'Tens ${stats.xp} XP — continua a treinar para subir de nível!',
+      );
     }
     if (stats.resilience >= 75) {
-      add(NotifType.achievement, 'Resiliência Alta! 🛡️',
-          'O teu nível de resiliência está em ${stats.resilience}%. Excelente!');
+      add(
+        NotifType.achievement,
+        'Resiliência Alta! 🛡️',
+        'O teu nível de resiliência está em ${stats.resilience}%. Excelente!',
+      );
     } else if (stats.resilience > 0 && stats.resilience < 50) {
-      add(NotifType.warning, 'Atenção ao Risco! ⚠️',
-          'A tua resiliência está em ${stats.resilience}%. Completa mais simulações!');
+      add(
+        NotifType.warning,
+        'Atenção ao Risco! ⚠️',
+        'A tua resiliência está em ${stats.resilience}%. Completa mais simulações!',
+      );
     }
     if (stats.answeredTotal >= 5) {
-      add(NotifType.achievement, 'Veterano! 🎯',
-          'Respondeste a ${stats.answeredTotal} questões. Estás a crescer!');
+      add(
+        NotifType.achievement,
+        'Veterano! 🎯',
+        'Respondeste a ${stats.answeredTotal} questões. Estás a crescer!',
+      );
     }
-    add(NotifType.tip, 'Dica do Dia 💡',
-        'Verifica sempre o domínio do remetente antes de clicar em qualquer link. Pequenas diferenças escondem grandes ameaças.');
+    add(
+      NotifType.tip,
+      'Dica do Dia 💡',
+      'Verifica sempre o domínio do remetente antes de clicar em qualquer link. Pequenas diferenças escondem grandes ameaças.',
+    );
 
-    _notifications
-        .firstWhere((n) => true, orElse: () => _notifications.first)
-        .id;
-    _notifications.add(AppNotification(
-      id: 'stats_sync',
-      type: NotifType.system,
-      title: '',
-      body: '',
-      timestamp: DateTime(2000),
-      read: true,
-    ));
-    _notifications.removeWhere((n) => n.id == 'stats_sync');
     final marker = AppNotification(
       id: 'stats_sync',
       type: NotifType.system,
@@ -103,6 +110,8 @@ class NotificationService {
     _notifications.add(marker);
   }
 }
+
+// ─── NotificationsScreen ──────────────────────────────────────────────────────
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
@@ -121,7 +130,9 @@ class _NotificationsScreenState extends State<NotificationsScreen>
   void initState() {
     super.initState();
     _ctrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 600));
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
     _fade = CurvedAnimation(parent: _ctrl, curve: Curves.easeOut);
     _ctrl.forward();
     _loadAndSync();
@@ -166,26 +177,32 @@ class _NotificationsScreenState extends State<NotificationsScreen>
       body: SafeArea(
         child: FadeTransition(
           opacity: _fade,
-          child: Column(children: [
-            _buildHeader(unread),
-            Expanded(
-              child: notifications.isEmpty
-                  ? _EmptyState()
-                  : ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
-                      itemCount: notifications.length,
-                      itemBuilder: (_, i) {
-                        final notif = notifications[i];
-                        return _NotifCard(
-                          key: ValueKey(notif.id),
-                          notif: notif,
-                          onTap: () => _tapNotif(notif),
-                          onDismiss: () => _dismiss(notif.id),
-                        );
-                      },
-                    ),
-            ),
-          ]),
+          child: Column(
+            children: [
+              _buildHeader(unread),
+              Expanded(
+                child: notifications.isEmpty
+                    ? _EmptyState()
+                    // ── Staggered list ─────────────────────────────────────
+                    : ListView.builder(
+                        padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+                        itemCount: notifications.length,
+                        itemBuilder: (_, i) {
+                          final notif = notifications[i];
+                          return StaggeredItem(
+                            index: i,
+                            child: _NotifCard(
+                              key: ValueKey(notif.id),
+                              notif: notif,
+                              onTap: () => _tapNotif(notif),
+                              onDismiss: () => _dismiss(notif.id),
+                            ),
+                          );
+                        },
+                      ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -198,72 +215,102 @@ class _NotificationsScreenState extends State<NotificationsScreen>
         color: AppColors.bg,
         border: Border(bottom: BorderSide(color: AppColors.border, width: 1)),
       ),
-      child: Row(children: [
-        GestureDetector(
-          onTap: () => Navigator.pop(context),
-          child: Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.border),
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.border),
+              ),
+              child: const Icon(
+                Icons.arrow_back,
+                color: Colors.white,
+                size: 20,
+              ),
             ),
-            child: const Icon(Icons.arrow_back, color: Colors.white, size: 20),
           ),
-        ),
-        const SizedBox(width: 14),
-        Expanded(
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Row(children: [
-              Text('Notificações',
-                  style: GoogleFonts.spaceGrotesk(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700)),
-              if (unread > 0) ...[
-                const SizedBox(width: 8),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: AppColors.accent,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text('$unread',
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      'Notificações',
                       style: GoogleFonts.spaceGrotesk(
-                          color: Colors.black,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700)),
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    if (unread > 0) ...[
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.accent,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          '$unread',
+                          style: GoogleFonts.spaceGrotesk(
+                            color: Colors.black,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+                Text(
+                  'Desliza para eliminar',
+                  style: GoogleFonts.inter(
+                    color: AppColors.textMuted,
+                    fontSize: 10,
+                  ),
                 ),
               ],
-            ]),
-            Text('Desliza para eliminar',
-                style: GoogleFonts.inter(
-                    color: AppColors.textMuted, fontSize: 10)),
-          ]),
-        ),
-        if (unread > 0)
-          GestureDetector(
-            onTap: _markAllRead,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-              decoration: BoxDecoration(
-                color: AppColors.accent.withAlpha(15),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: AppColors.accent.withAlpha(50)),
-              ),
-              child: Text('Ler tudo',
-                  style: GoogleFonts.inter(
-                      color: AppColors.accent,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600)),
             ),
           ),
-      ]),
+          if (unread > 0)
+            GestureDetector(
+              onTap: _markAllRead,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 7,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.accent.withAlpha(15),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: AppColors.accent.withAlpha(50)),
+                ),
+                child: Text(
+                  'Ler tudo',
+                  style: GoogleFonts.inter(
+                    color: AppColors.accent,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 }
+
+// ─── _NotifCard ───────────────────────────────────────────────────────────────
 
 class _NotifCard extends StatefulWidget {
   final AppNotification notif;
@@ -290,7 +337,9 @@ class _NotifCardState extends State<_NotifCard>
   void initState() {
     super.initState();
     _slideCtrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 500));
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
     _slide = Tween<Offset>(
       begin: const Offset(0.4, 0),
       end: Offset.zero,
@@ -326,8 +375,7 @@ class _NotifCardState extends State<_NotifCard>
             borderRadius: BorderRadius.circular(18),
             border: Border.all(color: AppColors.danger.withAlpha(60)),
           ),
-          child: const Icon(Icons.delete_outline,
-              color: AppColors.danger, size: 22),
+          child: Icon(Icons.delete_outline, color: AppColors.danger, size: 22),
         ),
         child: GestureDetector(
           onTap: widget.onTap,
@@ -345,71 +393,91 @@ class _NotifCardState extends State<_NotifCard>
                   ? []
                   : [
                       BoxShadow(
-                          color: config.color.withAlpha(15),
-                          blurRadius: 12,
-                          spreadRadius: -4)
+                        color: config.color.withAlpha(15),
+                        blurRadius: 12,
+                        spreadRadius: -4,
+                      ),
                     ],
             ),
-            child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Container(
-                width: 42,
-                height: 42,
-                decoration: BoxDecoration(
-                  color: config.color.withAlpha(20),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: config.color.withAlpha(50)),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color: config.color.withAlpha(20),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: config.color.withAlpha(50)),
+                  ),
+                  child: Center(
+                    child: Text(
+                      config.icon,
+                      style: const TextStyle(fontSize: 18),
+                    ),
+                  ),
                 ),
-                child: Center(
-                  child:
-                      Text(config.icon, style: const TextStyle(fontSize: 18)),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(children: [
-                        Expanded(
-                          child: Text(n.title,
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              n.title,
                               style: GoogleFonts.spaceGrotesk(
                                 color: n.read ? AppColors.text : Colors.white,
                                 fontSize: 13,
-                                fontWeight:
-                                    n.read ? FontWeight.w500 : FontWeight.w700,
-                              )),
-                        ),
-                        if (!n.read)
-                          Container(
-                            width: 7,
-                            height: 7,
-                            decoration: BoxDecoration(
-                              color: config.color,
-                              shape: BoxShape.circle,
+                                fontWeight: n.read
+                                    ? FontWeight.w500
+                                    : FontWeight.w700,
+                              ),
                             ),
                           ),
-                      ]),
+                          if (!n.read)
+                            Container(
+                              width: 7,
+                              height: 7,
+                              decoration: BoxDecoration(
+                                color: config.color,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                        ],
+                      ),
                       const SizedBox(height: 4),
-                      Text(n.body,
-                          style: GoogleFonts.inter(
-                              color: AppColors.textMuted,
-                              fontSize: 11,
-                              height: 1.5)),
+                      Text(
+                        n.body,
+                        style: GoogleFonts.inter(
+                          color: AppColors.textMuted,
+                          fontSize: 11,
+                          height: 1.5,
+                        ),
+                      ),
                       const SizedBox(height: 6),
-                      Text(_timeAgo(n.timestamp),
-                          style: GoogleFonts.inter(
-                              color: config.color.withAlpha(180),
-                              fontSize: 10,
-                              fontWeight: FontWeight.w500)),
-                    ]),
-              ),
-            ]),
+                      Text(
+                        _timeAgo(n.timestamp),
+                        style: GoogleFonts.inter(
+                          color: config.color.withAlpha(180),
+                          fontSize: 10,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 }
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 ({String icon, Color color}) _notifConfig(NotifType type) {
   switch (type) {
@@ -437,28 +505,36 @@ String _timeAgo(DateTime dt) {
 class _EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Center(
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              shape: BoxShape.circle,
-              border: Border.all(color: AppColors.border),
-            ),
-            child:
-                const Center(child: Text('🔕', style: TextStyle(fontSize: 32))),
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 80,
+          height: 80,
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            shape: BoxShape.circle,
+            border: Border.all(color: AppColors.border),
           ),
-          const SizedBox(height: 16),
-          Text('Sem notificações',
-              style: GoogleFonts.spaceGrotesk(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600)),
-          const SizedBox(height: 6),
-          Text('Completa simulações para receber alertas',
-              style:
-                  GoogleFonts.inter(color: AppColors.textMuted, fontSize: 12)),
-        ]),
-      );
+          child: const Center(
+            child: Text('🔕', style: TextStyle(fontSize: 32)),
+          ),
+        ),
+        const SizedBox(height: 16),
+        Text(
+          'Sem notificações',
+          style: GoogleFonts.spaceGrotesk(
+            color: Colors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          'Completa simulações para receber alertas',
+          style: GoogleFonts.inter(color: AppColors.textMuted, fontSize: 12),
+        ),
+      ],
+    ),
+  );
 }

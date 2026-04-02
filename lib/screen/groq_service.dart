@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'api_service.dart';
 import 'package:flutter/material.dart';
+import 'package:phishing/models/app_models.dart';
 
 class GroqService {
   static Future<AiScenario> generateScenario({
@@ -17,9 +18,11 @@ class GroqService {
     final uri = Uri.parse('${ApiService.baseUrl}/ai-simulations/generate');
     try {
       final res = await http
-          .post(uri,
-              headers: {'Content-Type': 'application/json'},
-              body: jsonEncode(body))
+          .post(
+            uri,
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode(body),
+          )
           .timeout(const Duration(seconds: 35));
 
       if (res.statusCode == 503) throw GroqServiceUnavailableException();
@@ -64,237 +67,6 @@ class GroqException implements Exception {
   const GroqException(this.message);
   @override
   String toString() => message;
-}
-
-class SuspiciousElement {
-  final String id;
-  final String label;
-  final String hint;
-  final bool isSuspicious;
-  final String elementType;
-
-  const SuspiciousElement({
-    required this.id,
-    required this.label,
-    required this.hint,
-    required this.isSuspicious,
-    required this.elementType,
-  });
-
-  factory SuspiciousElement.fromJson(Map<String, dynamic> j) =>
-      SuspiciousElement(
-        id: (j['id'] ?? 'unknown').toString(),
-        label: (j['label'] ?? '').toString(),
-        hint: (j['hint'] ?? '').toString(),
-        isSuspicious:
-            j['is_suspicious'] == true || j['is_suspicious'] == 'true',
-        elementType: (j['element_type'] ?? 'body_text').toString(),
-      );
-}
-
-class AiScenario {
-  final String type;
-  final bool isPhishing;
-  final String difficulty;
-  final String brand;
-  final String brandColor;
-  final String logoUrl;
-  final String logoAltText;
-  final String senderName;
-  final String senderAddress;
-  final String subject;
-  final String previewText;
-  final String body;
-  final String ctaText;
-  final String ctaUrl;
-  final String timestamp;
-  final String? phoneNumber;
-  final String? pageTitle;
-  final List<String> formFields;
-  final List<SuspiciousElement> suspiciousElements;
-  final List<String> redFlags;
-  final List<String> greenFlags;
-  final String explanation;
-  final String attackTechnique;
-  final String realWorldReference;
-  final String potentialDamage;
-  final String forensicTip;
-  final String difficultyReason;
-
-  const AiScenario({
-    required this.type,
-    required this.isPhishing,
-    required this.difficulty,
-    required this.brand,
-    required this.brandColor,
-    required this.logoUrl,
-    required this.logoAltText,
-    required this.senderName,
-    required this.senderAddress,
-    required this.subject,
-    required this.previewText,
-    required this.body,
-    required this.ctaText,
-    required this.ctaUrl,
-    required this.timestamp,
-    this.phoneNumber,
-    this.pageTitle,
-    this.formFields = const [],
-    required this.suspiciousElements,
-    required this.redFlags,
-    required this.greenFlags,
-    required this.explanation,
-    required this.attackTechnique,
-    required this.realWorldReference,
-    required this.potentialDamage,
-    required this.forensicTip,
-    required this.difficultyReason,
-  });
-
-  static String _sanitizeUrl(String url, String brand, bool isPhishing) {
-    if (url.length > 10 &&
-        (url.startsWith('http://') || url.startsWith('https://'))) {
-      final afterProtocol = url.replaceFirst(RegExp(r'https?://'), '');
-      if (afterProtocol.isNotEmpty && afterProtocol != '/') return url;
-    }
-    final brandSlug = brand
-        .toLowerCase()
-        .replaceAll(' ', '-')
-        .replaceAll(RegExp(r'[^a-z0-9\-]'), '');
-    if (isPhishing) {
-      final phishingDomains = [
-        'https://$brandSlug-secure.com/account/verify',
-        'https://secure-$brandSlug.net/login',
-        'https://$brandSlug-alert.com/action/confirm',
-        'http://$brandSlug-support.xyz/verify-account',
-        'https://account-$brandSlug.online/confirm',
-      ];
-      return phishingDomains[(brand.length) % phishingDomains.length];
-    } else {
-      return 'https://www.$brandSlug.com/account';
-    }
-  }
-
-  factory AiScenario.fromJson(Map<String, dynamic> j) => AiScenario(
-        type: (j['type'] ?? 'email').toString(),
-        isPhishing: j['is_phishing'] == true || j['is_phishing'] == 'true',
-        difficulty: (j['difficulty'] ?? 'medium').toString(),
-        brand: (j['brand'] ?? 'Empresa').toString(),
-        brandColor: (j['brand_color'] ?? '#3B82F6').toString(),
-        logoUrl: (j['logo_url'] ?? '').toString(),
-        logoAltText: (j['logo_alt_text'] ?? j['brand'] ?? 'Empresa').toString(),
-        senderName: (j['sender_name'] ?? 'Remetente').toString(),
-        senderAddress:
-            (j['sender_address'] ?? 'no-reply@exemplo.com').toString(),
-        subject: (j['subject'] ?? 'Assunto').toString(),
-        previewText: (j['preview_text'] ?? '').toString(),
-        body: (j['body'] ?? '').toString(),
-        ctaText: (j['cta_text'] ?? 'Clique Aqui').toString(),
-        ctaUrl: _sanitizeUrl((j['cta_url'] ?? '').toString(),
-            (j['brand'] ?? 'exemplo').toString(), j['is_phishing'] == true),
-        timestamp: (j['timestamp'] ?? 'Agora').toString(),
-        phoneNumber: j['phone_number']?.toString(),
-        pageTitle: j['page_title']?.toString(),
-        formFields: List<String>.from(j['form_fields'] ?? []),
-        suspiciousElements: (j['suspicious_elements'] as List<dynamic>? ?? [])
-            .whereType<Map<String, dynamic>>()
-            .map(SuspiciousElement.fromJson)
-            .toList(),
-        redFlags: List<String>.from(j['red_flags'] ?? []),
-        greenFlags: List<String>.from(j['green_flags'] ?? []),
-        explanation: (j['explanation'] ?? '').toString(),
-        attackTechnique: (j['attack_technique'] ?? '').toString(),
-        realWorldReference: (j['real_world_reference'] ?? '').toString(),
-        potentialDamage: (j['potential_damage'] ?? '').toString(),
-        forensicTip: (j['forensic_tip'] ?? '').toString(),
-        difficultyReason: (j['difficulty_reason'] ?? '').toString(),
-      );
-
-  String get typeIcon {
-    switch (type) {
-      case 'sms':
-        return '💬';
-      case 'whatsapp':
-        return '🟢';
-      case 'login_page':
-        return '🔐';
-      case 'url':
-        return '🔗';
-      default:
-        return '📧';
-    }
-  }
-
-  String get typeLabel {
-    switch (type) {
-      case 'sms':
-        return 'SMS';
-      case 'whatsapp':
-        return 'WhatsApp';
-      case 'login_page':
-        return 'Página de Login';
-      case 'url':
-        return 'URL / Link';
-      default:
-        return 'Email';
-    }
-  }
-
-  String get difficultyLabel {
-    switch (difficulty) {
-      case 'easy':
-        return 'Fácil';
-      case 'hard':
-        return 'Difícil';
-      default:
-        return 'Médio';
-    }
-  }
-
-  Color get brandColorParsed {
-    try {
-      final hex = brandColor.replaceAll('#', '');
-      return Color(int.parse('FF$hex', radix: 16));
-    } catch (_) {
-      return const Color(0xFF3B82F6);
-    }
-  }
-}
-
-class ForensicCase {
-  final String id;
-  final String title;
-  final String year;
-  final String target;
-  final String country;
-  final String attackType;
-  final String attackVector;
-  final String summary;
-  final String howItWorked;
-  final List<String> redFlags;
-  final String outcome;
-  final String financialImpact;
-  final List<String> lessons;
-  final String threat_actor;
-  final String emoji;
-
-  const ForensicCase({
-    required this.id,
-    required this.title,
-    required this.year,
-    required this.target,
-    required this.country,
-    required this.attackType,
-    required this.attackVector,
-    required this.summary,
-    required this.howItWorked,
-    required this.redFlags,
-    required this.outcome,
-    required this.financialImpact,
-    required this.lessons,
-    required this.threat_actor,
-    required this.emoji,
-  });
 }
 
 final List<ForensicCase> kForensicCases = [

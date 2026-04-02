@@ -21,39 +21,6 @@ void main() async {
   runApp(const PhishAwareApp());
 }
 
-class AppColors {
-  static Color bg = const Color(0xFF0A0E14);
-  static Color surface = const Color(0xFF131920);
-  static Color surface2 = const Color(0xFF1C2535);
-  static Color border = const Color(0xFF1E2A3A);
-  static Color text = Colors.white;
-  static Color textMuted = const Color(0xFF64748B);
-  static Color accent = const Color(0xFF00E5A0);
-  static Color blue = const Color(0xFF3B82F6);
-  static Color warn = const Color(0xFFFFCC00);
-  static Color danger = const Color(0xFFFF4444);
-
-  static void apply(bool isDark) {
-    if (isDark) {
-      bg = const Color(0xFF0A0E14);
-      surface = const Color(0xFF131920);
-      surface2 = const Color(0xFF1C2535);
-      border = const Color(0xFF1E2A3A);
-      text = Colors.white;
-      textMuted = const Color(0xFF64748B);
-      accent = const Color(0xFF00E5A0);
-    } else {
-      bg = const Color(0xFFF4F6F8);
-      surface = const Color(0xFFFFFFFF);
-      surface2 = const Color(0xFFE8EDF2);
-      border = const Color(0xFFDDE2E8);
-      text = const Color(0xFF111827);
-      textMuted = const Color(0xFF6B7280);
-      accent = const Color(0xFF009E72);
-    }
-  }
-}
-
 class PhishAwareApp extends StatelessWidget {
   const PhishAwareApp({super.key});
 
@@ -62,6 +29,7 @@ class PhishAwareApp extends StatelessWidget {
     return ValueListenableBuilder<bool>(
       valueListenable: AppPreferences.themeNotifier,
       builder: (_, isDark, __) {
+        // Atualiza as cores do AppColors (definido em app_models.dart)
         AppColors.apply(isDark);
 
         return MaterialApp(
@@ -92,25 +60,89 @@ class PhishAwareApp extends StatelessWidget {
 
   ThemeData _buildDarkTheme() => ThemeData(
     brightness: Brightness.dark,
-    scaffoldBackgroundColor: const Color(0xFF0A0E14),
+    scaffoldBackgroundColor: const Color(0xFF0F1318),
     colorScheme: const ColorScheme.dark(
       primary: Color(0xFF00E5A0),
-      surface: Color(0xFF131920),
+      secondary: Color(0xFF00C87A),
+      surface: Color(0xFF1A2030),
+      error: Color(0xFFEF4444),
     ),
+    cardColor: const Color(0xFF1A2030),
+    dividerColor: const Color(0x1AFFFFFF),
     textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme),
     splashColor: Colors.transparent,
     highlightColor: Colors.transparent,
+    appBarTheme: const AppBarTheme(
+      backgroundColor: Color(0xFF0F1318),
+      foregroundColor: Color(0xFFE2E8F0),
+      elevation: 0,
+    ),
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: const Color(0xFF242D3E),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0x1AFFFFFF)),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0x1AFFFFFF)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFF00E5A0), width: 1.5),
+      ),
+    ),
   );
 
   ThemeData _buildLightTheme() => ThemeData(
     brightness: Brightness.light,
-    scaffoldBackgroundColor: const Color(0xFFF4F6F8),
+    scaffoldBackgroundColor: const Color(0xFFF4F7F5),
     colorScheme: const ColorScheme.light(
-      primary: Color(0xFF009E72),
+      primary: Color(0xFF00A374),
+      secondary: Color(0xFF008A62),
       surface: Color(0xFFFFFFFF),
+      error: Color(0xFFDC2626),
     ),
+    cardColor: const Color(0xFFFFFFFF),
+    dividerColor: const Color(0xFFCDD9D4),
     textTheme: GoogleFonts.interTextTheme(ThemeData.light().textTheme),
     splashColor: Colors.transparent,
     highlightColor: Colors.transparent,
+    appBarTheme: const AppBarTheme(
+      backgroundColor: Color(0xFFF4F7F5),
+      foregroundColor: Color(0xFF0D1F1A),
+      elevation: 0,
+      iconTheme: IconThemeData(color: Color(0xFF0D1F1A)),
+    ),
+    iconTheme: const IconThemeData(color: Color(0xFF0D1F1A)),
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: const Color(0xFFEAF2EE),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFFCDD9D4)),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFFCDD9D4)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFF00A374), width: 1.5),
+      ),
+      labelStyle: const TextStyle(color: Color(0xFF4B6858)),
+      hintStyle: const TextStyle(color: Color(0xFF4B6858)),
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xFF00A374),
+        foregroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      ),
+    ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(foregroundColor: const Color(0xFF00A374)),
+    ),
   );
 }

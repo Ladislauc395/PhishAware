@@ -6,10 +6,12 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:record/record.dart';
+import 'package:audioplayers/audioplayers.dart';
 import '../models/app_models.dart';
 import 'api_service.dart';
-import 'groq_service.dart';
+import 'groq_service.dart' hide ForensicCase, AiScenario, SuspiciousElement;
 import 'realistic_sim_renderer.dart';
+import 'avatar_call_sim_screen.dart';
 
 class AiLabScreen extends StatefulWidget {
   const AiLabScreen({super.key});
@@ -28,11 +30,14 @@ class _AiLabScreenState extends State<AiLabScreen>
   @override
   void initState() {
     super.initState();
-    _bgCtrl =
-        AnimationController(vsync: this, duration: const Duration(seconds: 20))
-          ..repeat();
+    _bgCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 20),
+    )..repeat();
     _entryCtrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 600));
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
     _entryFade = CurvedAnimation(parent: _entryCtrl, curve: Curves.easeOut);
     _entryCtrl.forward();
   }
@@ -52,8 +57,9 @@ class _AiLabScreenState extends State<AiLabScreen>
         pageBuilder: (_, a, __) =>
             AiChallengeScreen(type: type, difficulty: difficulty),
         transitionsBuilder: (_, a, __, child) => FadeTransition(
-            opacity: CurvedAnimation(parent: a, curve: Curves.easeOut),
-            child: child),
+          opacity: CurvedAnimation(parent: a, curve: Curves.easeOut),
+          child: child,
+        ),
         transitionDuration: const Duration(milliseconds: 300),
       ),
     );
@@ -63,9 +69,11 @@ class _AiLabScreenState extends State<AiLabScreen>
         if (result.correct) _sessionCorrect++;
       });
       ApiService.addXp(
-              result.xpEarned, result.correct, result.scenario?.type ?? 'email',
-              scenario: result.scenario?.subject ?? '')
-          .ignore();
+        result.xpEarned,
+        result.correct,
+        result.scenario?.type ?? 'email',
+        scenario: result.scenario?.subject ?? '',
+      ).ignore();
     }
   }
 
@@ -76,8 +84,10 @@ class _AiLabScreenState extends State<AiLabScreen>
       PageRouteBuilder(
         pageBuilder: (_, a, __) => ForensicDetailScreen(fc: fc),
         transitionsBuilder: (_, a, __, child) => SlideTransition(
-          position: Tween<Offset>(begin: const Offset(1, 0), end: Offset.zero)
-              .animate(CurvedAnimation(parent: a, curve: Curves.easeOutCubic)),
+          position: Tween<Offset>(
+            begin: const Offset(1, 0),
+            end: Offset.zero,
+          ).animate(CurvedAnimation(parent: a, curve: Curves.easeOutCubic)),
           child: child,
         ),
       ),
@@ -91,8 +101,9 @@ class _AiLabScreenState extends State<AiLabScreen>
       PageRouteBuilder(
         pageBuilder: (_, a, __) => AdvancedSimScreen(simType: simType),
         transitionsBuilder: (_, a, __, child) => FadeTransition(
-            opacity: CurvedAnimation(parent: a, curve: Curves.easeOut),
-            child: child),
+          opacity: CurvedAnimation(parent: a, curve: Curves.easeOut),
+          child: child,
+        ),
         transitionDuration: const Duration(milliseconds: 300),
       ),
     );
@@ -115,6 +126,7 @@ class _AiLabScreenState extends State<AiLabScreen>
                   _buildTypeSection(),
                   _buildDiffSection(),
                   _buildAdvancedSimsSection(),
+                  _buildAvatarCallSection(),
                   _buildForensicSection(),
                   const SliverToBoxAdapter(child: SizedBox(height: 48)),
                 ],
@@ -127,76 +139,105 @@ class _AiLabScreenState extends State<AiLabScreen>
   }
 
   Widget _buildHeader() {
-    final pct =
-        _sessionTotal > 0 ? (_sessionCorrect / _sessionTotal * 100).round() : 0;
+    final pct = _sessionTotal > 0
+        ? (_sessionCorrect / _sessionTotal * 100).round()
+        : 0;
     return SliverToBoxAdapter(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
-            Container(
-              width: 52,
-              height: 52,
-              decoration: BoxDecoration(
-                color: const Color(0xFF0D1520),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.white.withAlpha(18)),
-                boxShadow: [
-                  BoxShadow(
-                      color: Colors.black.withAlpha(60),
-                      blurRadius: 12,
-                      spreadRadius: -2)
-                ],
-              ),
-              child: Stack(alignment: Alignment.center, children: [
-                const Icon(Icons.shield_outlined,
-                    color: Color(0xFF00FF88), size: 28),
-                Positioned(
-                  bottom: 10,
-                  child: Container(
-                    width: 10,
-                    height: 10,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Color(0xFF00FF88),
-                    ),
-                    child: const Icon(Icons.close,
-                        color: Color(0xFF060A10), size: 7),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  width: 52,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF0D1520),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.white.withAlpha(18)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withAlpha(60),
+                        blurRadius: 12,
+                        spreadRadius: -2,
+                      ),
+                    ],
+                  ),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      const Icon(
+                        Icons.shield_outlined,
+                        color: Color(0xFF00FF88),
+                        size: 28,
+                      ),
+                      Positioned(
+                        bottom: 10,
+                        child: Container(
+                          width: 10,
+                          height: 10,
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Color(0xFF00FF88),
+                          ),
+                          child: const Icon(
+                            Icons.close,
+                            color: Color(0xFF060A10),
+                            size: 7,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ]),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('PhishAware',
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'PhishAware',
                         style: GoogleFonts.syne(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: -0.5)),
-                    Row(children: [
-                      Container(
-                        width: 6,
-                        height: 6,
-                        decoration: const BoxDecoration(
-                            shape: BoxShape.circle, color: Color(0xFF00FF88)),
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -0.5,
+                        ),
                       ),
-                      const SizedBox(width: 6),
-                      Text('Simulações por IA · Groq',
-                          style: GoogleFonts.inter(
-                              color: Colors.white38, fontSize: 11)),
-                    ]),
-                  ]),
+                      Row(
+                        children: [
+                          Container(
+                            width: 6,
+                            height: 6,
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Color(0xFF00FF88),
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            'Simulações por IA · Groq',
+                            style: GoogleFonts.inter(
+                              color: Colors.white38,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ]),
-          if (_sessionTotal > 0) ...[
-            const SizedBox(height: 20),
-            _buildSessionBar(pct),
+            if (_sessionTotal > 0) ...[
+              const SizedBox(height: 20),
+              _buildSessionBar(pct),
+            ],
           ],
-        ]),
+        ),
       ),
     );
   }
@@ -210,26 +251,35 @@ class _AiLabScreenState extends State<AiLabScreen>
         border: Border.all(color: Colors.white.withAlpha(10)),
       ),
       child: IntrinsicHeight(
-        child: Row(children: [
-          _MiniStat('$_sessionTotal', 'Jogadas', const Color(0xFF3B82F6)),
-          _divider(),
-          _MiniStat('$_sessionCorrect', 'Acertos', const Color(0xFF00FF88)),
-          _divider(),
-          _MiniStat('${_sessionTotal - _sessionCorrect}', 'Erros',
-              const Color(0xFFFF4444)),
-          _divider(),
-          _MiniStat('$pct%', 'Taxa',
-              pct >= 70 ? const Color(0xFF00FF88) : const Color(0xFFFFCC00)),
-        ]),
+        child: Row(
+          children: [
+            _MiniStat('$_sessionTotal', 'Jogadas', const Color(0xFF3B82F6)),
+            _divider(),
+            _MiniStat('$_sessionCorrect', 'Acertos', const Color(0xFF00FF88)),
+            _divider(),
+            _MiniStat(
+              '${_sessionTotal - _sessionCorrect}',
+              'Erros',
+              const Color(0xFFFF4444),
+            ),
+            _divider(),
+            _MiniStat(
+              '$pct%',
+              'Taxa',
+              pct >= 70 ? const Color(0xFF00FF88) : const Color(0xFFFFCC00),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _divider() => Container(
-      width: 1,
-      height: 28,
-      color: Colors.white.withAlpha(12),
-      margin: const EdgeInsets.symmetric(horizontal: 12));
+    width: 1,
+    height: 28,
+    color: Colors.white.withAlpha(12),
+    margin: const EdgeInsets.symmetric(horizontal: 12),
+  );
 
   Widget _buildHeroCard() {
     return SliverToBoxAdapter(
@@ -245,52 +295,70 @@ class _AiLabScreenState extends State<AiLabScreen>
               border: Border.all(color: Colors.white.withAlpha(14)),
               boxShadow: [
                 BoxShadow(
-                    color: Colors.black.withAlpha(50),
-                    blurRadius: 20,
-                    spreadRadius: -4)
+                  color: Colors.black.withAlpha(50),
+                  blurRadius: 20,
+                  spreadRadius: -4,
+                ),
               ],
             ),
-            child: Row(children: [
-              Container(
-                width: 54,
-                height: 54,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF00FF88).withAlpha(12),
-                  borderRadius: BorderRadius.circular(16),
-                  border:
-                      Border.all(color: const Color(0xFF00FF88).withAlpha(35)),
+            child: Row(
+              children: [
+                Container(
+                  width: 54,
+                  height: 54,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF00FF88).withAlpha(12),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: const Color(0xFF00FF88).withAlpha(35),
+                    ),
+                  ),
+                  child: const Icon(
+                    Icons.auto_awesome_rounded,
+                    color: Color(0xFF00FF88),
+                    size: 24,
+                  ),
                 ),
-                child: const Icon(Icons.auto_awesome_rounded,
-                    color: Color(0xFF00FF88), size: 24),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Simulação Aleatória',
-                          style: GoogleFonts.syne(
-                              color: Colors.white,
-                              fontSize: 15,
-                              fontWeight: FontWeight.w700)),
+                      Text(
+                        'Simulação Aleatória',
+                        style: GoogleFonts.syne(
+                          color: Colors.white,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
                       const SizedBox(height: 4),
-                      Text('A IA gera um cenário único',
-                          style: GoogleFonts.inter(
-                              color: Colors.white38, fontSize: 12)),
-                    ]),
-              ),
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: Colors.white.withAlpha(8),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: Colors.white.withAlpha(15)),
+                      Text(
+                        'A IA gera um cenário único',
+                        style: GoogleFonts.inter(
+                          color: Colors.white38,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                child: const Icon(Icons.arrow_forward,
-                    color: Colors.white54, size: 16),
-              ),
-            ]),
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withAlpha(8),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: Colors.white.withAlpha(15)),
+                  ),
+                  child: const Icon(
+                    Icons.arrow_forward,
+                    color: Colors.white54,
+                    size: 16,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -300,43 +368,62 @@ class _AiLabScreenState extends State<AiLabScreen>
   Widget _buildTypeSection() {
     final types = [
       _SimTypeData(
-          Icons.email_outlined, 'Email', const Color(0xFF00FF88), 'email'),
+        Icons.email_outlined,
+        'Email',
+        const Color(0xFF00FF88),
+        'email',
+      ),
       _SimTypeData(Icons.sms_outlined, 'SMS', const Color(0xFFFFCC00), 'sms'),
       _SimTypeData(
-          Icons.chat_outlined, 'WhatsApp', const Color(0xFF25D366), 'whatsapp'),
+        Icons.chat_outlined,
+        'WhatsApp',
+        const Color(0xFF25D366),
+        'whatsapp',
+      ),
       _SimTypeData(
-          Icons.lock_outline, 'Login', const Color(0xFFFF6B35), 'login_page'),
+        Icons.lock_outline,
+        'Login',
+        const Color(0xFFFF6B35),
+        'login_page',
+      ),
       _SimTypeData(Icons.link_rounded, 'URL', const Color(0xFF3B82F6), 'url'),
       _SimTypeData(
-          Icons.shuffle_rounded, 'Aleatório', const Color(0xFFB06EFF), ''),
+        Icons.shuffle_rounded,
+        'Aleatório',
+        const Color(0xFFB06EFF),
+        '',
+      ),
     ];
 
     return SliverToBoxAdapter(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 28, 20, 0),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          _SectionLabel(Icons.tune_rounded, 'Por Tipo'),
-          const SizedBox(height: 14),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              mainAxisSpacing: 10,
-              crossAxisSpacing: 10,
-              childAspectRatio: 1.1,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _SectionLabel(Icons.tune_rounded, 'Por Tipo'),
+            const SizedBox(height: 14),
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                mainAxisSpacing: 10,
+                crossAxisSpacing: 10,
+                childAspectRatio: 1.1,
+              ),
+              itemCount: types.length,
+              itemBuilder: (_, i) {
+                final t = types[i];
+                return GestureDetector(
+                  onTap: () =>
+                      _openChallenge(type: t.type.isEmpty ? null : t.type),
+                  child: _TypePill(data: t),
+                );
+              },
             ),
-            itemCount: types.length,
-            itemBuilder: (_, i) {
-              final t = types[i];
-              return GestureDetector(
-                onTap: () =>
-                    _openChallenge(type: t.type.isEmpty ? null : t.type),
-                child: _TypePill(data: t),
-              );
-            },
-          ),
-        ]),
+          ],
+        ),
       ),
     );
   }
@@ -345,29 +432,37 @@ class _AiLabScreenState extends State<AiLabScreen>
     return SliverToBoxAdapter(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          _SectionLabel(Icons.signal_cellular_alt, 'Por Dificuldade'),
-          const SizedBox(height: 14),
-          Row(children: [
-            _DiffPill(
-                icon: Icons.signal_cellular_0_bar,
-                label: 'Fácil',
-                color: const Color(0xFF00FF88),
-                onTap: () => _openChallenge(difficulty: 'easy')),
-            const SizedBox(width: 10),
-            _DiffPill(
-                icon: Icons.signal_cellular_alt_2_bar,
-                label: 'Médio',
-                color: const Color(0xFFFFCC00),
-                onTap: () => _openChallenge(difficulty: 'medium')),
-            const SizedBox(width: 10),
-            _DiffPill(
-                icon: Icons.signal_cellular_alt,
-                label: 'Difícil',
-                color: const Color(0xFFFF4444),
-                onTap: () => _openChallenge(difficulty: 'hard')),
-          ]),
-        ]),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _SectionLabel(Icons.signal_cellular_alt, 'Por Dificuldade'),
+            const SizedBox(height: 14),
+            Row(
+              children: [
+                _DiffPill(
+                  icon: Icons.signal_cellular_0_bar,
+                  label: 'Fácil',
+                  color: const Color(0xFF00FF88),
+                  onTap: () => _openChallenge(difficulty: 'easy'),
+                ),
+                const SizedBox(width: 10),
+                _DiffPill(
+                  icon: Icons.signal_cellular_alt_2_bar,
+                  label: 'Médio',
+                  color: const Color(0xFFFFCC00),
+                  onTap: () => _openChallenge(difficulty: 'medium'),
+                ),
+                const SizedBox(width: 10),
+                _DiffPill(
+                  icon: Icons.signal_cellular_alt,
+                  label: 'Difícil',
+                  color: const Color(0xFFFF4444),
+                  onTap: () => _openChallenge(difficulty: 'hard'),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -375,85 +470,126 @@ class _AiLabScreenState extends State<AiLabScreen>
   Widget _buildAdvancedSimsSection() {
     final sims = [
       _AdvancedSimData(
-          icon: Icons.phone_in_talk_outlined,
-          label: 'Vishing',
-          subtitle: 'Chamada com voz clonada',
-          color: const Color(0xFFFF4444),
-          type: 'vishing'),
+        icon: Icons.phone_in_talk_outlined,
+        label: 'Vishing',
+        subtitle: 'Chamada com voz clonada',
+        color: const Color(0xFFFF4444),
+        type: 'vishing',
+      ),
       _AdvancedSimData(
-          icon: Icons.search_rounded,
-          label: 'Search Phishing',
-          subtitle: 'Resultados falsos',
-          color: const Color(0xFF3B82F6),
-          type: 'search'),
+        icon: Icons.search_rounded,
+        label: 'Search Phishing',
+        subtitle: 'Resultados falsos',
+        color: const Color(0xFF3B82F6),
+        type: 'search',
+      ),
       _AdvancedSimData(
-          icon: Icons.qr_code_scanner_rounded,
-          label: 'Quishing',
-          subtitle: 'QR Code malicioso',
-          color: const Color(0xFFFFCC00),
-          type: 'quishing'),
+        icon: Icons.qr_code_scanner_rounded,
+        label: 'Quishing',
+        subtitle: 'QR Code malicioso',
+        color: const Color(0xFFFFCC00),
+        type: 'quishing',
+      ),
       _AdvancedSimData(
-          icon: Icons.dns_outlined,
-          label: 'Pharming',
-          subtitle: 'DNS envenenado',
-          color: const Color(0xFFB06EFF),
-          type: 'pharming'),
+        icon: Icons.dns_outlined,
+        label: 'Pharming',
+        subtitle: 'DNS envenenado',
+        color: const Color(0xFFB06EFF),
+        type: 'pharming',
+      ),
       _AdvancedSimData(
-          icon: Icons.support_agent_outlined,
-          label: 'Angler',
-          subtitle: 'Suporte falso',
-          color: const Color(0xFF25D366),
-          type: 'angler'),
+        icon: Icons.support_agent_outlined,
+        label: 'Angler',
+        subtitle: 'Suporte falso',
+        color: const Color(0xFF25D366),
+        type: 'angler',
+      ),
       _AdvancedSimData(
-          icon: Icons.account_balance_outlined,
-          label: 'Whaling',
-          subtitle: 'Ataque a executivos',
-          color: const Color(0xFFFF6B35),
-          type: 'whaling'),
+        icon: Icons.account_balance_outlined,
+        label: 'Whaling',
+        subtitle: 'Ataque a executivos',
+        color: const Color(0xFFFF6B35),
+        type: 'whaling',
+      ),
     ];
 
     return SliverToBoxAdapter(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 28, 20, 0),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(children: [
-            _SectionLabel(Icons.hub_outlined, 'Simulações Avançadas'),
-            const Spacer(),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-              decoration: BoxDecoration(
-                color: const Color(0xFF3B82F6).withAlpha(18),
-                borderRadius: BorderRadius.circular(6),
-                border:
-                    Border.all(color: const Color(0xFF3B82F6).withAlpha(50)),
-              ),
-              child: Text('Novos vetores',
-                  style: GoogleFonts.jetBrainsMono(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                _SectionLabel(Icons.hub_outlined, 'Simulações Avançadas'),
+                const Spacer(),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF3B82F6).withAlpha(18),
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(
+                      color: const Color(0xFF3B82F6).withAlpha(50),
+                    ),
+                  ),
+                  child: Text(
+                    'Novos vetores',
+                    style: GoogleFonts.jetBrainsMono(
                       color: const Color(0xFF3B82F6),
                       fontSize: 9,
-                      fontWeight: FontWeight.w600)),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ]),
-          const SizedBox(height: 6),
-          Text('Ataques sofisticados além do e‑mail',
-              style: GoogleFonts.inter(color: Colors.white38, fontSize: 12)),
-          const SizedBox(height: 16),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              mainAxisSpacing: 10,
-              crossAxisSpacing: 10,
-              childAspectRatio: 1.55,
+            const SizedBox(height: 6),
+            Text(
+              'Ataques sofisticados além do e‑mail',
+              style: GoogleFonts.inter(color: Colors.white38, fontSize: 12),
             ),
-            itemCount: sims.length,
-            itemBuilder: (_, i) => _AdvancedSimCard(
-              data: sims[i],
-              onTap: () => _openAdvancedSim(sims[i].type),
+            const SizedBox(height: 16),
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                mainAxisSpacing: 10,
+                crossAxisSpacing: 10,
+                childAspectRatio: 1.55,
+              ),
+              itemCount: sims.length,
+              itemBuilder: (_, i) => _AdvancedSimCard(
+                data: sims[i],
+                onTap: () => _openAdvancedSim(sims[i].type),
+              ),
             ),
-          ),
-        ]),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAvatarCallSection() {
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 28, 20, 0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _SectionLabel(Icons.phone_in_talk_outlined, 'Chamada Suspeita'),
+            const SizedBox(height: 6),
+            Text(
+              'Treina a resistência a ataques de vishing ao vivo',
+              style: GoogleFonts.inter(color: Colors.white38, fontSize: 12),
+            ),
+            const SizedBox(height: 14),
+            AvatarCallSimCard(),
+          ],
+        ),
       ),
     );
   }
@@ -462,15 +598,21 @@ class _AiLabScreenState extends State<AiLabScreen>
     return SliverToBoxAdapter(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 28, 20, 0),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          _SectionLabel(Icons.biotech_outlined, 'Análise Forense'),
-          const SizedBox(height: 6),
-          Text('Ataques documentados que mudaram a cibersegurança',
-              style: GoogleFonts.inter(color: Colors.white38, fontSize: 12)),
-          const SizedBox(height: 16),
-          ...kForensicCases.map(
-              (fc) => _ForensicCard(fc: fc, onTap: () => _openForensic(fc))),
-        ]),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _SectionLabel(Icons.biotech_outlined, 'Análise Forense'),
+            const SizedBox(height: 6),
+            Text(
+              'Ataques documentados que mudaram a cibersegurança',
+              style: GoogleFonts.inter(color: Colors.white38, fontSize: 12),
+            ),
+            const SizedBox(height: 16),
+            ...kForensicCases.map(
+              (fc) => _ForensicCard(fc: fc, onTap: () => _openForensic(fc)),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -480,8 +622,11 @@ class _ChallengeResult {
   final bool correct;
   final int xpEarned;
   final AiScenario? scenario;
-  _ChallengeResult(
-      {required this.correct, required this.xpEarned, this.scenario});
+  _ChallengeResult({
+    required this.correct,
+    required this.xpEarned,
+    this.scenario,
+  });
 }
 
 class AiChallengeScreen extends StatefulWidget {
@@ -510,13 +655,18 @@ class _AiChallengeScreenState extends State<AiChallengeScreen>
   void initState() {
     super.initState();
     _revealCtrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 500));
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
     _revealAnim = CurvedAnimation(parent: _revealCtrl, curve: Curves.easeOut);
     _shakeCtrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 500));
-    _shakeAnim = Tween<Offset>(begin: Offset.zero, end: const Offset(0.02, 0))
-        .chain(CurveTween(curve: Curves.elasticIn))
-        .animate(_shakeCtrl);
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+    _shakeAnim = Tween<Offset>(
+      begin: Offset.zero,
+      end: const Offset(0.02, 0),
+    ).chain(CurveTween(curve: Curves.elasticIn)).animate(_shakeCtrl);
     _generate();
   }
 
@@ -539,7 +689,9 @@ class _AiChallengeScreenState extends State<AiChallengeScreen>
     });
     try {
       final data = await ApiService.generateAiSimulation(
-          type: widget.type, difficulty: widget.difficulty);
+        type: widget.type,
+        difficulty: widget.difficulty,
+      );
       final s = AiScenario.fromJson(data);
       if (mounted)
         setState(() {
@@ -563,39 +715,58 @@ class _AiChallengeScreenState extends State<AiChallengeScreen>
   }
 
   void _showElementHint(SuspiciousElement el) {
-    final color =
-        el.isSuspicious ? const Color(0xFFFF4444) : const Color(0xFF00FF88);
+    final color = el.isSuspicious
+        ? const Color(0xFFFF4444)
+        : const Color(0xFF00FF88);
     ScaffoldMessenger.of(context).clearSnackBars();
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      backgroundColor: const Color(0xFF0D1520),
-      behavior: SnackBarBehavior.floating,
-      shape: RoundedRectangleBorder(
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: const Color(0xFF0D1520),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(14),
-          side: BorderSide(color: color.withAlpha(80))),
-      margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-      duration: const Duration(seconds: 4),
-      content: Row(children: [
-        Icon(
-            el.isSuspicious
-                ? Icons.warning_amber_rounded
-                : Icons.check_circle_outline,
-            color: color,
-            size: 20),
-        const SizedBox(width: 10),
-        Expanded(
-            child: Column(
+          side: BorderSide(color: color.withAlpha(80)),
+        ),
+        margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+        duration: const Duration(seconds: 4),
+        content: Row(
+          children: [
+            Icon(
+              el.isSuspicious
+                  ? Icons.warning_amber_rounded
+                  : Icons.check_circle_outline,
+              color: color,
+              size: 20,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-              Text(el.isSuspicious ? 'Elemento Suspeito' : 'Elemento Normal',
-                  style: GoogleFonts.syne(
-                      color: color, fontSize: 11, fontWeight: FontWeight.w700)),
-              Text(el.hint,
-                  style: GoogleFonts.inter(
-                      color: Colors.white70, fontSize: 11, height: 1.4)),
-            ])),
-      ]),
-    ));
+                  Text(
+                    el.isSuspicious ? 'Elemento Suspeito' : 'Elemento Normal',
+                    style: GoogleFonts.syne(
+                      color: color,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  Text(
+                    el.hint,
+                    style: GoogleFonts.inter(
+                      color: Colors.white70,
+                      fontSize: 11,
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   void _answer(bool isPhishing) {
@@ -613,17 +784,20 @@ class _AiChallengeScreenState extends State<AiChallengeScreen>
     } else {
       HapticFeedback.lightImpact();
       Future.delayed(
-          const Duration(milliseconds: 100), HapticFeedback.lightImpact);
+        const Duration(milliseconds: 100),
+        HapticFeedback.lightImpact,
+      );
     }
   }
 
   void _nextRound() => Navigator.pop(
-      context,
-      _ChallengeResult(
-        correct: _userAnswer == (_scenario?.isPhishing ?? true),
-        xpEarned: _calcXp(),
-        scenario: _scenario,
-      ));
+    context,
+    _ChallengeResult(
+      correct: _userAnswer == (_scenario?.isPhishing ?? true),
+      xpEarned: _calcXp(),
+      scenario: _scenario,
+    ),
+  );
 
   int _calcXp() {
     if (_scenario == null || _userAnswer == null) return 0;
@@ -631,7 +805,7 @@ class _AiChallengeScreenState extends State<AiChallengeScreen>
     final baseXp = switch (_scenario!.difficulty) {
       'hard' => 30,
       'medium' => 20,
-      _ => 10
+      _ => 10,
     };
     return baseXp + (_tappedElements.length * 2).clamp(0, 10);
   }
@@ -644,255 +818,323 @@ class _AiChallengeScreenState extends State<AiChallengeScreen>
         child: _loading
             ? _LoadingView(type: widget.type)
             : _error != null
-                ? _ErrorView(error: _error!, onRetry: _generate)
-                : _buildChallenge(),
+            ? _ErrorView(error: _error!, onRetry: _generate)
+            : _buildChallenge(),
       ),
     );
   }
 
   Widget _buildChallenge() {
     final s = _scenario!;
-    return Column(children: [
-      _ChallengeHeader(
-        scenario: s,
-        revealed: _revealed,
-        inspectMode: _inspectMode,
-        tappedCount: _tappedElements.length,
-        onClose: _revealed ? _nextRound : () => Navigator.pop(context),
-        onToggleInspect: () => setState(() => _inspectMode = !_inspectMode),
-      ),
-      Expanded(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
-          physics: const BouncingScrollPhysics(),
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
-            const SizedBox(height: 16),
-            if (_inspectMode && !_revealed)
-              _InspectBanner(elementCount: s.suspiciousElements.length),
-            const SizedBox(height: 8),
-            SlideTransition(
-                position: _shakeAnim, child: _buildVisualRenderer(s)),
-            const SizedBox(height: 20),
-            if (!_revealed)
-              _buildDecisionSection(s)
-            else
-              FadeTransition(
-                  opacity: _revealAnim, child: _buildAnalysisPanel(s)),
-          ]),
+    return Column(
+      children: [
+        _ChallengeHeader(
+          scenario: s,
+          revealed: _revealed,
+          inspectMode: _inspectMode,
+          tappedCount: _tappedElements.length,
+          onClose: _revealed ? _nextRound : () => Navigator.pop(context),
+          onToggleInspect: () => setState(() => _inspectMode = !_inspectMode),
         ),
-      ),
-    ]);
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+            physics: const BouncingScrollPhysics(),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 16),
+                if (_inspectMode && !_revealed)
+                  _InspectBanner(elementCount: s.suspiciousElements.length),
+                const SizedBox(height: 8),
+                SlideTransition(
+                  position: _shakeAnim,
+                  child: _buildVisualRenderer(s),
+                ),
+                const SizedBox(height: 20),
+                if (!_revealed)
+                  _buildDecisionSection(s)
+                else
+                  FadeTransition(
+                    opacity: _revealAnim,
+                    child: _buildAnalysisPanel(s),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   Widget _buildVisualRenderer(AiScenario s) => RealisticSimRenderer(
-        scenario: s,
-        revealed: _revealed,
-        inspectMode: _inspectMode,
-        tappedElements: _tappedElements,
-        onElementTap: _onElementTapped,
-      );
+    scenario: s,
+    revealed: _revealed,
+    inspectMode: _inspectMode,
+    tappedElements: _tappedElements,
+    onElementTap: _onElementTapped,
+  );
 
   Widget _buildDecisionSection(AiScenario s) {
-    return Column(children: [
-      if (_tappedElements.isNotEmpty) ...[
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          decoration: BoxDecoration(
-            color: const Color(0xFFFFCC00).withAlpha(15),
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: const Color(0xFFFFCC00).withAlpha(40)),
+    return Column(
+      children: [
+        if (_tappedElements.isNotEmpty) ...[
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFCC00).withAlpha(15),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: const Color(0xFFFFCC00).withAlpha(40)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.search_rounded,
+                  color: Color(0xFFFFCC00),
+                  size: 13,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  '${_tappedElements.length} elemento(s) inspecionado(s)',
+                  style: GoogleFonts.jetBrainsMono(
+                    color: const Color(0xFFFFCC00),
+                    fontSize: 10,
+                  ),
+                ),
+              ],
+            ),
           ),
-          child: Row(mainAxisSize: MainAxisSize.min, children: [
-            const Icon(Icons.search_rounded,
-                color: Color(0xFFFFCC00), size: 13),
-            const SizedBox(width: 6),
-            Text('${_tappedElements.length} elemento(s) inspecionado(s)',
-                style: GoogleFonts.jetBrainsMono(
-                    color: const Color(0xFFFFCC00), fontSize: 10)),
-          ]),
-        ),
-        const SizedBox(height: 16),
-      ],
-      Text('O que achas?',
+          const SizedBox(height: 16),
+        ],
+        Text(
+          'O que achas?',
           style: GoogleFonts.syne(
-              color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
-      const SizedBox(height: 6),
-      Text('Toca nos elementos suspeitos • Depois decide',
-          style: GoogleFonts.inter(color: Colors.white38, fontSize: 12)),
-      const SizedBox(height: 20),
-      Row(children: [
-        Expanded(
-            child: _DecisionButton(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          'Toca nos elementos suspeitos • Depois decide',
+          style: GoogleFonts.inter(color: Colors.white38, fontSize: 12),
+        ),
+        const SizedBox(height: 20),
+        Row(
+          children: [
+            Expanded(
+              child: _DecisionButton(
                 label: 'É Phishing',
                 icon: Icons.phishing_rounded,
                 color: const Color(0xFFFF4444),
-                onTap: () => _answer(true))),
-        const SizedBox(width: 12),
-        Expanded(
-            child: _DecisionButton(
+                onTap: () => _answer(true),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _DecisionButton(
                 label: 'É Legítimo',
                 icon: Icons.verified_outlined,
                 color: const Color(0xFF00FF88),
-                onTap: () => _answer(false))),
-      ]),
-    ]);
+                onTap: () => _answer(false),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
   }
 
   Widget _buildAnalysisPanel(AiScenario s) {
     final userWasCorrect = _userAnswer == s.isPhishing;
     final xp = _calcXp();
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          color: userWasCorrect
-              ? const Color(0xFF00FF88).withAlpha(15)
-              : const Color(0xFFFF4444).withAlpha(15),
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            color: userWasCorrect
+                ? const Color(0xFF00FF88).withAlpha(15)
+                : const Color(0xFFFF4444).withAlpha(15),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
               color: userWasCorrect
                   ? const Color(0xFF00FF88).withAlpha(60)
-                  : const Color(0xFFFF4444).withAlpha(60)),
-        ),
-        child: Row(children: [
-          Container(
-            width: 46,
-            height: 46,
-            decoration: BoxDecoration(
-              color: userWasCorrect
-                  ? const Color(0xFF00FF88).withAlpha(20)
-                  : const Color(0xFFFF4444).withAlpha(20),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              userWasCorrect ? Icons.check_rounded : Icons.close_rounded,
-              color: userWasCorrect
-                  ? const Color(0xFF00FF88)
-                  : const Color(0xFFFF4444),
-              size: 24,
+                  : const Color(0xFFFF4444).withAlpha(60),
             ),
           ),
-          const SizedBox(width: 14),
-          Expanded(
-              child: Column(
+          child: Row(
+            children: [
+              Container(
+                width: 46,
+                height: 46,
+                decoration: BoxDecoration(
+                  color: userWasCorrect
+                      ? const Color(0xFF00FF88).withAlpha(20)
+                      : const Color(0xFFFF4444).withAlpha(20),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  userWasCorrect ? Icons.check_rounded : Icons.close_rounded,
+                  color: userWasCorrect
+                      ? const Color(0xFF00FF88)
+                      : const Color(0xFFFF4444),
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                Text(userWasCorrect ? 'Correto!' : 'Não desta vez',
-                    style: GoogleFonts.syne(
+                    Text(
+                      userWasCorrect ? 'Correto!' : 'Não desta vez',
+                      style: GoogleFonts.syne(
                         color: userWasCorrect
                             ? const Color(0xFF00FF88)
                             : const Color(0xFFFF4444),
                         fontSize: 18,
-                        fontWeight: FontWeight.w800)),
-                Text(
-                    s.isPhishing
-                        ? 'Era um ataque de phishing'
-                        : 'Era uma mensagem legítima',
-                    style:
-                        GoogleFonts.inter(color: Colors.white54, fontSize: 12)),
-              ])),
-          if (userWasCorrect && xp > 0)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: BoxDecoration(
-                color: const Color(0xFFFFCC00).withAlpha(20),
-                borderRadius: BorderRadius.circular(8),
-                border:
-                    Border.all(color: const Color(0xFFFFCC00).withAlpha(60)),
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    Text(
+                      s.isPhishing
+                          ? 'Era um ataque de phishing'
+                          : 'Era uma mensagem legítima',
+                      style: GoogleFonts.inter(
+                        color: Colors.white54,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              child: Text('+$xp XP',
-                  style: GoogleFonts.jetBrainsMono(
+              if (userWasCorrect && xp > 0)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFCC00).withAlpha(20),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: const Color(0xFFFFCC00).withAlpha(60),
+                    ),
+                  ),
+                  child: Text(
+                    '+$xp XP',
+                    style: GoogleFonts.jetBrainsMono(
                       color: const Color(0xFFFFCC00),
                       fontSize: 12,
-                      fontWeight: FontWeight.w700)),
-            ),
-        ]),
-      ),
-      const SizedBox(height: 16),
-      if (s.suspiciousElements.isNotEmpty) ...[
-        _ElementsRevealCard(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        if (s.suspiciousElements.isNotEmpty) ...[
+          _ElementsRevealCard(
             elements: s.suspiciousElements,
             tapped: _tappedElements,
-            isPhishing: s.isPhishing),
-        const SizedBox(height: 12),
-      ],
-      if (s.isPhishing && s.redFlags.isNotEmpty) ...[
-        _AnalysisCard(
+            isPhishing: s.isPhishing,
+          ),
+          const SizedBox(height: 12),
+        ],
+        if (s.isPhishing && s.redFlags.isNotEmpty) ...[
+          _AnalysisCard(
             title: 'Sinais de Phishing',
             icon: Icons.flag_rounded,
             items: s.redFlags,
-            color: const Color(0xFFFF4444)),
-        const SizedBox(height: 12),
-      ],
-      if (!s.isPhishing && s.greenFlags.isNotEmpty) ...[
-        _AnalysisCard(
+            color: const Color(0xFFFF4444),
+          ),
+          const SizedBox(height: 12),
+        ],
+        if (!s.isPhishing && s.greenFlags.isNotEmpty) ...[
+          _AnalysisCard(
             title: 'Indicadores de Confiança',
             icon: Icons.verified_outlined,
             items: s.greenFlags,
-            color: const Color(0xFF00FF88)),
-        const SizedBox(height: 12),
-      ],
-      _InfoBlock(
+            color: const Color(0xFF00FF88),
+          ),
+          const SizedBox(height: 12),
+        ],
+        _InfoBlock(
           icon: Icons.manage_search_rounded,
           title: 'Análise Técnica',
           content: s.explanation,
-          color: const Color(0xFF3B82F6)),
-      const SizedBox(height: 12),
-      if (s.isPhishing &&
-          s.attackTechnique.isNotEmpty &&
-          s.attackTechnique != 'N/A') ...[
-        _InfoBlock(
+          color: const Color(0xFF3B82F6),
+        ),
+        const SizedBox(height: 12),
+        if (s.isPhishing &&
+            s.attackTechnique.isNotEmpty &&
+            s.attackTechnique != 'N/A') ...[
+          _InfoBlock(
             icon: Icons.bolt_rounded,
             title: 'Técnica de Ataque',
             content: s.attackTechnique,
-            color: const Color(0xFFFF6B35)),
-        const SizedBox(height: 12),
-      ],
-      if (s.isPhishing &&
-          s.potentialDamage.isNotEmpty &&
-          s.potentialDamage != 'Não aplicável') ...[
-        _InfoBlock(
+            color: const Color(0xFFFF6B35),
+          ),
+          const SizedBox(height: 12),
+        ],
+        if (s.isPhishing &&
+            s.potentialDamage.isNotEmpty &&
+            s.potentialDamage != 'Não aplicável') ...[
+          _InfoBlock(
             icon: Icons.warning_amber_rounded,
             title: 'Impacto Potencial',
             content: s.potentialDamage,
-            color: const Color(0xFFFF4444)),
-        const SizedBox(height: 12),
-      ],
-      if (s.realWorldReference.isNotEmpty) ...[
-        _InfoBlock(
+            color: const Color(0xFFFF4444),
+          ),
+          const SizedBox(height: 12),
+        ],
+        if (s.realWorldReference.isNotEmpty) ...[
+          _InfoBlock(
             icon: Icons.newspaper_rounded,
             title: 'Caso Real Similar',
             content: s.realWorldReference,
-            color: const Color(0xFFFFCC00)),
-        const SizedBox(height: 12),
-      ],
-      if (s.forensicTip.isNotEmpty) ...[
-        _InfoBlock(
+            color: const Color(0xFFFFCC00),
+          ),
+          const SizedBox(height: 12),
+        ],
+        if (s.forensicTip.isNotEmpty) ...[
+          _InfoBlock(
             icon: Icons.shield_outlined,
             title: 'Dica Forense',
             content: s.forensicTip,
-            color: const Color(0xFF00FF88)),
-        const SizedBox(height: 20),
-      ],
-      SizedBox(
-        width: double.infinity,
-        height: 52,
-        child: ElevatedButton(
-          onPressed: _nextRound,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF00FF88),
-            foregroundColor: Colors.black,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            elevation: 0,
+            color: const Color(0xFF00FF88),
           ),
-          child: Text('Próxima Simulação',
-              style:
-                  GoogleFonts.syne(fontSize: 15, fontWeight: FontWeight.w700)),
+          const SizedBox(height: 20),
+        ],
+        SizedBox(
+          width: double.infinity,
+          height: 52,
+          child: ElevatedButton(
+            onPressed: _nextRound,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF00FF88),
+              foregroundColor: Colors.black,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              elevation: 0,
+            ),
+            child: Text(
+              'Próxima Simulação',
+              style: GoogleFonts.syne(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
         ),
-      ),
-    ]);
+      ],
+    );
   }
 }
 
@@ -901,33 +1143,44 @@ class _InspectBanner extends StatelessWidget {
   const _InspectBanner({required this.elementCount});
   @override
   Widget build(BuildContext context) => Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        decoration: BoxDecoration(
-          color: const Color(0xFFFFCC00).withAlpha(12),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFFFFCC00).withAlpha(50)),
+    width: double.infinity,
+    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+    decoration: BoxDecoration(
+      color: const Color(0xFFFFCC00).withAlpha(12),
+      borderRadius: BorderRadius.circular(12),
+      border: Border.all(color: const Color(0xFFFFCC00).withAlpha(50)),
+    ),
+    child: Row(
+      children: [
+        const Icon(
+          Icons.touch_app_outlined,
+          color: Color(0xFFFFCC00),
+          size: 16,
         ),
-        child: Row(children: [
-          const Icon(Icons.touch_app_outlined,
-              color: Color(0xFFFFCC00), size: 16),
-          const SizedBox(width: 8),
-          Expanded(
-              child: Text(
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
             'Modo inspeção ativo — toca nos elementos ($elementCount disponíveis)',
             style: GoogleFonts.jetBrainsMono(
-                color: const Color(0xFFFFCC00), fontSize: 10),
-          )),
-        ]),
-      );
+              color: const Color(0xFFFFCC00),
+              fontSize: 10,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
 }
 
 class _ElementsRevealCard extends StatelessWidget {
   final List<SuspiciousElement> elements;
   final Set<String> tapped;
   final bool isPhishing;
-  const _ElementsRevealCard(
-      {required this.elements, required this.tapped, required this.isPhishing});
+  const _ElementsRevealCard({
+    required this.elements,
+    required this.tapped,
+    required this.isPhishing,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -941,64 +1194,94 @@ class _ElementsRevealCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: const Color(0xFFFFCC00).withAlpha(40)),
       ),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Row(children: [
-          const Icon(Icons.manage_search_rounded,
-              color: Color(0xFFFFCC00), size: 16),
-          const SizedBox(width: 6),
-          Text('Elementos Suspeitos',
-              style: GoogleFonts.syne(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.manage_search_rounded,
+                color: Color(0xFFFFCC00),
+                size: 16,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                'Elementos Suspeitos',
+                style: GoogleFonts.syne(
                   color: const Color(0xFFFFCC00),
                   fontSize: 13,
-                  fontWeight: FontWeight.w700)),
-          const Spacer(),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-            decoration: BoxDecoration(
-              color: found == suspicious.length
-                  ? const Color(0xFF00FF88).withAlpha(20)
-                  : const Color(0xFFFFCC00).withAlpha(20),
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: Text('$found/${suspicious.length} encontrados',
-                style: GoogleFonts.jetBrainsMono(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: found == suspicious.length
+                      ? const Color(0xFF00FF88).withAlpha(20)
+                      : const Color(0xFFFFCC00).withAlpha(20),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  '$found/${suspicious.length} encontrados',
+                  style: GoogleFonts.jetBrainsMono(
                     color: found == suspicious.length
                         ? const Color(0xFF00FF88)
                         : const Color(0xFFFFCC00),
                     fontSize: 9,
-                    fontWeight: FontWeight.w700)),
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
           ),
-        ]),
-        const SizedBox(height: 10),
-        ...suspicious.map((el) {
-          final wasTapped = tapped.contains(el.id);
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Icon(
-                  wasTapped ? Icons.check_circle : Icons.radio_button_unchecked,
-                  color: wasTapped
-                      ? const Color(0xFF00FF88)
-                      : const Color(0xFFFF4444),
-                  size: 14),
-              const SizedBox(width: 8),
-              Expanded(
-                  child: Column(
+          const SizedBox(height: 10),
+          ...suspicious.map((el) {
+            final wasTapped = tapped.contains(el.id);
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    wasTapped
+                        ? Icons.check_circle
+                        : Icons.radio_button_unchecked,
+                    color: wasTapped
+                        ? const Color(0xFF00FF88)
+                        : const Color(0xFFFF4444),
+                    size: 14,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                    Text(el.label,
-                        style: GoogleFonts.jetBrainsMono(
+                        Text(
+                          el.label,
+                          style: GoogleFonts.jetBrainsMono(
                             color: Colors.white70,
                             fontSize: 10,
-                            fontWeight: FontWeight.w600)),
-                    Text(el.hint,
-                        style: GoogleFonts.inter(
-                            color: Colors.white38, fontSize: 10, height: 1.4)),
-                  ])),
-            ]),
-          );
-        }),
-      ]),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Text(
+                          el.hint,
+                          style: GoogleFonts.inter(
+                            color: Colors.white38,
+                            fontSize: 10,
+                            height: 1.4,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
+        ],
+      ),
     );
   }
 }
@@ -1010,12 +1293,13 @@ class _BrandLogo extends StatelessWidget {
   final bool isTapped;
   final VoidCallback? onTap;
 
-  const _BrandLogo(
-      {required this.scenario,
-      this.size = 40,
-      this.inspectMode = false,
-      this.isTapped = false,
-      this.onTap});
+  const _BrandLogo({
+    required this.scenario,
+    this.size = 40,
+    this.inspectMode = false,
+    this.isTapped = false,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -1026,7 +1310,8 @@ class _BrandLogo extends StatelessWidget {
     Widget logoWidget = ClipRRect(
       borderRadius: BorderRadius.circular(size * 0.22),
       child: scenario.logoUrl.isNotEmpty
-          ? Image.network(scenario.logoUrl,
+          ? Image.network(
+              scenario.logoUrl,
               width: size,
               height: size,
               fit: BoxFit.contain,
@@ -1034,7 +1319,8 @@ class _BrandLogo extends StatelessWidget {
                   _FallbackLogo(scenario: scenario, size: size),
               loadingBuilder: (_, child, progress) => progress == null
                   ? child
-                  : _FallbackLogo(scenario: scenario, size: size))
+                  : _FallbackLogo(scenario: scenario, size: size),
+            )
           : _FallbackLogo(scenario: scenario, size: size),
     );
     if (isInteractive) {
@@ -1045,10 +1331,11 @@ class _BrandLogo extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(size * 0.22 + 3),
             border: Border.all(
-                color: isTapped
-                    ? const Color(0xFFFFCC00)
-                    : const Color(0xFFFFCC00).withAlpha(100),
-                width: isTapped ? 2.5 : 1.5),
+              color: isTapped
+                  ? const Color(0xFFFFCC00)
+                  : const Color(0xFFFFCC00).withAlpha(100),
+              width: isTapped ? 2.5 : 1.5,
+            ),
           ),
           child: logoWidget,
         ),
@@ -1064,20 +1351,22 @@ class _FallbackLogo extends StatelessWidget {
   const _FallbackLogo({required this.scenario, required this.size});
   @override
   Widget build(BuildContext context) => Container(
-        width: size,
-        height: size,
-        color: scenario.brandColorParsed.withAlpha(40),
-        child: Center(
-            child: Text(
-          scenario.logoAltText.isNotEmpty
-              ? scenario.logoAltText[0].toUpperCase()
-              : '?',
-          style: GoogleFonts.syne(
-              color: scenario.brandColorParsed,
-              fontSize: size * 0.4,
-              fontWeight: FontWeight.w900),
-        )),
-      );
+    width: size,
+    height: size,
+    color: scenario.brandColorParsed.withAlpha(40),
+    child: Center(
+      child: Text(
+        scenario.logoAltText.isNotEmpty
+            ? scenario.logoAltText[0].toUpperCase()
+            : '?',
+        style: GoogleFonts.syne(
+          color: scenario.brandColorParsed,
+          fontSize: size * 0.4,
+          fontWeight: FontWeight.w900,
+        ),
+      ),
+    ),
+  );
 }
 
 class _TappableSpan extends StatelessWidget {
@@ -1088,13 +1377,14 @@ class _TappableSpan extends StatelessWidget {
   final VoidCallback onTap;
   final Widget child;
 
-  const _TappableSpan(
-      {required this.element,
-      required this.inspectMode,
-      required this.isTapped,
-      required this.revealed,
-      required this.onTap,
-      required this.child});
+  const _TappableSpan({
+    required this.element,
+    required this.inspectMode,
+    required this.isTapped,
+    required this.revealed,
+    required this.onTap,
+    required this.child,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -1117,11 +1407,11 @@ class _TappableSpan extends StatelessWidget {
         decoration: BoxDecoration(
           color: revealed
               ? (element.isSuspicious
-                  ? const Color(0xFFFF4444).withAlpha(25)
-                  : const Color(0xFF00FF88).withAlpha(25))
+                    ? const Color(0xFFFF4444).withAlpha(25)
+                    : const Color(0xFF00FF88).withAlpha(25))
               : (isTapped
-                  ? const Color(0xFFFFCC00).withAlpha(25)
-                  : const Color(0xFFFFCC00).withAlpha(10)),
+                    ? const Color(0xFFFFCC00).withAlpha(25)
+                    : const Color(0xFFFFCC00).withAlpha(10)),
           borderRadius: BorderRadius.circular(6),
           border: Border.all(color: borderColor, width: 1.2),
         ),
@@ -1138,12 +1428,13 @@ class _EmailRenderer extends StatelessWidget {
   final Set<String> tappedElements;
   final ValueChanged<SuspiciousElement> onElementTap;
 
-  const _EmailRenderer(
-      {required this.scenario,
-      required this.revealed,
-      required this.inspectMode,
-      required this.tappedElements,
-      required this.onElementTap});
+  const _EmailRenderer({
+    required this.scenario,
+    required this.revealed,
+    required this.inspectMode,
+    required this.tappedElements,
+    required this.onElementTap,
+  });
 
   SuspiciousElement? _el(String id) =>
       scenario.suspiciousElements.where((e) => e.id == id).firstOrNull;
@@ -1154,8 +1445,8 @@ class _EmailRenderer extends StatelessWidget {
     final borderColor = !revealed
         ? Colors.white.withAlpha(20)
         : s.isPhishing
-            ? const Color(0xFFFF4444).withAlpha(100)
-            : const Color(0xFF00FF88).withAlpha(100);
+        ? const Color(0xFFFF4444).withAlpha(100)
+        : const Color(0xFF00FF88).withAlpha(100);
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFF0D1520),
@@ -1164,177 +1455,250 @@ class _EmailRenderer extends StatelessWidget {
         boxShadow: revealed
             ? [
                 BoxShadow(
-                    color: (s.isPhishing
-                            ? const Color(0xFFFF4444)
-                            : const Color(0xFF00FF88))
-                        .withAlpha(30),
-                    blurRadius: 30,
-                    spreadRadius: -5)
+                  color:
+                      (s.isPhishing
+                              ? const Color(0xFFFF4444)
+                              : const Color(0xFF00FF88))
+                          .withAlpha(30),
+                  blurRadius: 30,
+                  spreadRadius: -5,
+                ),
               ]
             : null,
       ),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          decoration: BoxDecoration(
-            color: const Color(0xFF161E2E),
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-            border:
-                Border(bottom: BorderSide(color: Colors.white.withAlpha(15))),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: const Color(0xFF161E2E),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(20),
+              ),
+              border: Border(
+                bottom: BorderSide(color: Colors.white.withAlpha(15)),
+              ),
+            ),
+            child: Row(
+              children: [
+                _dot(const Color(0xFFFF5F57)),
+                const SizedBox(width: 5),
+                _dot(const Color(0xFFFFBD2E)),
+                const SizedBox(width: 5),
+                _dot(const Color(0xFF27C93F)),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0A0E14),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      'Caixa de Entrada',
+                      style: GoogleFonts.jetBrainsMono(
+                        color: Colors.white38,
+                        fontSize: 10,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-          child: Row(children: [
-            _dot(const Color(0xFFFF5F57)),
-            const SizedBox(width: 5),
-            _dot(const Color(0xFFFFBD2E)),
-            const SizedBox(width: 5),
-            _dot(const Color(0xFF27C93F)),
-            const SizedBox(width: 12),
-            Expanded(
-                child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              decoration: BoxDecoration(
-                  color: const Color(0xFF0A0E14),
-                  borderRadius: BorderRadius.circular(6)),
-              child: Text('Caixa de Entrada',
-                  style: GoogleFonts.jetBrainsMono(
-                      color: Colors.white38, fontSize: 10)),
-            )),
-          ]),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              _BrandLogo(
-                  scenario: s,
-                  size: 42,
-                  inspectMode: inspectMode,
-                  isTapped: tappedElements.contains('logo'),
-                  onTap: () {
-                    final el = _el('logo');
-                    if (el != null) onElementTap(el);
-                  }),
-              const SizedBox(width: 12),
-              Expanded(
-                  child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                    Text(s.senderName,
-                        style: GoogleFonts.inter(
-                            color: Colors.white,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600)),
-                    Builder(builder: (_) {
-                      final el = _el('sender');
-                      final widget = Text(s.senderAddress,
-                          style: GoogleFonts.jetBrainsMono(
-                              color: revealed && s.isPhishing
-                                  ? const Color(0xFFFF6B6B)
-                                  : Colors.white54,
-                              fontSize: 10),
-                          overflow: TextOverflow.ellipsis);
-                      if (el != null) {
-                        return _TappableSpan(
-                            element: el,
-                            inspectMode: inspectMode,
-                            isTapped: tappedElements.contains(el.id),
-                            revealed: revealed,
-                            onTap: () => onElementTap(el),
-                            child: widget);
-                      }
-                      return widget;
-                    }),
-                  ])),
-              Text(s.timestamp,
-                  style:
-                      GoogleFonts.inter(color: Colors.white38, fontSize: 10)),
-            ]),
-            const SizedBox(height: 12),
-            Divider(color: Colors.white.withAlpha(15)),
-            const SizedBox(height: 10),
-            Text(s.subject,
-                style: GoogleFonts.syne(
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _BrandLogo(
+                      scenario: s,
+                      size: 42,
+                      inspectMode: inspectMode,
+                      isTapped: tappedElements.contains('logo'),
+                      onTap: () {
+                        final el = _el('logo');
+                        if (el != null) onElementTap(el);
+                      },
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            s.senderName,
+                            style: GoogleFonts.inter(
+                              color: Colors.white,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          Builder(
+                            builder: (_) {
+                              final el = _el('sender');
+                              final widget = Text(
+                                s.senderAddress,
+                                style: GoogleFonts.jetBrainsMono(
+                                  color: revealed && s.isPhishing
+                                      ? const Color(0xFFFF6B6B)
+                                      : Colors.white54,
+                                  fontSize: 10,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              );
+                              if (el != null) {
+                                return _TappableSpan(
+                                  element: el,
+                                  inspectMode: inspectMode,
+                                  isTapped: tappedElements.contains(el.id),
+                                  revealed: revealed,
+                                  onTap: () => onElementTap(el),
+                                  child: widget,
+                                );
+                              }
+                              return widget;
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    Text(
+                      s.timestamp,
+                      style: GoogleFonts.inter(
+                        color: Colors.white38,
+                        fontSize: 10,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Divider(color: Colors.white.withAlpha(15)),
+                const SizedBox(height: 10),
+                Text(
+                  s.subject,
+                  style: GoogleFonts.syne(
                     color: Colors.white,
                     fontSize: 16,
-                    fontWeight: FontWeight.w700)),
-            const SizedBox(height: 12),
-            Text(s.body,
-                style: GoogleFonts.inter(
-                    color: Colors.white70, fontSize: 13, height: 1.6)),
-            const SizedBox(height: 16),
-            if (s.ctaText.isNotEmpty)
-              Builder(builder: (_) {
-                final el = _el('cta_url') ?? _el('cta');
-                final btn = Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                  decoration: BoxDecoration(
-                    color: revealed && s.isPhishing
-                        ? const Color(0xFFFF4444).withAlpha(30)
-                        : s.brandColorParsed.withAlpha(40),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                        color: revealed && s.isPhishing
-                            ? const Color(0xFFFF4444).withAlpha(80)
-                            : s.brandColorParsed.withAlpha(80)),
+                    fontWeight: FontWeight.w700,
                   ),
-                  child: Row(mainAxisSize: MainAxisSize.min, children: [
-                    Flexible(
-                        child: Text(s.ctaText,
-                            style: GoogleFonts.inter(
-                                color: revealed && s.isPhishing
-                                    ? const Color(0xFFFF6B6B)
-                                    : s.brandColorParsed,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600),
-                            overflow: TextOverflow.ellipsis)),
-                    const SizedBox(width: 6),
-                    Icon(Icons.open_in_new,
-                        size: 13,
-                        color: revealed && s.isPhishing
-                            ? const Color(0xFFFF6B6B)
-                            : s.brandColorParsed),
-                  ]),
-                );
-                if (el != null) {
-                  return _TappableSpan(
-                      element: el,
-                      inspectMode: inspectMode,
-                      isTapped: tappedElements.contains(el.id),
-                      revealed: revealed,
-                      onTap: () => onElementTap(el),
-                      child: btn);
-                }
-                return btn;
-              }),
-            if (s.ctaUrl.isNotEmpty && revealed) ...[
-              const SizedBox(height: 8),
-              Row(children: [
-                if (s.isPhishing)
-                  const Icon(Icons.warning_amber_rounded,
-                      size: 12, color: Color(0xFFFF4444)),
-                const SizedBox(width: 4),
-                Expanded(
-                    child: Text(s.ctaUrl,
-                        style: GoogleFonts.jetBrainsMono(
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  s.body,
+                  style: GoogleFonts.inter(
+                    color: Colors.white70,
+                    fontSize: 13,
+                    height: 1.6,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                if (s.ctaText.isNotEmpty)
+                  Builder(
+                    builder: (_) {
+                      final el = _el('cta_url') ?? _el('cta');
+                      final btn = Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 12,
+                        ),
+                        decoration: BoxDecoration(
+                          color: revealed && s.isPhishing
+                              ? const Color(0xFFFF4444).withAlpha(30)
+                              : s.brandColorParsed.withAlpha(40),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: revealed && s.isPhishing
+                                ? const Color(0xFFFF4444).withAlpha(80)
+                                : s.brandColorParsed.withAlpha(80),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Flexible(
+                              child: Text(
+                                s.ctaText,
+                                style: GoogleFonts.inter(
+                                  color: revealed && s.isPhishing
+                                      ? const Color(0xFFFF6B6B)
+                                      : s.brandColorParsed,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Icon(
+                              Icons.open_in_new,
+                              size: 13,
+                              color: revealed && s.isPhishing
+                                  ? const Color(0xFFFF6B6B)
+                                  : s.brandColorParsed,
+                            ),
+                          ],
+                        ),
+                      );
+                      if (el != null) {
+                        return _TappableSpan(
+                          element: el,
+                          inspectMode: inspectMode,
+                          isTapped: tappedElements.contains(el.id),
+                          revealed: revealed,
+                          onTap: () => onElementTap(el),
+                          child: btn,
+                        );
+                      }
+                      return btn;
+                    },
+                  ),
+                if (s.ctaUrl.isNotEmpty && revealed) ...[
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      if (s.isPhishing)
+                        const Icon(
+                          Icons.warning_amber_rounded,
+                          size: 12,
+                          color: Color(0xFFFF4444),
+                        ),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          s.ctaUrl,
+                          style: GoogleFonts.jetBrainsMono(
                             color: s.isPhishing
                                 ? const Color(0xFFFF6B6B)
                                 : const Color(0xFF00FF88),
-                            fontSize: 10),
-                        overflow: TextOverflow.ellipsis)),
-              ]),
-            ],
-          ]),
-        ),
-      ]),
+                            fontSize: 10,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
   Widget _dot(Color c) => Container(
-      width: 8,
-      height: 8,
-      decoration: BoxDecoration(shape: BoxShape.circle, color: c));
+    width: 8,
+    height: 8,
+    decoration: BoxDecoration(shape: BoxShape.circle, color: c),
+  );
 }
 
 class _SmsRenderer extends StatelessWidget {
@@ -1344,12 +1708,13 @@ class _SmsRenderer extends StatelessWidget {
   final Set<String> tappedElements;
   final ValueChanged<SuspiciousElement> onElementTap;
 
-  const _SmsRenderer(
-      {required this.scenario,
-      required this.revealed,
-      required this.inspectMode,
-      required this.tappedElements,
-      required this.onElementTap});
+  const _SmsRenderer({
+    required this.scenario,
+    required this.revealed,
+    required this.inspectMode,
+    required this.tappedElements,
+    required this.onElementTap,
+  });
 
   SuspiciousElement? _el(String id) =>
       scenario.suspiciousElements.where((e) => e.id == id).firstOrNull;
@@ -1362,127 +1727,173 @@ class _SmsRenderer extends StatelessWidget {
         color: const Color(0xFF0D1520),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-            color: revealed
-                ? s.isPhishing
+          color: revealed
+              ? s.isPhishing
                     ? const Color(0xFFFF4444).withAlpha(100)
                     : const Color(0xFF00FF88).withAlpha(100)
-                : Colors.white.withAlpha(20)),
+              : Colors.white.withAlpha(20),
+        ),
       ),
-      child: Column(children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-          decoration: BoxDecoration(
-            color: const Color(0xFF161E2E),
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-            border:
-                Border(bottom: BorderSide(color: Colors.white.withAlpha(15))),
-          ),
-          child: Row(children: [
-            const Icon(Icons.signal_cellular_alt,
-                color: Colors.white38, size: 14),
-            const SizedBox(width: 6),
-            Text('Mensagens',
-                style: GoogleFonts.inter(
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            decoration: BoxDecoration(
+              color: const Color(0xFF161E2E),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(20),
+              ),
+              border: Border(
+                bottom: BorderSide(color: Colors.white.withAlpha(15)),
+              ),
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.signal_cellular_alt,
+                  color: Colors.white38,
+                  size: 14,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  'Mensagens',
+                  style: GoogleFonts.inter(
                     color: Colors.white,
                     fontSize: 14,
-                    fontWeight: FontWeight.w600)),
-            const Spacer(),
-            Text('87%',
-                style: GoogleFonts.jetBrainsMono(
-                    color: Colors.white38, fontSize: 10)),
-          ]),
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(14, 12, 14, 8),
-          child: Row(children: [
-            _BrandLogo(scenario: s, size: 36),
-            const SizedBox(width: 10),
-            Expanded(
-                child: Column(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  '87%',
+                  style: GoogleFonts.jetBrainsMono(
+                    color: Colors.white38,
+                    fontSize: 10,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 12, 14, 8),
+            child: Row(
+              children: [
+                _BrandLogo(scenario: s, size: 36),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                  Text(s.senderName,
-                      style: GoogleFonts.inter(
+                      Text(
+                        s.senderName,
+                        style: GoogleFonts.inter(
                           color: Colors.white,
                           fontSize: 14,
-                          fontWeight: FontWeight.w600),
-                      overflow: TextOverflow.ellipsis),
-                  Builder(builder: (_) {
-                    final el = _el('sender');
-                    final w = Text(s.phoneNumber ?? s.senderAddress,
-                        style: GoogleFonts.jetBrainsMono(
-                            color: revealed && s.isPhishing
-                                ? const Color(0xFFFF6B6B)
-                                : Colors.white38,
-                            fontSize: 10),
-                        overflow: TextOverflow.ellipsis);
-                    if (el != null) {
-                      return _TappableSpan(
-                          element: el,
-                          inspectMode: inspectMode,
-                          isTapped: tappedElements.contains(el.id),
-                          revealed: revealed,
-                          onTap: () => onElementTap(el),
-                          child: w);
-                    }
-                    return w;
-                  }),
-                ])),
-            Text(s.timestamp,
-                style: GoogleFonts.inter(color: Colors.white38, fontSize: 10)),
-          ]),
-        ),
-        Divider(color: Colors.white.withAlpha(10), height: 1),
-        Padding(
-          padding: const EdgeInsets.all(14),
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: Container(
-              constraints: const BoxConstraints(maxWidth: 290),
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: const Color(0xFF1C2A3A),
-                borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(4),
-                    topRight: Radius.circular(16),
-                    bottomLeft: Radius.circular(16),
-                    bottomRight: Radius.circular(16)),
-                border: Border.all(color: Colors.white.withAlpha(15)),
-              ),
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(s.body,
-                        style: GoogleFonts.inter(
-                            color: Colors.white70, fontSize: 13, height: 1.5)),
-                    if (s.ctaUrl.isNotEmpty) ...[
-                      const SizedBox(height: 8),
-                      Builder(builder: (_) {
-                        final el = _el('cta_url');
-                        final w = Text(s.ctaUrl,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Builder(
+                        builder: (_) {
+                          final el = _el('sender');
+                          final w = Text(
+                            s.phoneNumber ?? s.senderAddress,
                             style: GoogleFonts.jetBrainsMono(
-                                color: revealed && s.isPhishing
-                                    ? const Color(0xFFFF6B6B)
-                                    : const Color(0xFF60A5FA),
-                                fontSize: 11),
-                            overflow: TextOverflow.ellipsis);
-                        if (el != null) {
-                          return _TappableSpan(
+                              color: revealed && s.isPhishing
+                                  ? const Color(0xFFFF6B6B)
+                                  : Colors.white38,
+                              fontSize: 10,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          );
+                          if (el != null) {
+                            return _TappableSpan(
                               element: el,
                               inspectMode: inspectMode,
                               isTapped: tappedElements.contains(el.id),
                               revealed: revealed,
                               onTap: () => onElementTap(el),
-                              child: w);
-                        }
-                        return w;
-                      }),
+                              child: w,
+                            );
+                          }
+                          return w;
+                        },
+                      ),
                     ],
-                  ]),
+                  ),
+                ),
+                Text(
+                  s.timestamp,
+                  style: GoogleFonts.inter(color: Colors.white38, fontSize: 10),
+                ),
+              ],
             ),
           ),
-        ),
-      ]),
+          Divider(color: Colors.white.withAlpha(10), height: 1),
+          Padding(
+            padding: const EdgeInsets.all(14),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Container(
+                constraints: const BoxConstraints(maxWidth: 290),
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1C2A3A),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(4),
+                    topRight: Radius.circular(16),
+                    bottomLeft: Radius.circular(16),
+                    bottomRight: Radius.circular(16),
+                  ),
+                  border: Border.all(color: Colors.white.withAlpha(15)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      s.body,
+                      style: GoogleFonts.inter(
+                        color: Colors.white70,
+                        fontSize: 13,
+                        height: 1.5,
+                      ),
+                    ),
+                    if (s.ctaUrl.isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      Builder(
+                        builder: (_) {
+                          final el = _el('cta_url');
+                          final w = Text(
+                            s.ctaUrl,
+                            style: GoogleFonts.jetBrainsMono(
+                              color: revealed && s.isPhishing
+                                  ? const Color(0xFFFF6B6B)
+                                  : const Color(0xFF60A5FA),
+                              fontSize: 11,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          );
+                          if (el != null) {
+                            return _TappableSpan(
+                              element: el,
+                              inspectMode: inspectMode,
+                              isTapped: tappedElements.contains(el.id),
+                              revealed: revealed,
+                              onTap: () => onElementTap(el),
+                              child: w,
+                            );
+                          }
+                          return w;
+                        },
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -1494,12 +1905,13 @@ class _WhatsAppRenderer extends StatelessWidget {
   final Set<String> tappedElements;
   final ValueChanged<SuspiciousElement> onElementTap;
 
-  const _WhatsAppRenderer(
-      {required this.scenario,
-      required this.revealed,
-      required this.inspectMode,
-      required this.tappedElements,
-      required this.onElementTap});
+  const _WhatsAppRenderer({
+    required this.scenario,
+    required this.revealed,
+    required this.inspectMode,
+    required this.tappedElements,
+    required this.onElementTap,
+  });
 
   SuspiciousElement? _el(String id) =>
       scenario.suspiciousElements.where((e) => e.id == id).firstOrNull;
@@ -1515,213 +1927,291 @@ class _WhatsAppRenderer extends StatelessWidget {
         color: waDark,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-            color: revealed
-                ? s.isPhishing
+          color: revealed
+              ? s.isPhishing
                     ? const Color(0xFFFF4444).withAlpha(100)
                     : waGreen.withAlpha(100)
-                : Colors.white.withAlpha(20)),
+              : Colors.white.withAlpha(20),
+        ),
       ),
-      child: Column(children: [
-        Container(
-          padding: const EdgeInsets.fromLTRB(12, 14, 12, 14),
-          decoration: const BoxDecoration(
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.fromLTRB(12, 14, 12, 14),
+            decoration: const BoxDecoration(
               color: Color(0xFF1F2C34),
-              borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-          child: Row(children: [
-            const Icon(Icons.arrow_back, color: waGreen, size: 18),
-            const SizedBox(width: 8),
-            _BrandLogo(
-                scenario: s,
-                size: 36,
-                inspectMode: inspectMode,
-                isTapped: tappedElements.contains('logo'),
-                onTap: () {
-                  final el = _el('logo');
-                  if (el != null) onElementTap(el);
-                }),
-            const SizedBox(width: 10),
-            Expanded(
-                child: Column(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.arrow_back, color: waGreen, size: 18),
+                const SizedBox(width: 8),
+                _BrandLogo(
+                  scenario: s,
+                  size: 36,
+                  inspectMode: inspectMode,
+                  isTapped: tappedElements.contains('logo'),
+                  onTap: () {
+                    final el = _el('logo');
+                    if (el != null) onElementTap(el);
+                  },
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                  Text(s.senderName,
-                      style: GoogleFonts.inter(
+                      Text(
+                        s.senderName,
+                        style: GoogleFonts.inter(
                           color: Colors.white,
                           fontSize: 14,
-                          fontWeight: FontWeight.w600),
-                      overflow: TextOverflow.ellipsis),
-                  Builder(builder: (_) {
-                    final el = _el('sender');
-                    final w = Text(s.phoneNumber ?? s.senderAddress,
-                        style: GoogleFonts.inter(
-                            color: revealed && s.isPhishing
-                                ? const Color(0xFFFF6B6B)
-                                : Colors.white54,
-                            fontSize: 11),
-                        overflow: TextOverflow.ellipsis);
-                    if (el != null) {
-                      return _TappableSpan(
-                          element: el,
-                          inspectMode: inspectMode,
-                          isTapped: tappedElements.contains(el.id),
-                          revealed: revealed,
-                          onTap: () => onElementTap(el),
-                          child: w);
-                    }
-                    return w;
-                  }),
-                ])),
-            const Icon(Icons.videocam, color: waGreen, size: 20),
-            const SizedBox(width: 16),
-            const Icon(Icons.call, color: waGreen, size: 18),
-          ]),
-        ),
-        Container(
-          padding: const EdgeInsets.all(12),
-          color: const Color(0xFF0B141A),
-          child: Column(children: [
-            Center(
-                child: Container(
-              margin: const EdgeInsets.only(bottom: 8),
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                  color: const Color(0xFF182229),
-                  borderRadius: BorderRadius.circular(8)),
-              child: Text('HOJE',
-                  style:
-                      GoogleFonts.inter(color: Colors.white38, fontSize: 10)),
-            )),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Container(
-                constraints: BoxConstraints(
-                    maxWidth: MediaQuery.of(context).size.width * 0.72),
-                padding: const EdgeInsets.fromLTRB(12, 10, 12, 6),
-                decoration: const BoxDecoration(
-                  color: waBubble,
-                  borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(2),
-                      topRight: Radius.circular(12),
-                      bottomLeft: Radius.circular(12),
-                      bottomRight: Radius.circular(12)),
-                ),
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(s.senderName,
-                          style: GoogleFonts.inter(
-                              color: waGreen,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600),
-                          overflow: TextOverflow.ellipsis),
-                      const SizedBox(height: 4),
-                      Text(s.body,
-                          style: GoogleFonts.inter(
-                              color: Colors.white70,
-                              fontSize: 13,
-                              height: 1.5)),
-                      if (s.ctaUrl.isNotEmpty) ...[
-                        const SizedBox(height: 8),
-                        Builder(builder: (_) {
-                          final el = _el('cta_url');
-                          final preview = Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF182229),
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                  color: revealed && s.isPhishing
-                                      ? const Color(0xFFFF4444).withAlpha(80)
-                                      : waGreen.withAlpha(40)),
+                          fontWeight: FontWeight.w600,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Builder(
+                        builder: (_) {
+                          final el = _el('sender');
+                          final w = Text(
+                            s.phoneNumber ?? s.senderAddress,
+                            style: GoogleFonts.inter(
+                              color: revealed && s.isPhishing
+                                  ? const Color(0xFFFF6B6B)
+                                  : Colors.white54,
+                              fontSize: 11,
                             ),
-                            child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(children: [
-                                    Icon(Icons.link,
-                                        size: 12,
-                                        color: revealed && s.isPhishing
-                                            ? const Color(0xFFFF4444)
-                                            : waGreen),
-                                    const SizedBox(width: 6),
-                                    Expanded(
-                                        child: Text(
+                            overflow: TextOverflow.ellipsis,
+                          );
+                          if (el != null) {
+                            return _TappableSpan(
+                              element: el,
+                              inspectMode: inspectMode,
+                              isTapped: tappedElements.contains(el.id),
+                              revealed: revealed,
+                              onTap: () => onElementTap(el),
+                              child: w,
+                            );
+                          }
+                          return w;
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.videocam, color: waGreen, size: 20),
+                const SizedBox(width: 16),
+                const Icon(Icons.call, color: waGreen, size: 18),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.all(12),
+            color: const Color(0xFF0B141A),
+            child: Column(
+              children: [
+                Center(
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF182229),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      'HOJE',
+                      style: GoogleFonts.inter(
+                        color: Colors.white38,
+                        fontSize: 10,
+                      ),
+                    ),
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Container(
+                    constraints: BoxConstraints(
+                      maxWidth: MediaQuery.of(context).size.width * 0.72,
+                    ),
+                    padding: const EdgeInsets.fromLTRB(12, 10, 12, 6),
+                    decoration: const BoxDecoration(
+                      color: waBubble,
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(2),
+                        topRight: Radius.circular(12),
+                        bottomLeft: Radius.circular(12),
+                        bottomRight: Radius.circular(12),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          s.senderName,
+                          style: GoogleFonts.inter(
+                            color: waGreen,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          s.body,
+                          style: GoogleFonts.inter(
+                            color: Colors.white70,
+                            fontSize: 13,
+                            height: 1.5,
+                          ),
+                        ),
+                        if (s.ctaUrl.isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          Builder(
+                            builder: (_) {
+                              final el = _el('cta_url');
+                              final preview = Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF182229),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: revealed && s.isPhishing
+                                        ? const Color(0xFFFF4444).withAlpha(80)
+                                        : waGreen.withAlpha(40),
+                                  ),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          Icons.link,
+                                          size: 12,
+                                          color: revealed && s.isPhishing
+                                              ? const Color(0xFFFF4444)
+                                              : waGreen,
+                                        ),
+                                        const SizedBox(width: 6),
+                                        Expanded(
+                                          child: Text(
                                             s.ctaText.isNotEmpty
                                                 ? s.ctaText
                                                 : 'Ver link',
                                             style: GoogleFonts.inter(
-                                                color: revealed && s.isPhishing
-                                                    ? const Color(0xFFFF6B6B)
-                                                    : waGreen,
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.w600),
-                                            overflow: TextOverflow.ellipsis)),
-                                  ]),
-                                  const SizedBox(height: 4),
-                                  Text(s.ctaUrl,
+                                              color: revealed && s.isPhishing
+                                                  ? const Color(0xFFFF6B6B)
+                                                  : waGreen,
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      s.ctaUrl,
                                       style: GoogleFonts.jetBrainsMono(
-                                          color: revealed && s.isPhishing
-                                              ? const Color(0xFFFF6B6B)
-                                              : Colors.white38,
-                                          fontSize: 9),
+                                        color: revealed && s.isPhishing
+                                            ? const Color(0xFFFF6B6B)
+                                            : Colors.white38,
+                                        fontSize: 9,
+                                      ),
                                       overflow: TextOverflow.ellipsis,
-                                      maxLines: 1),
-                                ]),
-                          );
-                          if (el != null) {
-                            return _TappableSpan(
-                                element: el,
-                                inspectMode: inspectMode,
-                                isTapped: tappedElements.contains(el.id),
-                                revealed: revealed,
-                                onTap: () => onElementTap(el),
-                                child: preview);
-                          }
-                          return preview;
-                        }),
+                                      maxLines: 1,
+                                    ),
+                                  ],
+                                ),
+                              );
+                              if (el != null) {
+                                return _TappableSpan(
+                                  element: el,
+                                  inspectMode: inspectMode,
+                                  isTapped: tappedElements.contains(el.id),
+                                  revealed: revealed,
+                                  onTap: () => onElementTap(el),
+                                  child: preview,
+                                );
+                              }
+                              return preview;
+                            },
+                          ),
+                        ],
+                        Align(
+                          alignment: Alignment.bottomRight,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                s.timestamp,
+                                style: GoogleFonts.inter(
+                                  color: Colors.white38,
+                                  fontSize: 10,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              const Icon(
+                                Icons.done_all,
+                                size: 14,
+                                color: waGreen,
+                              ),
+                            ],
+                          ),
+                        ),
                       ],
-                      Align(
-                        alignment: Alignment.bottomRight,
-                        child: Row(mainAxisSize: MainAxisSize.min, children: [
-                          Text(s.timestamp,
-                              style: GoogleFonts.inter(
-                                  color: Colors.white38, fontSize: 10)),
-                          const SizedBox(width: 4),
-                          const Icon(Icons.done_all, size: 14, color: waGreen),
-                        ]),
-                      ),
-                    ]),
-              ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ]),
-        ),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          decoration: const BoxDecoration(
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: const BoxDecoration(
               color: Color(0xFF1F2C34),
-              borderRadius: BorderRadius.vertical(bottom: Radius.circular(20))),
-          child: Row(children: [
-            Expanded(
-                child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                  color: const Color(0xFF2A3942),
-                  borderRadius: BorderRadius.circular(20)),
-              child: Text('Mensagem',
-                  style:
-                      GoogleFonts.inter(color: Colors.white38, fontSize: 12)),
-            )),
-            const SizedBox(width: 8),
-            Container(
-              width: 36,
-              height: 36,
-              decoration:
-                  const BoxDecoration(shape: BoxShape.circle, color: waGreen),
-              child: const Icon(Icons.mic, color: Colors.white, size: 18),
+              borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
             ),
-          ]),
-        ),
-      ]),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF2A3942),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      'Mensagem',
+                      style: GoogleFonts.inter(
+                        color: Colors.white38,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: waGreen,
+                  ),
+                  child: const Icon(Icons.mic, color: Colors.white, size: 18),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -1733,12 +2223,13 @@ class _LoginPageRenderer extends StatelessWidget {
   final Set<String> tappedElements;
   final ValueChanged<SuspiciousElement> onElementTap;
 
-  const _LoginPageRenderer(
-      {required this.scenario,
-      required this.revealed,
-      required this.inspectMode,
-      required this.tappedElements,
-      required this.onElementTap});
+  const _LoginPageRenderer({
+    required this.scenario,
+    required this.revealed,
+    required this.inspectMode,
+    required this.tappedElements,
+    required this.onElementTap,
+  });
 
   SuspiciousElement? _el(String id) =>
       scenario.suspiciousElements.where((e) => e.id == id).firstOrNull;
@@ -1752,181 +2243,240 @@ class _LoginPageRenderer extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-            color: revealed
-                ? s.isPhishing
+          color: revealed
+              ? s.isPhishing
                     ? const Color(0xFFFF4444).withAlpha(150)
                     : const Color(0xFF00FF88).withAlpha(150)
-                : Colors.white.withAlpha(20),
-            width: 2),
+              : Colors.white.withAlpha(20),
+          width: 2,
+        ),
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withAlpha(60),
-              blurRadius: 20,
-              spreadRadius: -4)
+            color: Colors.black.withAlpha(60),
+            blurRadius: 20,
+            spreadRadius: -4,
+          ),
         ],
       ),
-      child: Column(children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          decoration: const BoxDecoration(
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: const BoxDecoration(
               color: Color(0xFFF0F0F0),
-              borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-          child: Row(children: [
-            Icon(revealed && s.isPhishing ? Icons.lock_open : Icons.lock,
-                size: 13,
-                color: revealed && s.isPhishing
-                    ? const Color(0xFFFF4444)
-                    : const Color(0xFF4CAF50)),
-            const SizedBox(width: 6),
-            Expanded(child: Builder(builder: (_) {
-              final el = _el('cta_url') ?? _el('page_url');
-              final w = Text(s.ctaUrl,
-                  style: GoogleFonts.jetBrainsMono(
-                      color: revealed && s.isPhishing
-                          ? const Color(0xFFFF4444)
-                          : const Color(0xFF333333),
-                      fontSize: 10),
-                  overflow: TextOverflow.ellipsis);
-              if (el != null) {
-                return _TappableSpan(
-                    element: el,
-                    inspectMode: inspectMode,
-                    isTapped: tappedElements.contains(el.id),
-                    revealed: revealed,
-                    onTap: () => onElementTap(el),
-                    child: w);
-              }
-              return w;
-            })),
-          ]),
-        ),
-        Container(
-          padding: const EdgeInsets.all(24),
-          decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.vertical(bottom: Radius.circular(20))),
-          child: Column(children: [
-            _BrandLogo(
-                scenario: s,
-                size: 56,
-                inspectMode: inspectMode,
-                isTapped: tappedElements.contains('logo'),
-                onTap: () {
-                  final el = _el('logo');
-                  if (el != null) onElementTap(el);
-                }),
-            const SizedBox(height: 8),
-            Builder(builder: (_) {
-              final el = _el('logo') ?? _el('header');
-              final w = Text(s.logoAltText,
-                  style: GoogleFonts.syne(
-                      color: brandColor,
-                      fontSize: 22,
-                      fontWeight: FontWeight.w800));
-              if (el != null) {
-                return _TappableSpan(
-                    element: el,
-                    inspectMode: inspectMode,
-                    isTapped: tappedElements.contains(el.id),
-                    revealed: revealed,
-                    onTap: () => onElementTap(el),
-                    child: w);
-              }
-              return w;
-            }),
-            const SizedBox(height: 4),
-            Text(s.pageTitle ?? '${s.brand} — Iniciar Sessão',
-                style: GoogleFonts.inter(color: Colors.black54, fontSize: 13)),
-            const SizedBox(height: 24),
-            ...s.formFields.map((field) {
-              final isPasswordField = field.toLowerCase().contains('senha') ||
-                  field.toLowerCase().contains('password') ||
-                  field.toLowerCase().contains('confirmar');
-              final isSuspect = s.formFields.length > 2;
-              final el = _el('form_field');
-              Widget fieldWidget = Container(
-                margin: const EdgeInsets.only(bottom: 12),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF5F5F5),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                      color: revealed && s.isPhishing && isSuspect
-                          ? const Color(0xFFFF4444).withAlpha(100)
-                          : const Color(0xFFDDDDDD)),
-                ),
-                child: Row(children: [
-                  Icon(
-                      isPasswordField
-                          ? Icons.lock_outline
-                          : Icons.person_outline,
-                      size: 16,
-                      color: Colors.black38),
-                  const SizedBox(width: 10),
-                  Expanded(
-                      child: Text(field,
-                          style: GoogleFonts.inter(
-                              color: Colors.black38, fontSize: 13))),
-                ]),
-              );
-              if (el != null && inspectMode) {
-                return _TappableSpan(
-                    element: el,
-                    inspectMode: inspectMode,
-                    isTapped: tappedElements.contains(el.id),
-                    revealed: revealed,
-                    onTap: () => onElementTap(el),
-                    child: fieldWidget);
-              }
-              return fieldWidget;
-            }),
-            Builder(builder: (_) {
-              final el = _el('cta');
-              final btn = Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                decoration: BoxDecoration(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  revealed && s.isPhishing ? Icons.lock_open : Icons.lock,
+                  size: 13,
                   color: revealed && s.isPhishing
                       ? const Color(0xFFFF4444)
-                      : brandColor,
-                  borderRadius: BorderRadius.circular(10),
+                      : const Color(0xFF4CAF50),
                 ),
-                child: Center(
-                    child: Text(
-                        s.ctaText.isNotEmpty ? s.ctaText : 'Iniciar Sessão',
-                        style: GoogleFonts.syne(
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Builder(
+                    builder: (_) {
+                      final el = _el('cta_url') ?? _el('page_url');
+                      final w = Text(
+                        s.ctaUrl,
+                        style: GoogleFonts.jetBrainsMono(
+                          color: revealed && s.isPhishing
+                              ? const Color(0xFFFF4444)
+                              : const Color(0xFF333333),
+                          fontSize: 10,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      );
+                      if (el != null) {
+                        return _TappableSpan(
+                          element: el,
+                          inspectMode: inspectMode,
+                          isTapped: tappedElements.contains(el.id),
+                          revealed: revealed,
+                          onTap: () => onElementTap(el),
+                          child: w,
+                        );
+                      }
+                      return w;
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
+            ),
+            child: Column(
+              children: [
+                _BrandLogo(
+                  scenario: s,
+                  size: 56,
+                  inspectMode: inspectMode,
+                  isTapped: tappedElements.contains('logo'),
+                  onTap: () {
+                    final el = _el('logo');
+                    if (el != null) onElementTap(el);
+                  },
+                ),
+                const SizedBox(height: 8),
+                Builder(
+                  builder: (_) {
+                    final el = _el('logo') ?? _el('header');
+                    final w = Text(
+                      s.logoAltText,
+                      style: GoogleFonts.syne(
+                        color: brandColor,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    );
+                    if (el != null) {
+                      return _TappableSpan(
+                        element: el,
+                        inspectMode: inspectMode,
+                        isTapped: tappedElements.contains(el.id),
+                        revealed: revealed,
+                        onTap: () => onElementTap(el),
+                        child: w,
+                      );
+                    }
+                    return w;
+                  },
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  s.pageTitle ?? '${s.brand} — Iniciar Sessão',
+                  style: GoogleFonts.inter(color: Colors.black54, fontSize: 13),
+                ),
+                const SizedBox(height: 24),
+                ...s.formFields.map((field) {
+                  final isPasswordField =
+                      field.toLowerCase().contains('senha') ||
+                      field.toLowerCase().contains('password') ||
+                      field.toLowerCase().contains('confirmar');
+                  final isSuspect = s.formFields.length > 2;
+                  final el = _el('form_field');
+                  Widget fieldWidget = Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 14,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF5F5F5),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: revealed && s.isPhishing && isSuspect
+                            ? const Color(0xFFFF4444).withAlpha(100)
+                            : const Color(0xFFDDDDDD),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          isPasswordField
+                              ? Icons.lock_outline
+                              : Icons.person_outline,
+                          size: 16,
+                          color: Colors.black38,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            field,
+                            style: GoogleFonts.inter(
+                              color: Colors.black38,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                  if (el != null && inspectMode) {
+                    return _TappableSpan(
+                      element: el,
+                      inspectMode: inspectMode,
+                      isTapped: tappedElements.contains(el.id),
+                      revealed: revealed,
+                      onTap: () => onElementTap(el),
+                      child: fieldWidget,
+                    );
+                  }
+                  return fieldWidget;
+                }),
+                Builder(
+                  builder: (_) {
+                    final el = _el('cta');
+                    final btn = Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      decoration: BoxDecoration(
+                        color: revealed && s.isPhishing
+                            ? const Color(0xFFFF4444)
+                            : brandColor,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Center(
+                        child: Text(
+                          s.ctaText.isNotEmpty ? s.ctaText : 'Iniciar Sessão',
+                          style: GoogleFonts.syne(
                             color: Colors.white,
                             fontSize: 14,
-                            fontWeight: FontWeight.w700))),
-              );
-              if (el != null) {
-                return _TappableSpan(
-                    element: el,
-                    inspectMode: inspectMode,
-                    isTapped: tappedElements.contains(el.id),
-                    revealed: revealed,
-                    onTap: () => onElementTap(el),
-                    child: btn);
-              }
-              return btn;
-            }),
-            if (s.isPhishing && revealed) ...[
-              const SizedBox(height: 12),
-              Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                const Icon(Icons.warning_amber_rounded,
-                    size: 14, color: Color(0xFFFF4444)),
-                const SizedBox(width: 6),
-                Flexible(
-                    child: Text('Página FALSA — dados seriam roubados',
-                        style: GoogleFonts.jetBrainsMono(
-                            color: const Color(0xFFFF4444), fontSize: 10),
-                        overflow: TextOverflow.ellipsis)),
-              ]),
-            ],
-          ]),
-        ),
-      ]),
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    );
+                    if (el != null) {
+                      return _TappableSpan(
+                        element: el,
+                        inspectMode: inspectMode,
+                        isTapped: tappedElements.contains(el.id),
+                        revealed: revealed,
+                        onTap: () => onElementTap(el),
+                        child: btn,
+                      );
+                    }
+                    return btn;
+                  },
+                ),
+                if (s.isPhishing && revealed) ...[
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.warning_amber_rounded,
+                        size: 14,
+                        color: Color(0xFFFF4444),
+                      ),
+                      const SizedBox(width: 6),
+                      Flexible(
+                        child: Text(
+                          'Página FALSA — dados seriam roubados',
+                          style: GoogleFonts.jetBrainsMono(
+                            color: const Color(0xFFFF4444),
+                            fontSize: 10,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -1938,12 +2488,13 @@ class _UrlRenderer extends StatelessWidget {
   final Set<String> tappedElements;
   final ValueChanged<SuspiciousElement> onElementTap;
 
-  const _UrlRenderer(
-      {required this.scenario,
-      required this.revealed,
-      required this.inspectMode,
-      required this.tappedElements,
-      required this.onElementTap});
+  const _UrlRenderer({
+    required this.scenario,
+    required this.revealed,
+    required this.inspectMode,
+    required this.tappedElements,
+    required this.onElementTap,
+  });
 
   SuspiciousElement? _el(String id) =>
       scenario.suspiciousElements.where((e) => e.id == id).firstOrNull;
@@ -1953,143 +2504,215 @@ class _UrlRenderer extends StatelessWidget {
     final s = scenario;
     final urlColor = revealed
         ? s.isPhishing
-            ? const Color(0xFFFF4444)
-            : const Color(0xFF00FF88)
+              ? const Color(0xFFFF4444)
+              : const Color(0xFF00FF88)
         : const Color(0xFF60A5FA);
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFF0D1520),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-            color: revealed && s.isPhishing
-                ? const Color(0xFFFF4444).withAlpha(100)
-                : Colors.white.withAlpha(20)),
-      ),
-      child: Column(children: [
-        Container(
-          padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
-          decoration: BoxDecoration(
-            color: const Color(0xFF161E2E),
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-            border:
-                Border(bottom: BorderSide(color: Colors.white.withAlpha(15))),
-          ),
-          child: Column(children: [
-            Row(children: [
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                    color: const Color(0xFF0D1520),
-                    borderRadius: BorderRadius.circular(6)),
-                child: Row(mainAxisSize: MainAxisSize.min, children: [
-                  Icon(Icons.lock_outline,
-                      size: 10,
-                      color: revealed && s.isPhishing
-                          ? const Color(0xFFFF4444)
-                          : Colors.white38),
-                  const SizedBox(width: 4),
-                  Flexible(
-                      child: Text(s.brand,
-                          style: GoogleFonts.inter(
-                              color: Colors.white54, fontSize: 10),
-                          overflow: TextOverflow.ellipsis)),
-                  const SizedBox(width: 6),
-                  const Icon(Icons.close, size: 10, color: Colors.white38),
-                ]),
-              ),
-              const SizedBox(width: 6),
-              const Icon(Icons.add, size: 14, color: Colors.white38),
-            ]),
-            const SizedBox(height: 8),
-            Builder(builder: (_) {
-              final el = _el('cta_url');
-              final urlBar = Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF0A0E14),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                      color: revealed && s.isPhishing
-                          ? const Color(0xFFFF4444).withAlpha(80)
-                          : Colors.white.withAlpha(15)),
-                ),
-                child: Row(children: [
-                  Icon(revealed && s.isPhishing ? Icons.lock_open : Icons.lock,
-                      size: 12, color: urlColor),
-                  const SizedBox(width: 6),
-                  Expanded(
-                      child: Text(s.ctaUrl,
-                          style: GoogleFonts.jetBrainsMono(
-                              color: urlColor, fontSize: 10),
-                          overflow: TextOverflow.ellipsis)),
-                  const Icon(Icons.refresh, size: 12, color: Colors.white38),
-                ]),
-              );
-              if (el != null) {
-                return _TappableSpan(
-                    element: el,
-                    inspectMode: inspectMode,
-                    isTapped: tappedElements.contains(el.id),
-                    revealed: revealed,
-                    onTap: () => onElementTap(el),
-                    child: urlBar);
-              }
-              return urlBar;
-            }),
-          ]),
+          color: revealed && s.isPhishing
+              ? const Color(0xFFFF4444).withAlpha(100)
+              : Colors.white.withAlpha(20),
         ),
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Row(children: [
-              _BrandLogo(scenario: s, size: 32),
-              const SizedBox(width: 10),
-              Expanded(
-                  child: Text(s.brand,
-                      style: GoogleFonts.syne(
+      ),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
+            decoration: BoxDecoration(
+              color: const Color(0xFF161E2E),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(20),
+              ),
+              border: Border(
+                bottom: BorderSide(color: Colors.white.withAlpha(15)),
+              ),
+            ),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF0D1520),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.lock_outline,
+                            size: 10,
+                            color: revealed && s.isPhishing
+                                ? const Color(0xFFFF4444)
+                                : Colors.white38,
+                          ),
+                          const SizedBox(width: 4),
+                          Flexible(
+                            child: Text(
+                              s.brand,
+                              style: GoogleFonts.inter(
+                                color: Colors.white54,
+                                fontSize: 10,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          const Icon(
+                            Icons.close,
+                            size: 10,
+                            color: Colors.white38,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    const Icon(Icons.add, size: 14, color: Colors.white38),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Builder(
+                  builder: (_) {
+                    final el = _el('cta_url');
+                    final urlBar = Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF0A0E14),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: revealed && s.isPhishing
+                              ? const Color(0xFFFF4444).withAlpha(80)
+                              : Colors.white.withAlpha(15),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            revealed && s.isPhishing
+                                ? Icons.lock_open
+                                : Icons.lock,
+                            size: 12,
+                            color: urlColor,
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              s.ctaUrl,
+                              style: GoogleFonts.jetBrainsMono(
+                                color: urlColor,
+                                fontSize: 10,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const Icon(
+                            Icons.refresh,
+                            size: 12,
+                            color: Colors.white38,
+                          ),
+                        ],
+                      ),
+                    );
+                    if (el != null) {
+                      return _TappableSpan(
+                        element: el,
+                        inspectMode: inspectMode,
+                        isTapped: tappedElements.contains(el.id),
+                        revealed: revealed,
+                        onTap: () => onElementTap(el),
+                        child: urlBar,
+                      );
+                    }
+                    return urlBar;
+                  },
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    _BrandLogo(scenario: s, size: 32),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        s.brand,
+                        style: GoogleFonts.syne(
                           color: Colors.white,
                           fontSize: 16,
-                          fontWeight: FontWeight.w700),
-                      overflow: TextOverflow.ellipsis)),
-            ]),
-            const SizedBox(height: 16),
-            Text(s.subject,
-                style: GoogleFonts.inter(
+                          fontWeight: FontWeight.w700,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  s.subject,
+                  style: GoogleFonts.inter(
                     color: Colors.white,
                     fontSize: 14,
-                    fontWeight: FontWeight.w600)),
-            const SizedBox(height: 10),
-            Text(s.body,
-                style: GoogleFonts.inter(
-                    color: Colors.white60, fontSize: 12, height: 1.5)),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              decoration: BoxDecoration(
-                color: revealed && s.isPhishing
-                    ? const Color(0xFFFF4444).withAlpha(20)
-                    : s.brandColorParsed.withAlpha(40),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                    color: revealed && s.isPhishing
-                        ? const Color(0xFFFF4444).withAlpha(60)
-                        : s.brandColorParsed.withAlpha(60)),
-              ),
-              child: Text(s.ctaText,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  s.body,
                   style: GoogleFonts.inter(
+                    color: Colors.white60,
+                    fontSize: 12,
+                    height: 1.5,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 10,
+                  ),
+                  decoration: BoxDecoration(
+                    color: revealed && s.isPhishing
+                        ? const Color(0xFFFF4444).withAlpha(20)
+                        : s.brandColorParsed.withAlpha(40),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: revealed && s.isPhishing
+                          ? const Color(0xFFFF4444).withAlpha(60)
+                          : s.brandColorParsed.withAlpha(60),
+                    ),
+                  ),
+                  child: Text(
+                    s.ctaText,
+                    style: GoogleFonts.inter(
                       color: revealed && s.isPhishing
                           ? const Color(0xFFFF6B6B)
                           : s.brandColorParsed,
                       fontSize: 13,
-                      fontWeight: FontWeight.w600),
-                  overflow: TextOverflow.ellipsis),
+                      fontWeight: FontWeight.w600,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
             ),
-          ]),
-        ),
-      ]),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -2103,67 +2726,89 @@ class ForensicDetailScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFF060A10),
       body: SafeArea(
-        child: CustomScrollView(slivers: [
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
-              child: Column(
+        child: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(children: [
-                      GestureDetector(
-                        onTap: () => Navigator.pop(context),
-                        child: Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF0D1520),
-                            borderRadius: BorderRadius.circular(12),
-                            border:
-                                Border.all(color: Colors.white.withAlpha(20)),
+                    Row(
+                      children: [
+                        GestureDetector(
+                          onTap: () => Navigator.pop(context),
+                          child: Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF0D1520),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: Colors.white.withAlpha(20),
+                              ),
+                            ),
+                            child: const Icon(
+                              Icons.arrow_back,
+                              color: Colors.white,
+                              size: 20,
+                            ),
                           ),
-                          child: const Icon(Icons.arrow_back,
-                              color: Colors.white, size: 20),
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 5),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFF4444).withAlpha(20),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                              color: const Color(0xFFFF4444).withAlpha(60)),
-                        ),
-                        child: Row(mainAxisSize: MainAxisSize.min, children: [
-                          const Icon(Icons.biotech_outlined,
-                              color: Color(0xFFFF4444), size: 12),
-                          const SizedBox(width: 5),
-                          Text('ANÁLISE FORENSE',
-                              style: GoogleFonts.jetBrainsMono(
+                        const SizedBox(width: 12),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 5,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFF4444).withAlpha(20),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: const Color(0xFFFF4444).withAlpha(60),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.biotech_outlined,
+                                color: Color(0xFFFF4444),
+                                size: 12,
+                              ),
+                              const SizedBox(width: 5),
+                              Text(
+                                'ANÁLISE FORENSE',
+                                style: GoogleFonts.jetBrainsMono(
                                   color: const Color(0xFFFF4444),
                                   fontSize: 10,
                                   fontWeight: FontWeight.w700,
-                                  letterSpacing: 1)),
-                        ]),
-                      ),
-                    ]),
+                                  letterSpacing: 1,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                     const SizedBox(height: 28),
                     Container(
                       padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
-                            colors: [Color(0xFF161E2E), Color(0xFF0D1520)],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight),
+                          colors: [Color(0xFF161E2E), Color(0xFF0D1520)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
                         borderRadius: BorderRadius.circular(24),
                         border: Border.all(
-                            color: const Color(0xFFFF4444).withAlpha(40)),
+                          color: const Color(0xFFFF4444).withAlpha(40),
+                        ),
                       ),
                       child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(children: [
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
                               Container(
                                 width: 52,
                                 height: 52,
@@ -2171,80 +2816,110 @@ class ForensicDetailScreen extends StatelessWidget {
                                   color: const Color(0xFFFF4444).withAlpha(15),
                                   borderRadius: BorderRadius.circular(14),
                                   border: Border.all(
-                                      color: const Color(0xFFFF4444)
-                                          .withAlpha(50)),
+                                    color: const Color(
+                                      0xFFFF4444,
+                                    ).withAlpha(50),
+                                  ),
                                 ),
-                                child: const Icon(Icons.policy_outlined,
-                                    color: Color(0xFFFF4444), size: 26),
+                                child: const Icon(
+                                  Icons.policy_outlined,
+                                  color: Color(0xFFFF4444),
+                                  size: 26,
+                                ),
                               ),
                               const SizedBox(width: 14),
                               Expanded(
-                                  child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                    Text(fc.title,
-                                        style: GoogleFonts.syne(
-                                            color: Colors.white,
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w800)),
-                                    Text('${fc.year} • ${fc.country}',
-                                        style: GoogleFonts.inter(
-                                            color: Colors.white38,
-                                            fontSize: 12)),
-                                  ])),
-                            ]),
-                            const SizedBox(height: 16),
-                            Text(fc.summary,
-                                style: GoogleFonts.inter(
-                                    color: Colors.white70,
-                                    fontSize: 13,
-                                    height: 1.6)),
-                            const SizedBox(height: 14),
-                            Wrap(spacing: 8, runSpacing: 6, children: [
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      fc.title,
+                                      style: GoogleFonts.syne(
+                                        color: Colors.white,
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                    ),
+                                    Text(
+                                      '${fc.year} • ${fc.country}',
+                                      style: GoogleFonts.inter(
+                                        color: Colors.white38,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            fc.summary,
+                            style: GoogleFonts.inter(
+                              color: Colors.white70,
+                              fontSize: 13,
+                              height: 1.6,
+                            ),
+                          ),
+                          const SizedBox(height: 14),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 6,
+                            children: [
                               _Tag(fc.attackType, const Color(0xFFFF4444)),
-                              _Tag(fc.target.split(' ')[0],
-                                  const Color(0xFF3B82F6)),
+                              _Tag(
+                                fc.target.split(' ')[0],
+                                const Color(0xFF3B82F6),
+                              ),
                               _Tag(fc.year, const Color(0xFFFFCC00)),
-                            ]),
-                          ]),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                     const SizedBox(height: 20),
                     _InfoBlock(
-                        icon: Icons.groups_outlined,
-                        title: 'Ator da Ameaça',
-                        content: fc.threat_actor,
-                        color: const Color(0xFFFF6B35)),
+                      icon: Icons.groups_outlined,
+                      title: 'Ator da Ameaça',
+                      content: fc.threat_actor,
+                      color: const Color(0xFFFF6B35),
+                    ),
                     const SizedBox(height: 12),
                     _InfoBlock(
-                        icon: Icons.track_changes_rounded,
-                        title: 'Vetor de Ataque',
-                        content: '${fc.attackVector}\n\n${fc.howItWorked}',
-                        color: const Color(0xFF3B82F6)),
+                      icon: Icons.track_changes_rounded,
+                      title: 'Vetor de Ataque',
+                      content: '${fc.attackVector}\n\n${fc.howItWorked}',
+                      color: const Color(0xFF3B82F6),
+                    ),
                     const SizedBox(height: 12),
                     _AnalysisCard(
-                        title: 'Sinais que Deveriam ter Alertado',
-                        icon: Icons.flag_rounded,
-                        items: fc.redFlags,
-                        color: const Color(0xFFFFCC00)),
+                      title: 'Sinais que Deveriam ter Alertado',
+                      icon: Icons.flag_rounded,
+                      items: fc.redFlags,
+                      color: const Color(0xFFFFCC00),
+                    ),
                     const SizedBox(height: 12),
                     _InfoBlock(
-                        icon: Icons.bolt_rounded,
-                        title: 'Resultado e Impacto',
-                        content:
-                            '${fc.outcome}\n\nImpacto financeiro: ${fc.financialImpact}',
-                        color: const Color(0xFF3B82F6)),
+                      icon: Icons.bolt_rounded,
+                      title: 'Resultado e Impacto',
+                      content:
+                          '${fc.outcome}\n\nImpacto financeiro: ${fc.financialImpact}',
+                      color: const Color(0xFF3B82F6),
+                    ),
                     const SizedBox(height: 12),
                     _AnalysisCard(
-                        title: 'Lições Aprendidas',
-                        icon: Icons.school_outlined,
-                        items: fc.lessons,
-                        color: const Color(0xFF00FF88)),
+                      title: 'Lições Aprendidas',
+                      icon: Icons.school_outlined,
+                      items: fc.lessons,
+                      color: const Color(0xFF00FF88),
+                    ),
                     const SizedBox(height: 40),
-                  ]),
+                  ],
+                ),
+              ),
             ),
-          ),
-        ]),
+          ],
+        ),
       ),
     );
   }
@@ -2255,11 +2930,12 @@ class _GridBackground extends StatelessWidget {
   const _GridBackground({required this.controller});
   @override
   Widget build(BuildContext context) => AnimatedBuilder(
-        animation: controller,
-        builder: (_, __) => CustomPaint(
-            size: MediaQuery.of(context).size,
-            painter: _GridPainter(controller.value)),
-      );
+    animation: controller,
+    builder: (_, __) => CustomPaint(
+      size: MediaQuery.of(context).size,
+      painter: _GridPainter(controller.value),
+    ),
+  );
 }
 
 class _GridPainter extends CustomPainter {
@@ -2267,8 +2943,10 @@ class _GridPainter extends CustomPainter {
   _GridPainter(this.t);
   @override
   void paint(Canvas canvas, Size size) {
-    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height),
-        Paint()..color = const Color(0xFF060A10));
+    canvas.drawRect(
+      Rect.fromLTWH(0, 0, size.width, size.height),
+      Paint()..color = const Color(0xFF060A10),
+    );
     final p = Paint()..color = const Color(0xFF00FF88).withAlpha(6);
     const sp = 44.0;
     final ox = (t * sp) % sp;
@@ -2290,16 +2968,21 @@ class _SectionLabel extends StatelessWidget {
   final String title;
   const _SectionLabel(this.iconData, this.title);
   @override
-  Widget build(BuildContext context) =>
-      Row(mainAxisSize: MainAxisSize.min, children: [
-        Icon(iconData, color: const Color(0xFF00FF88), size: 16),
-        const SizedBox(width: 8),
-        Text(title,
-            style: GoogleFonts.syne(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w700)),
-      ]);
+  Widget build(BuildContext context) => Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Icon(iconData, color: const Color(0xFF00FF88), size: 16),
+      const SizedBox(width: 8),
+      Text(
+        title,
+        style: GoogleFonts.syne(
+          color: Colors.white,
+          fontSize: 16,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    ],
+  );
 }
 
 class _SimTypeData {
@@ -2314,33 +2997,39 @@ class _TypePill extends StatelessWidget {
   const _TypePill({required this.data});
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-        decoration: BoxDecoration(
-          color: const Color(0xFF0D1520),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.white.withAlpha(12)),
-        ),
-        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-          Container(
-            width: 34,
-            height: 34,
-            decoration: BoxDecoration(
-              color: data.color.withAlpha(15),
-              borderRadius: BorderRadius.circular(9),
-            ),
-            child: Icon(data.icon, color: data.color, size: 17),
+    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+    decoration: BoxDecoration(
+      color: const Color(0xFF0D1520),
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(color: Colors.white.withAlpha(12)),
+    ),
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Container(
+          width: 34,
+          height: 34,
+          decoration: BoxDecoration(
+            color: data.color.withAlpha(15),
+            borderRadius: BorderRadius.circular(9),
           ),
-          const SizedBox(height: 5),
-          Text(data.label,
-              style: GoogleFonts.inter(
-                  color: Colors.white70,
-                  fontSize: 10.5,
-                  fontWeight: FontWeight.w500),
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis),
-        ]),
-      );
+          child: Icon(data.icon, color: data.color, size: 17),
+        ),
+        const SizedBox(height: 5),
+        Text(
+          data.label,
+          style: GoogleFonts.inter(
+            color: Colors.white70,
+            fontSize: 10.5,
+            fontWeight: FontWeight.w500,
+          ),
+          textAlign: TextAlign.center,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
+    ),
+  );
 }
 
 class _DiffPill extends StatelessWidget {
@@ -2348,34 +3037,41 @@ class _DiffPill extends StatelessWidget {
   final String label;
   final Color color;
   final VoidCallback onTap;
-  const _DiffPill(
-      {required this.icon,
-      required this.label,
-      required this.color,
-      required this.onTap});
+  const _DiffPill({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onTap,
+  });
   @override
   Widget build(BuildContext context) => Expanded(
-        child: GestureDetector(
-          onTap: onTap,
-          child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            decoration: BoxDecoration(
-              color: color.withAlpha(10),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: color.withAlpha(40)),
-            ),
-            child: Column(mainAxisSize: MainAxisSize.min, children: [
-              Icon(icon, color: color, size: 18),
-              const SizedBox(height: 4),
-              Text(label,
-                  style: GoogleFonts.inter(
-                      color: Colors.white70,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500)),
-            ]),
-          ),
+    child: GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: color.withAlpha(10),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: color.withAlpha(40)),
         ),
-      );
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: color, size: 18),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: GoogleFonts.inter(
+                color: Colors.white70,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
 }
 
 class _ForensicCard extends StatelessWidget {
@@ -2384,77 +3080,101 @@ class _ForensicCard extends StatelessWidget {
   const _ForensicCard({required this.fc, required this.onTap});
   @override
   Widget build(BuildContext context) => GestureDetector(
-        onTap: onTap,
-        child: Container(
-          margin: const EdgeInsets.only(bottom: 10),
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: const Color(0xFF0D1520),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.white.withAlpha(12)),
-          ),
-          child: Row(children: [
-            Container(
-              width: 46,
-              height: 46,
-              decoration: BoxDecoration(
-                color: const Color(0xFFFF4444).withAlpha(12),
-                borderRadius: BorderRadius.circular(13),
-              ),
-              child: const Icon(Icons.policy_outlined,
-                  color: Color(0xFFFF4444), size: 22),
+    onTap: onTap,
+    child: Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0D1520),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withAlpha(12)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 46,
+            height: 46,
+            decoration: BoxDecoration(
+              color: const Color(0xFFFF4444).withAlpha(12),
+              borderRadius: BorderRadius.circular(13),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                  Text(fc.title,
-                      style: GoogleFonts.syne(
-                          color: Colors.white,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700),
-                      overflow: TextOverflow.ellipsis),
-                  const SizedBox(height: 2),
-                  Text('${fc.year} • ${fc.attackType}',
-                      style: GoogleFonts.inter(
-                          color: Colors.white38, fontSize: 11),
-                      overflow: TextOverflow.ellipsis),
-                  const SizedBox(height: 4),
-                  Text(fc.financialImpact,
-                      style: GoogleFonts.jetBrainsMono(
-                          color: const Color(0xFFFF4444), fontSize: 10),
-                      overflow: TextOverflow.ellipsis),
-                ])),
-            const Icon(Icons.chevron_right, color: Colors.white38, size: 18),
-          ]),
-        ),
-      );
+            child: const Icon(
+              Icons.policy_outlined,
+              color: Color(0xFFFF4444),
+              size: 22,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  fc.title,
+                  style: GoogleFonts.syne(
+                    color: Colors.white,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '${fc.year} • ${fc.attackType}',
+                  style: GoogleFonts.inter(color: Colors.white38, fontSize: 11),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  fc.financialImpact,
+                  style: GoogleFonts.jetBrainsMono(
+                    color: const Color(0xFFFF4444),
+                    fontSize: 10,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+          const Icon(Icons.chevron_right, color: Colors.white38, size: 18),
+        ],
+      ),
+    ),
+  );
 }
 
 class _GroqBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        decoration: BoxDecoration(
-          color: const Color(0xFF00FF88).withAlpha(15),
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: const Color(0xFF00FF88).withAlpha(50)),
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+    decoration: BoxDecoration(
+      color: const Color(0xFF00FF88).withAlpha(15),
+      borderRadius: BorderRadius.circular(10),
+      border: Border.all(color: const Color(0xFF00FF88).withAlpha(50)),
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 6,
+          height: 6,
+          decoration: const BoxDecoration(
+            shape: BoxShape.circle,
+            color: Color(0xFF00FF88),
+          ),
         ),
-        child: Row(mainAxisSize: MainAxisSize.min, children: [
-          Container(
-              width: 6,
-              height: 6,
-              decoration: const BoxDecoration(
-                  shape: BoxShape.circle, color: Color(0xFF00FF88))),
-          const SizedBox(width: 5),
-          Text('Groq',
-              style: GoogleFonts.jetBrainsMono(
-                  fontSize: 10,
-                  color: const Color(0xFF00FF88),
-                  fontWeight: FontWeight.w600)),
-        ]),
-      );
+        const SizedBox(width: 5),
+        Text(
+          'Groq',
+          style: GoogleFonts.jetBrainsMono(
+            fontSize: 10,
+            color: const Color(0xFF00FF88),
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    ),
+  );
 }
 
 class _MiniStat extends StatelessWidget {
@@ -2463,13 +3183,24 @@ class _MiniStat extends StatelessWidget {
   const _MiniStat(this.value, this.label, this.color);
   @override
   Widget build(BuildContext context) => Expanded(
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
-        Text(value,
-            style: GoogleFonts.syne(
-                color: color, fontSize: 16, fontWeight: FontWeight.w800)),
-        Text(label,
-            style: GoogleFonts.inter(color: Colors.white38, fontSize: 10)),
-      ]));
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          value,
+          style: GoogleFonts.syne(
+            color: color,
+            fontSize: 16,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        Text(
+          label,
+          style: GoogleFonts.inter(color: Colors.white38, fontSize: 10),
+        ),
+      ],
+    ),
+  );
 }
 
 class _ChallengeHeader extends StatelessWidget {
@@ -2478,111 +3209,142 @@ class _ChallengeHeader extends StatelessWidget {
   final int tappedCount;
   final VoidCallback onClose, onToggleInspect;
 
-  const _ChallengeHeader(
-      {required this.scenario,
-      required this.revealed,
-      required this.inspectMode,
-      required this.tappedCount,
-      required this.onClose,
-      required this.onToggleInspect});
+  const _ChallengeHeader({
+    required this.scenario,
+    required this.revealed,
+    required this.inspectMode,
+    required this.tappedCount,
+    required this.onClose,
+    required this.onToggleInspect,
+  });
 
   Color get _diffColor => scenario.difficulty == 'hard'
       ? const Color(0xFFFF4444)
       : scenario.difficulty == 'medium'
-          ? const Color(0xFFFFCC00)
-          : const Color(0xFF00FF88);
+      ? const Color(0xFFFFCC00)
+      : const Color(0xFF00FF88);
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
-        decoration: BoxDecoration(
-          color: const Color(0xFF0A0E14),
-          border: Border(bottom: BorderSide(color: Colors.white.withAlpha(15))),
-        ),
-        child: Row(children: [
-          GestureDetector(
-            onTap: onClose,
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: const Color(0xFF0D1520),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.white.withAlpha(20)),
-              ),
-              child: Icon(revealed ? Icons.check : Icons.close,
-                  color: Colors.white, size: 18),
+    padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+    decoration: BoxDecoration(
+      color: const Color(0xFF0A0E14),
+      border: Border(bottom: BorderSide(color: Colors.white.withAlpha(15))),
+    ),
+    child: Row(
+      children: [
+        GestureDetector(
+          onTap: onClose,
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: const Color(0xFF0D1520),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Colors.white.withAlpha(20)),
+            ),
+            child: Icon(
+              revealed ? Icons.check : Icons.close,
+              color: Colors.white,
+              size: 18,
             ),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                Text(scenario.typeLabel,
-                    style: GoogleFonts.syne(
-                        color: Colors.white,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700)),
-                Row(children: [
-                  Text(scenario.brand,
-                      style: GoogleFonts.inter(
-                          color: Colors.white38, fontSize: 11)),
-                  const Text(' • ',
-                      style: TextStyle(color: Colors.white24, fontSize: 11)),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                scenario.typeLabel,
+                style: GoogleFonts.syne(
+                  color: Colors.white,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              Row(
+                children: [
+                  Text(
+                    scenario.brand,
+                    style: GoogleFonts.inter(
+                      color: Colors.white38,
+                      fontSize: 11,
+                    ),
+                  ),
+                  const Text(
+                    ' • ',
+                    style: TextStyle(color: Colors.white24, fontSize: 11),
+                  ),
                   Container(
                     width: 6,
                     height: 6,
                     decoration: BoxDecoration(
-                        shape: BoxShape.circle, color: _diffColor),
+                      shape: BoxShape.circle,
+                      color: _diffColor,
+                    ),
                   ),
                   const SizedBox(width: 4),
-                  Text(scenario.difficultyLabel,
-                      style: GoogleFonts.inter(
-                          color: Colors.white38, fontSize: 11)),
-                ]),
-              ])),
-          if (!revealed)
-            GestureDetector(
-              onTap: onToggleInspect,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                decoration: BoxDecoration(
+                  Text(
+                    scenario.difficultyLabel,
+                    style: GoogleFonts.inter(
+                      color: Colors.white38,
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        if (!revealed)
+          GestureDetector(
+            onTap: onToggleInspect,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: inspectMode
+                    ? const Color(0xFFFFCC00).withAlpha(25)
+                    : const Color(0xFF0D1520),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
                   color: inspectMode
-                      ? const Color(0xFFFFCC00).withAlpha(25)
-                      : const Color(0xFF0D1520),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                      color: inspectMode
-                          ? const Color(0xFFFFCC00).withAlpha(80)
-                          : Colors.white.withAlpha(20)),
+                      ? const Color(0xFFFFCC00).withAlpha(80)
+                      : Colors.white.withAlpha(20),
                 ),
-                child: Row(mainAxisSize: MainAxisSize.min, children: [
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
                   Icon(
                     inspectMode
                         ? Icons.search_rounded
                         : Icons.visibility_outlined,
-                    color:
-                        inspectMode ? const Color(0xFFFFCC00) : Colors.white54,
+                    color: inspectMode
+                        ? const Color(0xFFFFCC00)
+                        : Colors.white54,
                     size: 13,
                   ),
                   const SizedBox(width: 4),
                   Text(
-                      inspectMode
-                          ? (tappedCount > 0 ? '$tappedCount' : 'ON')
-                          : 'Inspecionar',
-                      style: GoogleFonts.jetBrainsMono(
-                          color: inspectMode
-                              ? const Color(0xFFFFCC00)
-                              : Colors.white54,
-                          fontSize: 9,
-                          fontWeight: FontWeight.w700)),
-                ]),
+                    inspectMode
+                        ? (tappedCount > 0 ? '$tappedCount' : 'ON')
+                        : 'Inspecionar',
+                    style: GoogleFonts.jetBrainsMono(
+                      color: inspectMode
+                          ? const Color(0xFFFFCC00)
+                          : Colors.white54,
+                      fontSize: 9,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
               ),
             ),
-        ]),
-      );
+          ),
+      ],
+    ),
+  );
 }
 
 class _DecisionButton extends StatelessWidget {
@@ -2590,30 +3352,39 @@ class _DecisionButton extends StatelessWidget {
   final IconData icon;
   final Color color;
   final VoidCallback onTap;
-  const _DecisionButton(
-      {required this.label,
-      required this.icon,
-      required this.color,
-      required this.onTap});
+  const _DecisionButton({
+    required this.label,
+    required this.icon,
+    required this.color,
+    required this.onTap,
+  });
   @override
   Widget build(BuildContext context) => GestureDetector(
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          decoration: BoxDecoration(
-            color: color.withAlpha(20),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: color.withAlpha(80)),
+    onTap: onTap,
+    child: Container(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      decoration: BoxDecoration(
+        color: color.withAlpha(20),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.withAlpha(80)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: color, size: 16),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: GoogleFonts.syne(
+              color: color,
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+            ),
           ),
-          child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Icon(icon, color: color, size: 16),
-            const SizedBox(width: 6),
-            Text(label,
-                style: GoogleFonts.syne(
-                    color: color, fontSize: 14, fontWeight: FontWeight.w700)),
-          ]),
-        ),
-      );
+        ],
+      ),
+    ),
+  );
 }
 
 class _AnalysisCard extends StatelessWidget {
@@ -2621,85 +3392,120 @@ class _AnalysisCard extends StatelessWidget {
   final IconData icon;
   final List<String> items;
   final Color color;
-  const _AnalysisCard(
-      {required this.title,
-      required this.icon,
-      required this.items,
-      required this.color});
+  const _AnalysisCard({
+    required this.title,
+    required this.icon,
+    required this.items,
+    required this.color,
+  });
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: color.withAlpha(10),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: color.withAlpha(40)),
-        ),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(children: [
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: color.withAlpha(10),
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(color: color.withAlpha(40)),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
             Icon(icon, color: color, size: 14),
             const SizedBox(width: 6),
-            Text(title,
-                style: GoogleFonts.syne(
-                    color: color, fontSize: 13, fontWeight: FontWeight.w700)),
-          ]),
-          const SizedBox(height: 10),
-          ...items.map((flag) => Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                          width: 6,
-                          height: 6,
-                          margin: const EdgeInsets.only(top: 5, right: 8),
-                          decoration: BoxDecoration(
-                              shape: BoxShape.circle, color: color)),
-                      Expanded(
-                          child: Text(flag,
-                              style: GoogleFonts.inter(
-                                  color: Colors.white70,
-                                  fontSize: 12,
-                                  height: 1.4))),
-                    ]),
-              )),
-        ]),
-      );
+            Text(
+              title,
+              style: GoogleFonts.syne(
+                color: color,
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        ...items.map(
+          (flag) => Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 6,
+                  height: 6,
+                  margin: const EdgeInsets.only(top: 5, right: 8),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: color,
+                  ),
+                ),
+                Expanded(
+                  child: Text(
+                    flag,
+                    style: GoogleFonts.inter(
+                      color: Colors.white70,
+                      fontSize: 12,
+                      height: 1.4,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
 }
 
 class _InfoBlock extends StatelessWidget {
   final IconData icon;
   final String title, content;
   final Color color;
-  const _InfoBlock(
-      {required this.icon,
-      required this.title,
-      required this.content,
-      required this.color});
+  const _InfoBlock({
+    required this.icon,
+    required this.title,
+    required this.content,
+    required this.color,
+  });
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: const Color(0xFF0D1520),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.white.withAlpha(15)),
-        ),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(children: [
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: const Color(0xFF0D1520),
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(color: Colors.white.withAlpha(15)),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
             Icon(icon, color: color, size: 14),
             const SizedBox(width: 6),
-            Text(title,
-                style: GoogleFonts.syne(
-                    color: color,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0.3)),
-          ]),
-          const SizedBox(height: 8),
-          Text(content,
-              style: GoogleFonts.inter(
-                  color: Colors.white60, fontSize: 12, height: 1.5)),
-        ]),
-      );
+            Text(
+              title,
+              style: GoogleFonts.syne(
+                color: color,
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.3,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Text(
+          content,
+          style: GoogleFonts.inter(
+            color: Colors.white60,
+            fontSize: 12,
+            height: 1.5,
+          ),
+        ),
+      ],
+    ),
+  );
 }
 
 class _Tag extends StatelessWidget {
@@ -2708,19 +3514,22 @@ class _Tag extends StatelessWidget {
   const _Tag(this.label, this.color);
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-        decoration: BoxDecoration(
-          color: color.withAlpha(20),
-          borderRadius: BorderRadius.circular(6),
-          border: Border.all(color: color.withAlpha(60)),
-        ),
-        child: Text(label,
-            style: GoogleFonts.jetBrainsMono(
-                color: color,
-                fontSize: 9,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 0.3)),
-      );
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+    decoration: BoxDecoration(
+      color: color.withAlpha(20),
+      borderRadius: BorderRadius.circular(6),
+      border: Border.all(color: color.withAlpha(60)),
+    ),
+    child: Text(
+      label,
+      style: GoogleFonts.jetBrainsMono(
+        color: color,
+        fontSize: 9,
+        fontWeight: FontWeight.w600,
+        letterSpacing: 0.3,
+      ),
+    ),
+  );
 }
 
 class _LoadingView extends StatelessWidget {
@@ -2735,35 +3544,45 @@ class _LoadingView extends StatelessWidget {
   ];
   @override
   Widget build(BuildContext context) => Center(
-        child: Padding(
-          padding: const EdgeInsets.all(40),
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
-            Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                color: const Color(0xFF00FF88).withAlpha(15),
-                shape: BoxShape.circle,
-                border:
-                    Border.all(color: const Color(0xFF00FF88).withAlpha(60)),
-              ),
-              child: const Center(
-                  child: CircularProgressIndicator(
-                      color: Color(0xFF00FF88), strokeWidth: 2)),
+    child: Padding(
+      padding: const EdgeInsets.all(40),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              color: const Color(0xFF00FF88).withAlpha(15),
+              shape: BoxShape.circle,
+              border: Border.all(color: const Color(0xFF00FF88).withAlpha(60)),
             ),
-            const SizedBox(height: 24),
-            Text('Groq AI a trabalhar...',
-                style: GoogleFonts.syne(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700)),
-            const SizedBox(height: 12),
-            Text(_msgs[DateTime.now().second % _msgs.length],
-                style: GoogleFonts.inter(color: Colors.white38, fontSize: 12),
-                textAlign: TextAlign.center),
-          ]),
-        ),
-      );
+            child: const Center(
+              child: CircularProgressIndicator(
+                color: Color(0xFF00FF88),
+                strokeWidth: 2,
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            'Groq AI a trabalhar...',
+            style: GoogleFonts.syne(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            _msgs[DateTime.now().second % _msgs.length],
+            style: GoogleFonts.inter(color: Colors.white38, fontSize: 12),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    ),
+  );
 }
 
 class _ErrorView extends StatelessWidget {
@@ -2772,67 +3591,86 @@ class _ErrorView extends StatelessWidget {
   const _ErrorView({required this.error, required this.onRetry});
   @override
   Widget build(BuildContext context) => Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
-            Container(
-              width: 72,
-              height: 72,
-              decoration: BoxDecoration(
-                color: const Color(0xFFFF4444).withAlpha(15),
-                shape: BoxShape.circle,
-                border:
-                    Border.all(color: const Color(0xFFFF4444).withAlpha(60)),
-              ),
-              child: const Icon(Icons.error_outline_rounded,
-                  color: Color(0xFFFF4444), size: 32),
+    child: Padding(
+      padding: const EdgeInsets.all(32),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 72,
+            height: 72,
+            decoration: BoxDecoration(
+              color: const Color(0xFFFF4444).withAlpha(15),
+              shape: BoxShape.circle,
+              border: Border.all(color: const Color(0xFFFF4444).withAlpha(60)),
             ),
-            const SizedBox(height: 16),
-            Text('Erro ao gerar simulação',
-                style: GoogleFonts.syne(
-                    color: const Color(0xFFFF4444),
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700)),
-            const SizedBox(height: 8),
-            Text(error,
-                style: GoogleFonts.inter(color: Colors.white38, fontSize: 12),
-                textAlign: TextAlign.center),
-            const SizedBox(height: 24),
-            Row(children: [
+            child: const Icon(
+              Icons.error_outline_rounded,
+              color: Color(0xFFFF4444),
+              size: 32,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Erro ao gerar simulação',
+            style: GoogleFonts.syne(
+              color: const Color(0xFFFF4444),
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            error,
+            style: GoogleFonts.inter(color: Colors.white38, fontSize: 12),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 24),
+          Row(
+            children: [
               Expanded(
-                  child: OutlinedButton(
-                onPressed: () => Navigator.pop(context),
-                style: OutlinedButton.styleFrom(
+                child: OutlinedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.white54,
-                    side: BorderSide(color: Colors.white.withAlpha(30))),
-                child: const Text('Voltar'),
-              )),
+                    side: BorderSide(color: Colors.white.withAlpha(30)),
+                  ),
+                  child: const Text('Voltar'),
+                ),
+              ),
               const SizedBox(width: 12),
               Expanded(
-                  child: ElevatedButton(
-                onPressed: onRetry,
-                style: ElevatedButton.styleFrom(
+                child: ElevatedButton(
+                  onPressed: onRetry,
+                  style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF00FF88),
-                    foregroundColor: Colors.black),
-                child: Text('Tentar',
-                    style: GoogleFonts.syne(fontWeight: FontWeight.w700)),
-              )),
-            ]),
-          ]),
-        ),
-      );
+                    foregroundColor: Colors.black,
+                  ),
+                  child: Text(
+                    'Tentar',
+                    style: GoogleFonts.syne(fontWeight: FontWeight.w700),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    ),
+  );
 }
 
 class _AdvancedSimData {
   final IconData icon;
   final String label, subtitle, type;
   final Color color;
-  const _AdvancedSimData(
-      {required this.icon,
-      required this.label,
-      required this.subtitle,
-      required this.color,
-      required this.type});
+  const _AdvancedSimData({
+    required this.icon,
+    required this.label,
+    required this.subtitle,
+    required this.color,
+    required this.type,
+  });
 }
 
 class _AdvancedSimCard extends StatefulWidget {
@@ -2867,50 +3705,70 @@ class _AdvancedSimCardState extends State<_AdvancedSimCard> {
             border: Border.all(color: d.color.withAlpha(55)),
             boxShadow: [
               BoxShadow(
-                  color: d.color.withAlpha(18),
-                  blurRadius: 14,
-                  spreadRadius: -4)
+                color: d.color.withAlpha(18),
+                blurRadius: 14,
+                spreadRadius: -4,
+              ),
             ],
           ),
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Row(children: [
-              Container(
-                width: 38,
-                height: 38,
-                decoration: BoxDecoration(
-                  color: d.color.withAlpha(22),
-                  borderRadius: BorderRadius.circular(11),
-                  border: Border.all(color: d.color.withAlpha(70)),
-                ),
-                child: Icon(d.icon, color: d.color, size: 18),
-              ),
-              const Spacer(),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                    color: d.color.withAlpha(18),
-                    borderRadius: BorderRadius.circular(5)),
-                child: Text('NOVO',
-                    style: GoogleFonts.jetBrainsMono(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      color: d.color.withAlpha(22),
+                      borderRadius: BorderRadius.circular(11),
+                      border: Border.all(color: d.color.withAlpha(70)),
+                    ),
+                    child: Icon(d.icon, color: d.color, size: 18),
+                  ),
+                  const Spacer(),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: d.color.withAlpha(18),
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    child: Text(
+                      'NOVO',
+                      style: GoogleFonts.jetBrainsMono(
                         color: d.color,
                         fontSize: 8,
-                        fontWeight: FontWeight.w700)),
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ]),
-            const Spacer(),
-            Text(d.label,
+              const Spacer(),
+              Text(
+                d.label,
                 style: GoogleFonts.syne(
-                    color: Colors.white,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700),
-                overflow: TextOverflow.ellipsis),
-            const SizedBox(height: 2),
-            Text(d.subtitle,
+                  color: Colors.white,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 2),
+              Text(
+                d.subtitle,
                 style: GoogleFonts.inter(
-                    color: Colors.white38, fontSize: 10, height: 1.3),
-                overflow: TextOverflow.ellipsis),
-          ]),
+                  color: Colors.white38,
+                  fontSize: 10,
+                  height: 1.3,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -2940,10 +3798,14 @@ class _AdvancedSimScreenState extends State<AdvancedSimScreen>
   void initState() {
     super.initState();
     _fadeCtrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 600));
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
     _fadeAnim = CurvedAnimation(parent: _fadeCtrl, curve: Curves.easeOut);
     _revealCtrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 500));
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
     _revealAnim = CurvedAnimation(parent: _revealCtrl, curve: Curves.easeOut);
     _load();
   }
@@ -3026,17 +3888,18 @@ class _AdvancedSimScreenState extends State<AdvancedSimScreen>
     return Scaffold(
       backgroundColor: const Color(0xFF060A10),
       body: SafeArea(
-        child: Column(children: [
-          _buildTopBar(),
-          Expanded(
-            child: _loading
-                ? _LoadingView(type: widget.simType)
-                : _error != null
-                    ? _ErrorView(error: _error!, onRetry: _load)
-                    : FadeTransition(
-                        opacity: _fadeAnim, child: _buildContent()),
-          ),
-        ]),
+        child: Column(
+          children: [
+            _buildTopBar(),
+            Expanded(
+              child: _loading
+                  ? _LoadingView(type: widget.simType)
+                  : _error != null
+                  ? _ErrorView(error: _error!, onRetry: _load)
+                  : FadeTransition(opacity: _fadeAnim, child: _buildContent()),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -3046,48 +3909,63 @@ class _AdvancedSimScreenState extends State<AdvancedSimScreen>
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
       decoration: BoxDecoration(
         border: Border(
-            bottom: BorderSide(color: _typeColor.withAlpha(40), width: 1)),
+          bottom: BorderSide(color: _typeColor.withAlpha(40), width: 1),
+        ),
       ),
-      child: Row(children: [
-        GestureDetector(
-          onTap: () => Navigator.pop(context),
-          child: Container(
-            padding: const EdgeInsets.all(9),
-            decoration: BoxDecoration(
-              color: Colors.white.withAlpha(10),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: Colors.white.withAlpha(20)),
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: Container(
+              padding: const EdgeInsets.all(9),
+              decoration: BoxDecoration(
+                color: Colors.white.withAlpha(10),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.white.withAlpha(20)),
+              ),
+              child: const Icon(
+                Icons.arrow_back,
+                color: Colors.white,
+                size: 18,
+              ),
             ),
-            child: const Icon(Icons.arrow_back, color: Colors.white, size: 18),
           ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-            child: Text(_title,
-                style: GoogleFonts.syne(
-                    color: Colors.white,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700),
-                overflow: TextOverflow.ellipsis)),
-        GestureDetector(
-          onTap: _revealed ? _load : null,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: _typeColor.withAlpha(_revealed ? 30 : 10),
-              borderRadius: BorderRadius.circular(8),
-              border:
-                  Border.all(color: _typeColor.withAlpha(_revealed ? 80 : 30)),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              _title,
+              style: GoogleFonts.syne(
+                color: Colors.white,
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
-            child: Text('Próximo',
+          ),
+          GestureDetector(
+            onTap: _revealed ? _load : null,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: _typeColor.withAlpha(_revealed ? 30 : 10),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: _typeColor.withAlpha(_revealed ? 80 : 30),
+                ),
+              ),
+              child: Text(
+                'Próximo',
                 style: GoogleFonts.jetBrainsMono(
-                    color: _revealed ? _typeColor : Colors.white24,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700)),
+                  color: _revealed ? _typeColor : Colors.white24,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
           ),
-        ),
-      ]),
+        ],
+      ),
     );
   }
 
@@ -3117,23 +3995,33 @@ class _AdvancedSimScreenState extends State<AdvancedSimScreen>
     switch (widget.simType) {
       case 'vishing':
         return _VishingCard(
-            scenario: s,
-            revealed: _revealed,
-            color: _typeColor,
-            onAnswer: _answer);
+          scenario: s,
+          revealed: _revealed,
+          color: _typeColor,
+          onAnswer: _answer,
+        );
       case 'search':
         return _SearchCard(scenario: s, revealed: _revealed, color: _typeColor);
       case 'quishing':
         return _QuishingCard(
-            scenario: s, revealed: _revealed, color: _typeColor);
+          scenario: s,
+          revealed: _revealed,
+          color: _typeColor,
+        );
       case 'pharming':
         return _PharmingCard(
-            scenario: s, revealed: _revealed, color: _typeColor);
+          scenario: s,
+          revealed: _revealed,
+          color: _typeColor,
+        );
       case 'angler':
         return _AnglerCard(scenario: s, revealed: _revealed, color: _typeColor);
       case 'whaling':
         return _WhalingCard(
-            scenario: s, revealed: _revealed, color: _typeColor);
+          scenario: s,
+          revealed: _revealed,
+          color: _typeColor,
+        );
       default:
         return const SizedBox.shrink();
     }
@@ -3141,42 +4029,57 @@ class _AdvancedSimScreenState extends State<AdvancedSimScreen>
 
   Widget _buildDecision() {
     if (widget.simType == 'vishing') return const SizedBox.shrink();
-    return Column(children: [
-      Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: const Color(0xFF0D1520),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.white.withAlpha(15)),
-        ),
-        child: Column(children: [
-          Text('O que achas?',
-              style: GoogleFonts.syne(
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: const Color(0xFF0D1520),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.white.withAlpha(15)),
+          ),
+          child: Column(
+            children: [
+              Text(
+                'O que achas?',
+                style: GoogleFonts.syne(
                   color: Colors.white,
                   fontSize: 18,
-                  fontWeight: FontWeight.w700)),
-          const SizedBox(height: 6),
-          Text('Analisa cuidadosamente antes de decidir',
-              style: GoogleFonts.inter(color: Colors.white38, fontSize: 12)),
-          const SizedBox(height: 20),
-          Row(children: [
-            Expanded(
-                child: _DecisionButton(
-                    label: 'É Phishing',
-                    icon: Icons.phishing_rounded,
-                    color: const Color(0xFFFF4444),
-                    onTap: () => _answer(true))),
-            const SizedBox(width: 12),
-            Expanded(
-                child: _DecisionButton(
-                    label: 'É Legítimo',
-                    icon: Icons.verified_outlined,
-                    color: const Color(0xFF00FF88),
-                    onTap: () => _answer(false))),
-          ]),
-        ]),
-      ),
-    ]);
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Analisa cuidadosamente antes de decidir',
+                style: GoogleFonts.inter(color: Colors.white38, fontSize: 12),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: _DecisionButton(
+                      label: 'É Phishing',
+                      icon: Icons.phishing_rounded,
+                      color: const Color(0xFFFF4444),
+                      onTap: () => _answer(true),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _DecisionButton(
+                      label: 'É Legítimo',
+                      icon: Icons.verified_outlined,
+                      color: const Color(0xFF00FF88),
+                      onTap: () => _answer(false),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 
   Widget _buildReveal(Map<String, dynamic> s) {
@@ -3191,188 +4094,241 @@ class _AdvancedSimScreenState extends State<AdvancedSimScreen>
     final xp = correct ? (xpMap[difficulty] ?? 15) : 0;
     final userSaidPhishing = _userAnswer == true;
 
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          color: correct
-              ? const Color(0xFF00FF88).withAlpha(15)
-              : const Color(0xFFFF4444).withAlpha(15),
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            color: correct
+                ? const Color(0xFF00FF88).withAlpha(15)
+                : const Color(0xFFFF4444).withAlpha(15),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
               color: correct
                   ? const Color(0xFF00FF88).withAlpha(60)
-                  : const Color(0xFFFF4444).withAlpha(60)),
-        ),
-        child: Row(children: [
-          Container(
-            width: 46,
-            height: 46,
-            decoration: BoxDecoration(
-              color: correct
-                  ? const Color(0xFF00FF88).withAlpha(20)
-                  : const Color(0xFFFF4444).withAlpha(20),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              correct ? Icons.check_rounded : Icons.close_rounded,
-              color:
-                  correct ? const Color(0xFF00FF88) : const Color(0xFFFF4444),
-              size: 24,
+                  : const Color(0xFFFF4444).withAlpha(60),
             ),
           ),
-          const SizedBox(width: 14),
-          Expanded(
-              child: Column(
+          child: Row(
+            children: [
+              Container(
+                width: 46,
+                height: 46,
+                decoration: BoxDecoration(
+                  color: correct
+                      ? const Color(0xFF00FF88).withAlpha(20)
+                      : const Color(0xFFFF4444).withAlpha(20),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  correct ? Icons.check_rounded : Icons.close_rounded,
+                  color: correct
+                      ? const Color(0xFF00FF88)
+                      : const Color(0xFFFF4444),
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                Text(correct ? 'Correto!' : 'Não desta vez',
-                    style: GoogleFonts.syne(
+                    Text(
+                      correct ? 'Correto!' : 'Não desta vez',
+                      style: GoogleFonts.syne(
                         color: correct
                             ? const Color(0xFF00FF88)
                             : const Color(0xFFFF4444),
                         fontSize: 18,
-                        fontWeight: FontWeight.w800)),
-                Text(
-                    isPhishing
-                        ? 'Era um ataque de phishing'
-                        : 'Era uma comunicação legítima',
-                    style:
-                        GoogleFonts.inter(color: Colors.white54, fontSize: 12)),
-              ])),
-          if (correct && xp > 0)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: BoxDecoration(
-                color: const Color(0xFFFFCC00).withAlpha(20),
-                borderRadius: BorderRadius.circular(8),
-                border:
-                    Border.all(color: const Color(0xFFFFCC00).withAlpha(60)),
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    Text(
+                      isPhishing
+                          ? 'Era um ataque de phishing'
+                          : 'Era uma comunicação legítima',
+                      style: GoogleFonts.inter(
+                        color: Colors.white54,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              child: Text('+$xp XP',
-                  style: GoogleFonts.jetBrainsMono(
+              if (correct && xp > 0)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFCC00).withAlpha(20),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: const Color(0xFFFFCC00).withAlpha(60),
+                    ),
+                  ),
+                  child: Text(
+                    '+$xp XP',
+                    style: GoogleFonts.jetBrainsMono(
                       color: const Color(0xFFFFCC00),
                       fontSize: 12,
-                      fontWeight: FontWeight.w700)),
-            ),
-        ]),
-      ),
-      const SizedBox(height: 14),
-      Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          color: isPhishing
-              ? const Color(0xFFFF4444).withAlpha(8)
-              : const Color(0xFF00FF88).withAlpha(8),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 14),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            color: isPhishing
+                ? const Color(0xFFFF4444).withAlpha(8)
+                : const Color(0xFF00FF88).withAlpha(8),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
               color: isPhishing
                   ? const Color(0xFFFF4444).withAlpha(35)
-                  : const Color(0xFF00FF88).withAlpha(35)),
+                  : const Color(0xFF00FF88).withAlpha(35),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    isPhishing
+                        ? Icons.warning_amber_rounded
+                        : Icons.verified_outlined,
+                    color: isPhishing
+                        ? const Color(0xFFFF4444)
+                        : const Color(0xFF00FF88),
+                    size: 16,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      isPhishing
+                          ? 'Porque é um ataque de phishing'
+                          : 'Porque é legítimo',
+                      style: GoogleFonts.syne(
+                        color: isPhishing
+                            ? const Color(0xFFFF4444)
+                            : const Color(0xFF00FF88),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Text(
+                explanation,
+                style: GoogleFonts.inter(
+                  color: Colors.white70,
+                  fontSize: 13,
+                  height: 1.6,
+                ),
+              ),
+            ],
+          ),
         ),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(children: [
-            Icon(
-              isPhishing
-                  ? Icons.warning_amber_rounded
-                  : Icons.verified_outlined,
-              color: isPhishing
-                  ? const Color(0xFFFF4444)
-                  : const Color(0xFF00FF88),
-              size: 16,
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                  isPhishing
-                      ? 'Porque é um ataque de phishing'
-                      : 'Porque é legítimo',
-                  style: GoogleFonts.syne(
-                      color: isPhishing
-                          ? const Color(0xFFFF4444)
-                          : const Color(0xFF00FF88),
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700)),
-            ),
-          ]),
-          const SizedBox(height: 10),
-          Text(explanation,
-              style: GoogleFonts.inter(
-                  color: Colors.white70, fontSize: 13, height: 1.6)),
-        ]),
-      ),
-      const SizedBox(height: 12),
-      if (isPhishing && redFlags.isNotEmpty) ...[
-        _AnalysisCard(
+        const SizedBox(height: 12),
+        if (isPhishing && redFlags.isNotEmpty) ...[
+          _AnalysisCard(
             title: 'Sinais de Alerta',
             icon: Icons.flag_rounded,
             items: redFlags,
-            color: const Color(0xFFFF4444)),
-        const SizedBox(height: 12),
-      ],
-      if (!isPhishing && greenFlags.isNotEmpty) ...[
-        _AnalysisCard(
+            color: const Color(0xFFFF4444),
+          ),
+          const SizedBox(height: 12),
+        ],
+        if (!isPhishing && greenFlags.isNotEmpty) ...[
+          _AnalysisCard(
             title: 'Indicadores de Confiança',
             icon: Icons.verified_outlined,
             items: greenFlags,
-            color: const Color(0xFF00FF88)),
-        const SizedBox(height: 12),
-      ],
-      if (!correct) ...[
-        Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: const Color(0xFFFFCC00).withAlpha(10),
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: const Color(0xFFFFCC00).withAlpha(40)),
+            color: const Color(0xFF00FF88),
           ),
-          child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const Icon(Icons.lightbulb_outline_rounded,
-                color: Color(0xFFFFCC00), size: 16),
-            const SizedBox(width: 10),
-            Expanded(
-                child: Text(
-              userSaidPhishing
-                  ? 'Identificaste como phishing, mas era legítimo. Nem toda a comunicação urgente é golpe — verifica sempre os indicadores de confiança.'
-                  : 'Identificaste como legítimo, mas era phishing. Atenção aos sinais de alerta listados acima.',
-              style: GoogleFonts.inter(
-                  color: const Color(0xFFFFCC00), fontSize: 12, height: 1.5),
-            )),
-          ]),
-        ),
-        const SizedBox(height: 12),
-      ],
-      if (isPhishing &&
-          attackTechnique.isNotEmpty &&
-          attackTechnique != 'N/A') ...[
-        _InfoBlock(
+          const SizedBox(height: 12),
+        ],
+        if (!correct) ...[
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFCC00).withAlpha(10),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: const Color(0xFFFFCC00).withAlpha(40)),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(
+                  Icons.lightbulb_outline_rounded,
+                  color: Color(0xFFFFCC00),
+                  size: 16,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    userSaidPhishing
+                        ? 'Identificaste como phishing, mas era legítimo. Nem toda a comunicação urgente é golpe — verifica sempre os indicadores de confiança.'
+                        : 'Identificaste como legítimo, mas era phishing. Atenção aos sinais de alerta listados acima.',
+                    style: GoogleFonts.inter(
+                      color: const Color(0xFFFFCC00),
+                      fontSize: 12,
+                      height: 1.5,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
+        if (isPhishing &&
+            attackTechnique.isNotEmpty &&
+            attackTechnique != 'N/A') ...[
+          _InfoBlock(
             icon: Icons.bolt_rounded,
             title: 'Técnica Usada',
             content: attackTechnique,
-            color: const Color(0xFFFF6B35)),
-        const SizedBox(height: 12),
-      ],
-      const SizedBox(height: 8),
-      SizedBox(
-        width: double.infinity,
-        height: 52,
-        child: ElevatedButton(
-          onPressed: _load,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: _typeColor,
-            foregroundColor: Colors.black,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            elevation: 0,
+            color: const Color(0xFFFF6B35),
           ),
-          child: Text('Próxima Simulação',
-              style:
-                  GoogleFonts.syne(fontSize: 15, fontWeight: FontWeight.w700)),
+          const SizedBox(height: 12),
+        ],
+        const SizedBox(height: 8),
+        SizedBox(
+          width: double.infinity,
+          height: 52,
+          child: ElevatedButton(
+            onPressed: _load,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: _typeColor,
+              foregroundColor: Colors.black,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              elevation: 0,
+            ),
+            child: Text(
+              'Próxima Simulação',
+              style: GoogleFonts.syne(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
         ),
-      ),
-    ]);
+      ],
+    );
   }
 }
 
@@ -3384,11 +4340,12 @@ class _VishingCard extends StatefulWidget {
   final Color color;
   final void Function(bool isPhishing)? onAnswer;
 
-  const _VishingCard(
-      {required this.scenario,
-      required this.revealed,
-      required this.color,
-      this.onAnswer});
+  const _VishingCard({
+    required this.scenario,
+    required this.revealed,
+    required this.color,
+    this.onAnswer,
+  });
 
   @override
   State<_VishingCard> createState() => _VishingCardState();
@@ -3418,16 +4375,27 @@ class _VishingCardState extends State<_VishingCard>
   int _voiceFrames = 0;
   static const int _kVoiceConfirm = 3;
 
+  // ── Áudio ─────────────────────────────────────────────────────────────────
+  final AudioPlayer _sfxPlayer = AudioPlayer();
+  final AudioPlayer _ringPlayer = AudioPlayer();
+
   @override
   void initState() {
     super.initState();
     _pulseCtrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 900))
-      ..repeat(reverse: true);
-    _timerCtrl =
-        AnimationController(vsync: this, duration: const Duration(seconds: 10));
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    )..repeat(reverse: true);
+    _timerCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 10),
+    );
     _fadeScriptCtrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 400));
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    );
+    // Inicia o toque do telefone assim que o widget estiver montado
+    WidgetsBinding.instance.addPostFrameCallback((_) => _playRing());
   }
 
   @override
@@ -3438,6 +4406,8 @@ class _VishingCardState extends State<_VishingCard>
     _exposedTimer?.cancel();
     _scriptTimer?.cancel();
     _stopRealMicMonitoring();
+    _sfxPlayer.dispose();
+    _ringPlayer.dispose();
     super.dispose();
   }
 
@@ -3445,6 +4415,27 @@ class _VishingCardState extends State<_VishingCard>
   static const double _kMinVariance = 1.8;
   static const int _kWindowSize = 6;
   final List<double> _ampWindow = [];
+
+  // ── Métodos de áudio ───────────────────────────────────────────────────────
+
+  Future<void> _playRing() async {
+    try {
+      await _ringPlayer.setReleaseMode(ReleaseMode.loop);
+      await _ringPlayer.play(AssetSource('sounds/phone_ring.mp3'), volume: 0.6);
+    } catch (_) {}
+  }
+
+  Future<void> _stopRing() async {
+    try {
+      await _ringPlayer.stop();
+    } catch (_) {}
+  }
+
+  Future<void> _playSfx(String asset) async {
+    try {
+      await _sfxPlayer.play(AssetSource('sounds/$asset'), volume: 0.85);
+    } catch (_) {}
+  }
 
   Future<void> _startRealMicMonitoring() async {
     _audioRecorder = AudioRecorder();
@@ -3497,8 +4488,9 @@ class _VishingCardState extends State<_VishingCard>
       }
     }
 
-    _micMonitorTimer =
-        Timer.periodic(const Duration(milliseconds: 150), (_) async {
+    _micMonitorTimer = Timer.periodic(const Duration(milliseconds: 150), (
+      _,
+    ) async {
       if (!mounted || _phase != _VishCallPhase.connected) return;
       try {
         final amp = await _audioRecorder?.getAmplitude();
@@ -3520,7 +4512,8 @@ class _VishingCardState extends State<_VishingCard>
         }
 
         final mean = _ampWindow.reduce((a, b) => a + b) / _ampWindow.length;
-        final variance = _ampWindow
+        final variance =
+            _ampWindow
                 .map((v) => (v - mean) * (v - mean))
                 .reduce((a, b) => a + b) /
             _ampWindow.length;
@@ -3575,6 +4568,8 @@ class _VishingCardState extends State<_VishingCard>
 
   void _rejectCall() {
     HapticFeedback.mediumImpact();
+    _stopRing();
+    _playSfx('success.mp3');
     setState(() {
       _wasRejected = true;
       _phase = _VishCallPhase.safeEnded;
@@ -3584,6 +4579,8 @@ class _VishingCardState extends State<_VishingCard>
 
   void _answerCall() {
     HapticFeedback.mediumImpact();
+    _stopRing();
+    _playSfx('call_connect.mp3');
     setState(() {
       _phase = _VishCallPhase.connected;
       _callerSpeaking = true;
@@ -3611,6 +4608,8 @@ class _VishingCardState extends State<_VishingCard>
 
   void _hangUp() {
     HapticFeedback.mediumImpact();
+    _stopRing();
+    _playSfx('success.mp3');
     _exposedTimer?.cancel();
     _scriptTimer?.cancel();
     _timerCtrl.stop();
@@ -3665,124 +4664,162 @@ class _VishingCardState extends State<_VishingCard>
         border: Border.all(color: widget.color.withAlpha(40)),
       ),
       padding: const EdgeInsets.fromLTRB(24, 36, 24, 32),
-      child: Column(children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-          decoration: BoxDecoration(
-            color: widget.color.withAlpha(18),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: widget.color.withAlpha(50)),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+            decoration: BoxDecoration(
+              color: widget.color.withAlpha(18),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: widget.color.withAlpha(50)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AnimatedBuilder(
+                  animation: _pulseCtrl,
+                  builder: (_, __) => Container(
+                    width: 7,
+                    height: 7,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: widget.color.withOpacity(
+                        0.5 + _pulseCtrl.value * 0.5,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 7),
+                Text(
+                  'Chamada recebida',
+                  style: GoogleFonts.inter(
+                    color: widget.color,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
           ),
-          child: Row(mainAxisSize: MainAxisSize.min, children: [
-            AnimatedBuilder(
-              animation: _pulseCtrl,
-              builder: (_, __) => Container(
-                width: 7,
-                height: 7,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: widget.color.withOpacity(0.5 + _pulseCtrl.value * 0.5),
+          const SizedBox(height: 32),
+          AnimatedBuilder(
+            animation: _pulseCtrl,
+            builder: (_, child) => Stack(
+              alignment: Alignment.center,
+              children: [
+                Container(
+                  width: 110 + _pulseCtrl.value * 18,
+                  height: 110 + _pulseCtrl.value * 18,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: widget.color.withOpacity(
+                        0.08 * (1 - _pulseCtrl.value),
+                      ),
+                      width: 2,
+                    ),
+                  ),
+                ),
+                Container(
+                  width: 90 + _pulseCtrl.value * 10,
+                  height: 90 + _pulseCtrl.value * 10,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: widget.color.withOpacity(
+                        0.15 * (1 - _pulseCtrl.value),
+                      ),
+                      width: 1.5,
+                    ),
+                  ),
+                ),
+                child!,
+              ],
+            ),
+            child: Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: widget.color.withAlpha(22),
+                border: Border.all(color: widget.color.withAlpha(90), width: 2),
+              ),
+              child: Center(
+                child: Text(
+                  callerName.isNotEmpty ? callerName[0].toUpperCase() : '?',
+                  style: GoogleFonts.syne(
+                    color: widget.color,
+                    fontSize: 32,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
               ),
             ),
-            const SizedBox(width: 7),
-            Text('Chamada recebida',
-                style: GoogleFonts.inter(
-                    color: widget.color,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600)),
-          ]),
-        ),
-        const SizedBox(height: 32),
-        AnimatedBuilder(
-          animation: _pulseCtrl,
-          builder: (_, child) => Stack(alignment: Alignment.center, children: [
-            Container(
-              width: 110 + _pulseCtrl.value * 18,
-              height: 110 + _pulseCtrl.value * 18,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                    color:
-                        widget.color.withOpacity(0.08 * (1 - _pulseCtrl.value)),
-                    width: 2),
-              ),
-            ),
-            Container(
-              width: 90 + _pulseCtrl.value * 10,
-              height: 90 + _pulseCtrl.value * 10,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                    color:
-                        widget.color.withOpacity(0.15 * (1 - _pulseCtrl.value)),
-                    width: 1.5),
-              ),
-            ),
-            child!,
-          ]),
-          child: Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: widget.color.withAlpha(22),
-              border: Border.all(color: widget.color.withAlpha(90), width: 2),
-            ),
-            child: Center(
-                child: Text(
-              callerName.isNotEmpty ? callerName[0].toUpperCase() : '?',
-              style: GoogleFonts.syne(
-                  color: widget.color,
-                  fontSize: 32,
-                  fontWeight: FontWeight.w800),
-            )),
           ),
-        ),
-        const SizedBox(height: 20),
-        Text(callerName,
+          const SizedBox(height: 20),
+          Text(
+            callerName,
             style: GoogleFonts.syne(
-                color: Colors.white, fontSize: 22, fontWeight: FontWeight.w700),
-            textAlign: TextAlign.center),
-        const SizedBox(height: 6),
-        if (callerRole.isNotEmpty)
-          Text(callerRole,
+              color: Colors.white,
+              fontSize: 22,
+              fontWeight: FontWeight.w700,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 6),
+          if (callerRole.isNotEmpty)
+            Text(
+              callerRole,
               style: GoogleFonts.inter(color: Colors.white54, fontSize: 13),
-              textAlign: TextAlign.center),
-        const SizedBox(height: 8),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-          decoration: BoxDecoration(
-            color: Colors.white.withAlpha(8),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Text(phone,
+              textAlign: TextAlign.center,
+            ),
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.white.withAlpha(8),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              phone,
               style: GoogleFonts.jetBrainsMono(
-                  color: Colors.white38, fontSize: 12)),
-        ),
-        const SizedBox(height: 40),
-        Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-          _PhoneActionButton(
-            icon: Icons.call_end,
-            label: 'Rejeitar',
-            color: const Color(0xFFFF4444),
-            onTap: _rejectCall,
+                color: Colors.white38,
+                fontSize: 12,
+              ),
+            ),
           ),
-          _PhoneActionButton(
-            icon: Icons.call,
-            label: 'Atender',
-            color: const Color(0xFF00C853),
-            onTap: _answerCall,
+          const SizedBox(height: 40),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _PhoneActionButton(
+                icon: Icons.call_end,
+                label: 'Rejeitar',
+                color: const Color(0xFFFF4444),
+                onTap: _rejectCall,
+              ),
+              _PhoneActionButton(
+                icon: Icons.call,
+                label: 'Atender',
+                color: const Color(0xFF00C853),
+                onTap: _answerCall,
+              ),
+            ],
           ),
-        ]),
-        const SizedBox(height: 16),
-        Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-          const Icon(Icons.info_outline, size: 12, color: Colors.white24),
-          const SizedBox(width: 5),
-          Text('Pensas que é seguro atender?',
-              style: GoogleFonts.inter(color: Colors.white24, fontSize: 11)),
-        ]),
-      ]),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.info_outline, size: 12, color: Colors.white24),
+              const SizedBox(width: 5),
+              Text(
+                'Pensas que é seguro atender?',
+                style: GoogleFonts.inter(color: Colors.white24, fontSize: 11),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -3801,308 +4838,411 @@ class _VishingCardState extends State<_VishingCard>
       ),
       child: SingleChildScrollView(
         physics: const NeverScrollableScrollPhysics(),
-        child: Column(children: [
-          AnimatedBuilder(
-            animation: _timerCtrl,
-            builder: (_, __) {
-              final remaining = ((1 - _timerCtrl.value) * 10).ceil();
-              final danger = _timerCtrl.value > 0.7;
-              return Container(
-                padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
-                decoration: BoxDecoration(
-                  color: danger
-                      ? const Color(0xFFFF4444).withAlpha(12)
-                      : const Color(0xFF0D1520),
-                  borderRadius:
-                      const BorderRadius.vertical(top: Radius.circular(28)),
-                  border: Border(
+        child: Column(
+          children: [
+            AnimatedBuilder(
+              animation: _timerCtrl,
+              builder: (_, __) {
+                final remaining = ((1 - _timerCtrl.value) * 10).ceil();
+                final danger = _timerCtrl.value > 0.7;
+                return Container(
+                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+                  decoration: BoxDecoration(
+                    color: danger
+                        ? const Color(0xFFFF4444).withAlpha(12)
+                        : const Color(0xFF0D1520),
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(28),
+                    ),
+                    border: Border(
                       bottom: BorderSide(
-                          color: danger
-                              ? const Color(0xFFFF4444).withAlpha(40)
-                              : Colors.white.withAlpha(12))),
-                ),
-                child: Column(children: [
-                  Row(children: [
-                    Container(
-                      width: 8,
-                      height: 8,
-                      decoration: const BoxDecoration(
-                          shape: BoxShape.circle, color: Color(0xFF00C853)),
-                    ),
-                    const SizedBox(width: 8),
-                    Text('Em chamada',
-                        style: GoogleFonts.inter(
-                            color: Colors.white70,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600)),
-                    const Spacer(),
-                    Text('00:${remaining.toString().padLeft(2, '0')}',
-                        style: GoogleFonts.jetBrainsMono(
-                            color: danger
-                                ? const Color(0xFFFF4444)
-                                : Colors.white54,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700)),
-                  ]),
-                  const SizedBox(height: 8),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
-                    child: LinearProgressIndicator(
-                      value: 1 - _timerCtrl.value,
-                      backgroundColor: Colors.white.withAlpha(12),
-                      valueColor: AlwaysStoppedAnimation(danger
-                          ? const Color(0xFFFF4444)
-                          : const Color(0xFF00C853)),
-                      minHeight: 4,
-                    ),
-                  ),
-                  if (danger) ...[
-                    const SizedBox(height: 6),
-                    Text('Não respondas — o silêncio protege a tua voz!',
-                        style: GoogleFonts.inter(
-                            color: const Color(0xFFFF4444), fontSize: 10),
-                        textAlign: TextAlign.center,
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 2),
-                  ],
-                ]),
-              );
-            },
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-            child: Row(children: [
-              Container(
-                width: 52,
-                height: 52,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: widget.color.withAlpha(20),
-                  border:
-                      Border.all(color: widget.color.withAlpha(80), width: 2),
-                ),
-                child: Center(
-                    child: Text(
-                  callerName.isNotEmpty ? callerName[0].toUpperCase() : '?',
-                  style: GoogleFonts.syne(
-                      color: widget.color,
-                      fontSize: 22,
-                      fontWeight: FontWeight.w800),
-                )),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                  child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                    Text(callerName,
-                        style: GoogleFonts.syne(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700),
-                        overflow: TextOverflow.ellipsis),
-                    if (callerRole.isNotEmpty)
-                      Text(callerRole,
-                          style: GoogleFonts.inter(
-                              color: Colors.white38, fontSize: 11),
-                          overflow: TextOverflow.ellipsis),
-                  ])),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFF4444).withAlpha(18),
-                  borderRadius: BorderRadius.circular(8),
-                  border:
-                      Border.all(color: const Color(0xFFFF4444).withAlpha(50)),
-                ),
-                child: Row(mainAxisSize: MainAxisSize.min, children: [
-                  AnimatedBuilder(
-                    animation: _pulseCtrl,
-                    builder: (_, __) => Container(
-                      width: 6,
-                      height: 6,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: const Color(0xFFFF4444)
-                            .withOpacity(0.5 + _pulseCtrl.value * 0.5),
+                        color: danger
+                            ? const Color(0xFFFF4444).withAlpha(40)
+                            : Colors.white.withAlpha(12),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 5),
-                  Text('Voz IA',
-                      style: GoogleFonts.jetBrainsMono(
-                          color: const Color(0xFFFF4444),
-                          fontSize: 9,
-                          fontWeight: FontWeight.w700)),
-                ]),
-              ),
-            ]),
-          ),
-          Container(
-            margin: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-            padding: const EdgeInsets.all(14),
-            constraints: const BoxConstraints(minHeight: 100),
-            decoration: BoxDecoration(
-              color: const Color(0xFF0A0E14),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.white.withAlpha(10)),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            width: 8,
+                            height: 8,
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Color(0xFF00C853),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Em chamada',
+                            style: GoogleFonts.inter(
+                              color: Colors.white70,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const Spacer(),
+                          Text(
+                            '00:${remaining.toString().padLeft(2, '0')}',
+                            style: GoogleFonts.jetBrainsMono(
+                              color: danger
+                                  ? const Color(0xFFFF4444)
+                                  : Colors.white54,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: LinearProgressIndicator(
+                          value: 1 - _timerCtrl.value,
+                          backgroundColor: Colors.white.withAlpha(12),
+                          valueColor: AlwaysStoppedAnimation(
+                            danger
+                                ? const Color(0xFFFF4444)
+                                : const Color(0xFF00C853),
+                          ),
+                          minHeight: 4,
+                        ),
+                      ),
+                      if (danger) ...[
+                        const SizedBox(height: 6),
+                        Text(
+                          'Não respondas — o silêncio protege a tua voz!',
+                          style: GoogleFonts.inter(
+                            color: const Color(0xFFFF4444),
+                            fontSize: 10,
+                          ),
+                          textAlign: TextAlign.center,
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 2,
+                        ),
+                      ],
+                    ],
+                  ),
+                );
+              },
             ),
-            child: _callerSpeaking
-                ? Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                    const SizedBox(height: 32),
-                    _TypingDots(color: widget.color),
-                  ])
-                : FadeTransition(
-                    opacity: _fadeScriptCtrl,
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+              child: Row(
+                children: [
+                  Container(
+                    width: 52,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: widget.color.withAlpha(20),
+                      border: Border.all(
+                        color: widget.color.withAlpha(80),
+                        width: 2,
+                      ),
+                    ),
+                    child: Center(
+                      child: Text(
+                        callerName.isNotEmpty
+                            ? callerName[0].toUpperCase()
+                            : '?',
+                        style: GoogleFonts.syne(
+                          color: widget.color,
+                          fontSize: 22,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          callerName,
+                          style: GoogleFonts.syne(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        if (callerRole.isNotEmpty)
+                          Text(
+                            callerRole,
+                            style: GoogleFonts.inter(
+                              color: Colors.white38,
+                              fontSize: 11,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFF4444).withAlpha(18),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: const Color(0xFFFF4444).withAlpha(50),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        AnimatedBuilder(
+                          animation: _pulseCtrl,
+                          builder: (_, __) => Container(
+                            width: 6,
+                            height: 6,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: const Color(
+                                0xFFFF4444,
+                              ).withOpacity(0.5 + _pulseCtrl.value * 0.5),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 5),
+                        Text(
+                          'Voz IA',
+                          style: GoogleFonts.jetBrainsMono(
+                            color: const Color(0xFFFF4444),
+                            fontSize: 9,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              margin: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+              padding: const EdgeInsets.all(14),
+              constraints: const BoxConstraints(minHeight: 100),
+              decoration: BoxDecoration(
+                color: const Color(0xFF0A0E14),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.white.withAlpha(10)),
+              ),
+              child: _callerSpeaking
+                  ? Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const SizedBox(height: 32),
+                        _TypingDots(color: widget.color),
+                      ],
+                    )
+                  : FadeTransition(
+                      opacity: _fadeScriptCtrl,
+                      child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(children: [
-                            const Icon(Icons.mic_rounded,
-                                size: 11, color: Color(0xFFFF4444)),
-                            const SizedBox(width: 6),
-                            Text('Transcrição — Voz Clonada por IA',
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.mic_rounded,
+                                size: 11,
+                                color: Color(0xFFFF4444),
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                'Transcrição — Voz Clonada por IA',
                                 style: GoogleFonts.jetBrainsMono(
-                                    color: widget.color,
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.w600)),
-                          ]),
+                                  color: widget.color,
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
                           const SizedBox(height: 10),
                           ...scriptLines
                               .take(_scriptLine)
-                              .map((line) => Container(
-                                    margin: const EdgeInsets.only(bottom: 8),
-                                    padding: const EdgeInsets.all(10),
-                                    decoration: BoxDecoration(
-                                      color: widget.color.withAlpha(10),
-                                      borderRadius: BorderRadius.circular(10),
-                                      border: Border.all(
-                                          color: widget.color.withAlpha(35)),
+                              .map(
+                                (line) => Container(
+                                  margin: const EdgeInsets.only(bottom: 8),
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: widget.color.withAlpha(10),
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(
+                                      color: widget.color.withAlpha(35),
                                     ),
-                                    child: Text('"$line"',
-                                        style: GoogleFonts.inter(
-                                            color: Colors.white70,
-                                            fontSize: 12,
-                                            height: 1.4,
-                                            fontStyle: FontStyle.italic)),
-                                  )),
+                                  ),
+                                  child: Text(
+                                    '"$line"',
+                                    style: GoogleFonts.inter(
+                                      color: Colors.white70,
+                                      fontSize: 12,
+                                      height: 1.4,
+                                      fontStyle: FontStyle.italic,
+                                    ),
+                                  ),
+                                ),
+                              ),
                           if (_scriptLine < scriptLines.length)
                             Padding(
                               padding: const EdgeInsets.only(top: 4),
-                              child: Row(children: [
-                                SizedBox(
-                                  width: 14,
-                                  height: 14,
-                                  child: CircularProgressIndicator(
+                              child: Row(
+                                children: [
+                                  SizedBox(
+                                    width: 14,
+                                    height: 14,
+                                    child: CircularProgressIndicator(
                                       strokeWidth: 1.5,
-                                      color: widget.color.withAlpha(120)),
-                                ),
-                                const SizedBox(width: 8),
-                                Text('a falar...',
+                                      color: widget.color.withAlpha(120),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'a falar...',
                                     style: GoogleFonts.inter(
-                                        color: Colors.white30, fontSize: 10)),
-                              ]),
+                                      color: Colors.white30,
+                                      fontSize: 10,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           if (audioCues.isNotEmpty) ...[
                             const SizedBox(height: 10),
                             Wrap(
-                                spacing: 6,
-                                runSpacing: 6,
-                                children: audioCues
-                                    .map((cue) => Container(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 8, vertical: 4),
-                                          decoration: BoxDecoration(
-                                            color: Colors.white.withAlpha(8),
-                                            borderRadius:
-                                                BorderRadius.circular(6),
-                                          ),
-                                          child: Text(cue,
-                                              style: GoogleFonts.inter(
-                                                  color: Colors.white30,
-                                                  fontSize: 9)),
-                                        ))
-                                    .toList()),
-                          ],
-                        ]),
-                  ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-            child: Column(mainAxisSize: MainAxisSize.min, children: [
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                decoration: BoxDecoration(
-                  color: _micActive
-                      ? const Color(0xFFFF4444).withAlpha(12)
-                      : const Color(0xFFFFCC00).withAlpha(12),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                      color: _micActive
-                          ? const Color(0xFFFF4444).withAlpha(40)
-                          : const Color(0xFFFFCC00).withAlpha(40)),
-                ),
-                child: Row(children: [
-                  if (_micActive)
-                    AnimatedBuilder(
-                      animation: _pulseCtrl,
-                      builder: (_, __) => Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: List.generate(5, (i) {
-                          final h =
-                              4.0 + (_voiceLevel * 20) * (0.5 + (i % 3) * 0.25);
-                          return Container(
-                            width: 3,
-                            height: h.clamp(4.0, 24.0),
-                            margin: const EdgeInsets.symmetric(horizontal: 1.5),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFFF4444).withAlpha(180),
-                              borderRadius: BorderRadius.circular(2),
+                              spacing: 6,
+                              runSpacing: 6,
+                              children: audioCues
+                                  .map(
+                                    (cue) => Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white.withAlpha(8),
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Text(
+                                        cue,
+                                        style: GoogleFonts.inter(
+                                          color: Colors.white30,
+                                          fontSize: 9,
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                  .toList(),
                             ),
-                          );
-                        }),
+                          ],
+                        ],
                       ),
-                    )
-                  else
-                    const Icon(Icons.volume_off_outlined,
-                        color: Color(0xFFFFCC00), size: 14),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      _micActive
-                          ? 'Microfone ativo!'
-                          : 'A aguardar permissão do microfone…',
-                      style: GoogleFonts.inter(
-                          color: _micActive
-                              ? const Color(0xFFFF4444)
-                              : const Color(0xFFFFCC00),
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          height: 1.4),
+                    ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      color: _micActive
+                          ? const Color(0xFFFF4444).withAlpha(12)
+                          : const Color(0xFFFFCC00).withAlpha(12),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: _micActive
+                            ? const Color(0xFFFF4444).withAlpha(40)
+                            : const Color(0xFFFFCC00).withAlpha(40),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        if (_micActive)
+                          AnimatedBuilder(
+                            animation: _pulseCtrl,
+                            builder: (_, __) => Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: List.generate(5, (i) {
+                                final h =
+                                    4.0 +
+                                    (_voiceLevel * 20) * (0.5 + (i % 3) * 0.25);
+                                return Container(
+                                  width: 3,
+                                  height: h.clamp(4.0, 24.0),
+                                  margin: const EdgeInsets.symmetric(
+                                    horizontal: 1.5,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: const Color(
+                                      0xFFFF4444,
+                                    ).withAlpha(180),
+                                    borderRadius: BorderRadius.circular(2),
+                                  ),
+                                );
+                              }),
+                            ),
+                          )
+                        else
+                          const Icon(
+                            Icons.volume_off_outlined,
+                            color: Color(0xFFFFCC00),
+                            size: 14,
+                          ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            _micActive
+                                ? 'Microfone ativo!'
+                                : 'A aguardar permissão do microfone…',
+                            style: GoogleFonts.inter(
+                              color: _micActive
+                                  ? const Color(0xFFFF4444)
+                                  : const Color(0xFFFFCC00),
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                              height: 1.4,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ]),
+                  const SizedBox(height: 6),
+                  Text(
+                    '🔇 Devo ou não ficar em silencio ?',
+                    style: GoogleFonts.inter(
+                      color: Colors.white24,
+                      fontSize: 10,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  Center(
+                    child: _PhoneActionButton(
+                      icon: Icons.call_end,
+                      label: 'Desligar',
+                      color: const Color(0xFFFF4444),
+                      onTap: _hangUp,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 6),
-              Text(
-                '🔇 Devo ou não ficar em silencio ?',
-                style: GoogleFonts.inter(color: Colors.white24, fontSize: 10),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              Center(
-                child: _PhoneActionButton(
-                  icon: Icons.call_end,
-                  label: 'Desligar',
-                  color: const Color(0xFFFF4444),
-                  onTap: _hangUp,
-                ),
-              ),
-            ]),
-          ),
-        ]),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -4125,120 +5265,171 @@ class _VishingCardState extends State<_VishingCard>
         border: Border.all(color: const Color(0xFF00C853).withAlpha(80)),
         boxShadow: [
           BoxShadow(
-              color: const Color(0xFF00C853).withAlpha(20),
-              blurRadius: 24,
-              spreadRadius: -6)
+            color: const Color(0xFF00C853).withAlpha(20),
+            blurRadius: 24,
+            spreadRadius: -6,
+          ),
         ],
       ),
-      child: Column(children: [
-        Container(
-          width: 72,
-          height: 72,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: const Color(0xFF00C853).withAlpha(20),
-            border: Border.all(
-                color: const Color(0xFF00C853).withAlpha(80), width: 2),
+      child: Column(
+        children: [
+          Container(
+            width: 72,
+            height: 72,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: const Color(0xFF00C853).withAlpha(20),
+              border: Border.all(
+                color: const Color(0xFF00C853).withAlpha(80),
+                width: 2,
+              ),
+            ),
+            child: const Center(
+              child: Icon(
+                Icons.shield_rounded,
+                color: Color(0xFF00C853),
+                size: 34,
+              ),
+            ),
           ),
-          child: const Center(
-              child: Icon(Icons.shield_rounded,
-                  color: Color(0xFF00C853), size: 34)),
-        ),
-        const SizedBox(height: 16),
-        Text('Bom Trabalho! 🛡️',
+          const SizedBox(height: 16),
+          Text(
+            'Bom Trabalho! 🛡️',
             style: GoogleFonts.syne(
-                color: const Color(0xFF00C853),
-                fontSize: 22,
-                fontWeight: FontWeight.w800)),
-        const SizedBox(height: 8),
-        Text(msg,
+              color: const Color(0xFF00C853),
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            msg,
             style: GoogleFonts.inter(
-                color: Colors.white70, fontSize: 13, height: 1.5),
-            textAlign: TextAlign.center),
-        const SizedBox(height: 16),
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: const Color(0xFF00C853).withAlpha(8),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFF00C853).withAlpha(30)),
+              color: Colors.white70,
+              fontSize: 13,
+              height: 1.5,
+            ),
+            textAlign: TextAlign.center,
           ),
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Row(children: [
-              const Icon(Icons.psychology_outlined,
-                  color: Color(0xFF00C853), size: 14),
-              const SizedBox(width: 8),
-              Text('Por que agiste bem?',
-                  style: GoogleFonts.syne(
-                      color: const Color(0xFF00C853),
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700)),
-            ]),
-            const SizedBox(height: 10),
-            Text(reason,
-                style: GoogleFonts.inter(
-                    color: Colors.white60, fontSize: 12, height: 1.6)),
-          ]),
-        ),
-        const SizedBox(height: 14),
-        Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: const Color(0xFF0D1520),
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: Colors.white.withAlpha(12)),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFF00C853).withAlpha(8),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: const Color(0xFF00C853).withAlpha(30)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.psychology_outlined,
+                      color: Color(0xFF00C853),
+                      size: 14,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Por que agiste bem?',
+                      style: GoogleFonts.syne(
+                        color: const Color(0xFF00C853),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  reason,
+                  style: GoogleFonts.inter(
+                    color: Colors.white60,
+                    fontSize: 12,
+                    height: 1.6,
+                  ),
+                ),
+              ],
+            ),
           ),
-          child: Row(children: [
-            const Icon(Icons.phone_outlined, size: 14, color: Colors.white38),
-            const SizedBox(width: 8),
-            Expanded(
-                child: Column(
+          const SizedBox(height: 14),
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: const Color(0xFF0D1520),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: Colors.white.withAlpha(12)),
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.phone_outlined,
+                  size: 14,
+                  color: Colors.white38,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                  Text(callerName,
-                      style: GoogleFonts.inter(
+                      Text(
+                        callerName,
+                        style: GoogleFonts.inter(
                           color: Colors.white60,
                           fontSize: 12,
-                          fontWeight: FontWeight.w600),
-                      overflow: TextOverflow.ellipsis),
-                  Text(s['phone_number'] as String? ?? '',
-                      style: GoogleFonts.jetBrainsMono(
-                          color: Colors.white30, fontSize: 10),
-                      overflow: TextOverflow.ellipsis),
-                ])),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: const Color(0xFF00C853).withAlpha(18),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Text('BLOQUEADO',
-                  style: GoogleFonts.jetBrainsMono(
+                          fontWeight: FontWeight.w600,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        s['phone_number'] as String? ?? '',
+                        style: GoogleFonts.jetBrainsMono(
+                          color: Colors.white30,
+                          fontSize: 10,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF00C853).withAlpha(18),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    'BLOQUEADO',
+                    style: GoogleFonts.jetBrainsMono(
                       color: const Color(0xFF00C853),
                       fontSize: 8,
-                      fontWeight: FontWeight.w700)),
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ]),
-        ),
-      ]),
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildSilentWinUI() {
     final s = widget.scenario;
     final callerName = s['caller_name'] as String? ?? 'Desconhecido';
-    final technique = s['voice_clone_technique'] as String? ??
+    final technique =
+        s['voice_clone_technique'] as String? ??
         'clonagem de voz por IA com apenas 3 segundos de áudio';
 
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [
-            const Color(0xFF071B14),
-            const Color(0xFF060A10),
-          ],
+          colors: [const Color(0xFF071B14), const Color(0xFF060A10)],
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
         ),
@@ -4246,133 +5437,190 @@ class _VishingCardState extends State<_VishingCard>
         border: Border.all(color: const Color(0xFF00FF88).withAlpha(90)),
         boxShadow: [
           BoxShadow(
-              color: const Color(0xFF00FF88).withAlpha(25),
-              blurRadius: 28,
-              spreadRadius: -6)
+            color: const Color(0xFF00FF88).withAlpha(25),
+            blurRadius: 28,
+            spreadRadius: -6,
+          ),
         ],
       ),
-      child: Column(children: [
-        Container(
-          width: 76,
-          height: 76,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            gradient: const LinearGradient(
-              colors: [Color(0xFF00FF88), Color(0xFF00C853)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            boxShadow: [
-              BoxShadow(
+      child: Column(
+        children: [
+          Container(
+            width: 76,
+            height: 76,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: const LinearGradient(
+                colors: [Color(0xFF00FF88), Color(0xFF00C853)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              boxShadow: [
+                BoxShadow(
                   color: const Color(0xFF00FF88).withAlpha(70),
                   blurRadius: 20,
-                  spreadRadius: -4)
-            ],
-          ),
-          child: const Center(
-              child: Icon(Icons.emoji_events_rounded,
-                  color: Color(0xFF00FF88), size: 34)),
-        ),
-        const SizedBox(height: 18),
-        Text('Bom Trabalho!',
-            style: GoogleFonts.syne(
-                color: const Color(0xFF00FF88),
-                fontSize: 24,
-                fontWeight: FontWeight.w800)),
-        const SizedBox(height: 6),
-        Text('A tua voz não foi clonada',
-            style: GoogleFonts.inter(color: Colors.white54, fontSize: 13)),
-        const SizedBox(height: 20),
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(18),
-          decoration: BoxDecoration(
-            color: const Color(0xFF00FF88).withAlpha(8),
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: const Color(0xFF00FF88).withAlpha(30)),
-          ),
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Row(children: [
-              const Icon(Icons.psychology_outlined,
-                  color: Color(0xFF00FF88), size: 16),
-              const SizedBox(width: 8),
-              Text('Por que agiste bem?',
-                  style: GoogleFonts.syne(
-                      color: const Color(0xFF00FF88),
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700)),
-            ]),
-            const SizedBox(height: 12),
-            Text(
-              'Ficaste 10 segundos em silêncio sem dizer nada. '
-              'Para que o vishing resulte, o atacante precisa de gravar a tua voz '
-              'e usar $technique. '
-              'Se não falas, não há voz para clonar — o ataque falha completamente!',
-              style: GoogleFonts.inter(
-                  color: Colors.white70, fontSize: 13, height: 1.6),
+                  spreadRadius: -4,
+                ),
+              ],
             ),
-          ]),
-        ),
-        const SizedBox(height: 14),
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: const Color(0xFF0D1520),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.white.withAlpha(12)),
+            child: const Center(
+              child: Icon(
+                Icons.emoji_events_rounded,
+                color: Color(0xFF00FF88),
+                size: 34,
+              ),
+            ),
           ),
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text('Como funciona o Vishing',
-                style: GoogleFonts.syne(
+          const SizedBox(height: 18),
+          Text(
+            'Bom Trabalho!',
+            style: GoogleFonts.syne(
+              color: const Color(0xFF00FF88),
+              fontSize: 24,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'A tua voz não foi clonada',
+            style: GoogleFonts.inter(color: Colors.white54, fontSize: 13),
+          ),
+          const SizedBox(height: 20),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              color: const Color(0xFF00FF88).withAlpha(8),
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: const Color(0xFF00FF88).withAlpha(30)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.psychology_outlined,
+                      color: Color(0xFF00FF88),
+                      size: 16,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Por que agiste bem?',
+                      style: GoogleFonts.syne(
+                        color: const Color(0xFF00FF88),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Ficaste 10 segundos em silêncio sem dizer nada. '
+                  'Para que o vishing resulte, o atacante precisa de gravar a tua voz '
+                  'e usar $technique. '
+                  'Se não falas, não há voz para clonar — o ataque falha completamente!',
+                  style: GoogleFonts.inter(
+                    color: Colors.white70,
+                    fontSize: 13,
+                    height: 1.6,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFF0D1520),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.white.withAlpha(12)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Como funciona o Vishing',
+                  style: GoogleFonts.syne(
                     color: Colors.white60,
                     fontSize: 11,
-                    fontWeight: FontWeight.w700)),
-            const SizedBox(height: 10),
-            _VishStep('1', 'Atacante liga fingindo ser banco/empresa',
-                const Color(0xFFFF6B35)),
-            _VishStep('2', 'Tenta fazer-te falar para gravar a tua voz',
-                const Color(0xFFFFCC00)),
-            _VishStep(
-                '3', 'IA clona a tua voz em segundos', const Color(0xFFFF4444)),
-            _VishStep('4', 'Usa a voz clonada para fraudes futuras',
-                const Color(0xFFB06EFF)),
-            Container(
-              margin: const EdgeInsets.only(top: 8),
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: const Color(0xFF00FF88).withAlpha(10),
-                borderRadius: BorderRadius.circular(10),
-                border:
-                    Border.all(color: const Color(0xFF00FF88).withAlpha(40)),
-              ),
-              child: Row(children: [
-                const Icon(Icons.check_circle_outline,
-                    color: Color(0xFF00FF88), size: 14),
-                const SizedBox(width: 8),
-                Expanded(
-                    child: Text(
-                        'Tu não falaste → voz não gravada → ataque falhado',
-                        style: GoogleFonts.inter(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                _VishStep(
+                  '1',
+                  'Atacante liga fingindo ser banco/empresa',
+                  const Color(0xFFFF6B35),
+                ),
+                _VishStep(
+                  '2',
+                  'Tenta fazer-te falar para gravar a tua voz',
+                  const Color(0xFFFFCC00),
+                ),
+                _VishStep(
+                  '3',
+                  'IA clona a tua voz em segundos',
+                  const Color(0xFFFF4444),
+                ),
+                _VishStep(
+                  '4',
+                  'Usa a voz clonada para fraudes futuras',
+                  const Color(0xFFB06EFF),
+                ),
+                Container(
+                  margin: const EdgeInsets.only(top: 8),
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF00FF88).withAlpha(10),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: const Color(0xFF00FF88).withAlpha(40),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.check_circle_outline,
+                        color: Color(0xFF00FF88),
+                        size: 14,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Tu não falaste → voz não gravada → ataque falhado',
+                          style: GoogleFonts.inter(
                             color: const Color(0xFF00FF88),
                             fontSize: 11,
-                            fontWeight: FontWeight.w600))),
-              ]),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ]),
-        ),
-        const SizedBox(height: 14),
-        Row(children: [
-          const Icon(Icons.phone_disabled, size: 13, color: Colors.white24),
-          const SizedBox(width: 8),
-          Expanded(
-              child: Text('$callerName — Chamada terminada',
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              const Icon(Icons.phone_disabled, size: 13, color: Colors.white24),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  '$callerName — Chamada terminada',
                   style: GoogleFonts.inter(color: Colors.white30, fontSize: 11),
-                  overflow: TextOverflow.ellipsis)),
-        ]),
-      ]),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -4380,120 +5628,408 @@ class _VishingCardState extends State<_VishingCard>
     final s = widget.scenario;
     final scriptLines = (s['script_lines'] as List?)?.cast<String>() ?? [];
     final callerName = s['caller_name'] as String? ?? 'Desconhecido';
+    final callerRole = s['caller_role'] as String? ?? 'entidade desconhecida';
+    final phoneNumber = s['phone_number'] as String? ?? 'N/D';
+    final redFlags = (s['red_flags'] as List?)?.cast<String>() ?? [];
+    final technique =
+        s['voice_clone_technique'] as String? ??
+        'clonagem de voz por IA com menos de 3 segundos de áudio';
+    final explanation = s['explanation'] as String? ?? '';
 
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFF1A0808),
-        borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: const Color(0xFFFF4444).withAlpha(100)),
-        boxShadow: [
-          BoxShadow(
+    final autoFlags = [
+      _VishFlag(
+        '🎭',
+        'Personificação',
+        '$callerName fingiu ser $callerRole para criar confiança imediata',
+        const Color(0xFFFF6B35),
+      ),
+      _VishFlag(
+        '⏰',
+        'Urgência artificial',
+        'O script usa pressão temporal para impedir que o alvo pense criticamente',
+        const Color(0xFFFFCC00),
+      ),
+      _VishFlag(
+        '🎤',
+        'Captura de voz',
+        'O objetivo era gravar a tua voz para $technique',
+        const Color(0xFFFF4444),
+      ),
+      _VishFlag(
+        '📞',
+        'Número potencialmente falsificado',
+        'O número $phoneNumber pode estar spoofed — VoIP permite falsificar qualquer número',
+        const Color(0xFFB06EFF),
+      ),
+    ];
+
+    return SingleChildScrollView(
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFF1A0808),
+          borderRadius: BorderRadius.circular(28),
+          border: Border.all(color: const Color(0xFFFF4444).withAlpha(100)),
+          boxShadow: [
+            BoxShadow(
               color: const Color(0xFFFF4444).withAlpha(20),
               blurRadius: 24,
-              spreadRadius: -6)
-        ],
-      ),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Container(
-          padding: const EdgeInsets.all(20),
-          decoration: const BoxDecoration(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-          ),
-          child: Row(children: [
+              spreadRadius: -6,
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ── Header ──────────────────────────────────────────────────────
             Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: const Color(0xFFFF4444).withAlpha(20),
-                border: Border.all(
-                    color: const Color(0xFFFF4444).withAlpha(80), width: 2),
+              padding: const EdgeInsets.all(20),
+              decoration: const BoxDecoration(
+                borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
               ),
-              child: const Center(
-                  child: Icon(Icons.warning_amber_rounded,
-                      color: Color(0xFFFF4444), size: 24)),
+              child: Row(
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: const Color(0xFFFF4444).withAlpha(20),
+                      border: Border.all(
+                        color: const Color(0xFFFF4444).withAlpha(80),
+                        width: 2,
+                      ),
+                    ),
+                    child: const Center(
+                      child: Icon(
+                        Icons.warning_amber_rounded,
+                        color: Color(0xFFFF4444),
+                        size: 24,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Ficaste exposto!',
+                          style: GoogleFonts.syne(
+                            color: const Color(0xFFFF4444),
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        Text(
+                          'A tua voz foi capturada pelo atacante',
+                          style: GoogleFonts.inter(
+                            color: Colors.white38,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(width: 14),
-            Expanded(
+
+            // ── Banner IA ────────────────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 14),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFF4444).withAlpha(12),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: const Color(0xFFFF4444).withAlpha(40),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.smart_toy_outlined,
+                      color: Color(0xFF3B82F6),
+                      size: 14,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        '$callerName usou voz clonada por IA para parecer legítimo',
+                        style: GoogleFonts.inter(
+                          color: const Color(0xFFFF6B6B),
+                          fontSize: 11,
+                          height: 1.4,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // ── PORQUÊ É VISHING? ────────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF1C0A0A), Color(0xFF0A0E14)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: const Color(0xFFFF4444).withAlpha(50),
+                  ),
+                ),
                 child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                  Text('Ficaste exposto!',
-                      style: GoogleFonts.syne(
-                          color: const Color(0xFFFF4444),
-                          fontSize: 16,
-                          fontWeight: FontWeight.w800)),
-                  Text('A voz clonada por IA manipulou a conversa',
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.quiz_outlined,
+                          color: Color(0xFFFF4444),
+                          size: 14,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'PORQUÊ É VISHING?',
+                          style: GoogleFonts.jetBrainsMono(
+                            color: const Color(0xFFFF4444),
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 1.2,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Sinais de alerta desta chamada',
                       style: GoogleFonts.inter(
-                          color: Colors.white38, fontSize: 11)),
-                ])),
-          ]),
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 14),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: const Color(0xFFFF4444).withAlpha(12),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: const Color(0xFFFF4444).withAlpha(40)),
+                        color: Colors.white30,
+                        fontSize: 11,
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+
+                    // Flags automáticas
+                    ...autoFlags.map((f) => _VishFlagRow(flag: f)),
+
+                    // Flags do backend (se existirem)
+                    if (redFlags.isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      Container(
+                        height: 1,
+                        color: const Color(0xFFFF4444).withAlpha(20),
+                      ),
+                      const SizedBox(height: 8),
+                      ...redFlags.map(
+                        (flag) => Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                '⚠ ',
+                                style: TextStyle(
+                                  color: Color(0xFFFF4444),
+                                  fontSize: 11,
+                                ),
+                              ),
+                              Expanded(
+                                child: Text(
+                                  flag,
+                                  style: GoogleFonts.inter(
+                                    color: Colors.white54,
+                                    fontSize: 11,
+                                    height: 1.4,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+
+                    // Explicação do backend
+                    if (explanation.isNotEmpty) ...[
+                      const SizedBox(height: 12),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFFCC00).withAlpha(8),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: const Color(0xFFFFCC00).withAlpha(30),
+                          ),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(
+                              Icons.lightbulb_outline,
+                              color: Color(0xFFFFCC00),
+                              size: 13,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                explanation,
+                                style: GoogleFonts.inter(
+                                  color: const Color(0xFFFFCC00).withAlpha(200),
+                                  fontSize: 11.5,
+                                  height: 1.5,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
             ),
-            child: Row(children: [
-              const Icon(Icons.smart_toy_outlined,
-                  color: Color(0xFF3B82F6), size: 14),
-              const SizedBox(width: 8),
-              Expanded(
-                  child: Text(
-                '$callerName usou voz clonada por IA para parecer legítimo',
-                style: GoogleFonts.inter(
-                    color: const Color(0xFFFF6B6B), fontSize: 11, height: 1.4),
-              )),
-            ]),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-          child: Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: const Color(0xFF0A0E14),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: const Color(0xFFFF4444).withAlpha(30)),
+
+            // ── Como te protegeres ───────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+              child: Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF0D1520),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: Colors.white.withAlpha(12)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.shield_outlined,
+                          color: Color(0xFF00FF88),
+                          size: 14,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Como te protegeres',
+                          style: GoogleFonts.syne(
+                            color: const Color(0xFF00FF88),
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    _ProtectStep(
+                      '1',
+                      'Desliga e liga tu para o número oficial da instituição',
+                      const Color(0xFF00FF88),
+                    ),
+                    _ProtectStep(
+                      '2',
+                      'Nunca dês dados pessoais ao telefone — nenhum banco pede assim',
+                      const Color(0xFF00C853),
+                    ),
+                    _ProtectStep(
+                      '3',
+                      'Denuncia à CNCS (cncs.gov.pt) ou à GNR/PSP',
+                      const Color(0xFF00FF88),
+                    ),
+                    _ProtectStep(
+                      '4',
+                      'Bloqueia o número e partilha com contactos',
+                      const Color(0xFF00C853),
+                    ),
+                  ],
+                ),
+              ),
             ),
-            child:
-                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text('Transcrição Completa',
-                  style: GoogleFonts.jetBrainsMono(
-                      color: const Color(0xFFFF4444),
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700)),
-              const SizedBox(height: 10),
-              ...scriptLines.map((line) => Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
+
+            // ── Transcrição ──────────────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              child: Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF0A0E14),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: const Color(0xFFFF4444).withAlpha(30),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.record_voice_over_outlined,
+                          color: Color(0xFFFF4444),
+                          size: 13,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Transcrição do script',
+                          style: GoogleFonts.jetBrainsMono(
+                            color: const Color(0xFFFF4444),
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    ...scriptLines.map(
+                      (line) => Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
                               width: 4,
                               height: 4,
                               margin: const EdgeInsets.only(top: 6, right: 8),
                               decoration: const BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Color(0xFFFF4444))),
-                          Expanded(
-                              child: Text('"$line"',
-                                  style: GoogleFonts.inter(
-                                      color: Colors.white60,
-                                      fontSize: 12,
-                                      height: 1.4,
-                                      fontStyle: FontStyle.italic))),
-                        ]),
-                  )),
-            ]),
-          ),
+                                shape: BoxShape.circle,
+                                color: Color(0xFFFF4444),
+                              ),
+                            ),
+                            Expanded(
+                              child: Text(
+                                '"$line"',
+                                style: GoogleFonts.inter(
+                                  color: Colors.white60,
+                                  fontSize: 12,
+                                  height: 1.4,
+                                  fontStyle: FontStyle.italic,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 4),
+          ],
         ),
-        const SizedBox(height: 4),
-      ]),
+      ),
     );
   }
 }
@@ -4504,37 +6040,43 @@ class _PhoneActionButton extends StatelessWidget {
   final Color color;
   final VoidCallback onTap;
 
-  const _PhoneActionButton(
-      {required this.icon,
-      required this.label,
-      required this.color,
-      required this.onTap});
+  const _PhoneActionButton({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onTap,
+  });
 
   @override
-  Widget build(BuildContext context) =>
-      Column(mainAxisSize: MainAxisSize.min, children: [
-        GestureDetector(
-          onTap: onTap,
-          child: Container(
-            width: 68,
-            height: 68,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: color,
-              boxShadow: [
-                BoxShadow(
-                    color: color.withAlpha(80),
-                    blurRadius: 20,
-                    spreadRadius: -4)
-              ],
-            ),
-            child: Icon(icon, color: Colors.white, size: 30),
+  Widget build(BuildContext context) => Column(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      GestureDetector(
+        onTap: onTap,
+        child: Container(
+          width: 68,
+          height: 68,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: color,
+            boxShadow: [
+              BoxShadow(
+                color: color.withAlpha(80),
+                blurRadius: 20,
+                spreadRadius: -4,
+              ),
+            ],
           ),
+          child: Icon(icon, color: Colors.white, size: 30),
         ),
-        const SizedBox(height: 8),
-        Text(label,
-            style: GoogleFonts.inter(color: Colors.white54, fontSize: 12)),
-      ]);
+      ),
+      const SizedBox(height: 8),
+      Text(
+        label,
+        style: GoogleFonts.inter(color: Colors.white54, fontSize: 12),
+      ),
+    ],
+  );
 }
 
 class _VishStep extends StatelessWidget {
@@ -4543,29 +6085,144 @@ class _VishStep extends StatelessWidget {
   const _VishStep(this.step, this.label, this.color);
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.only(bottom: 8),
-        child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Container(
-            width: 20,
-            height: 20,
-            decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: color.withAlpha(25),
-                border: Border.all(color: color.withAlpha(70))),
-            child: Center(
-                child: Text(step,
-                    style: GoogleFonts.jetBrainsMono(
-                        color: color,
-                        fontSize: 9,
-                        fontWeight: FontWeight.w700))),
+    padding: const EdgeInsets.only(bottom: 8),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 20,
+          height: 20,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: color.withAlpha(25),
+            border: Border.all(color: color.withAlpha(70)),
           ),
+          child: Center(
+            child: Text(
+              step,
+              style: GoogleFonts.jetBrainsMono(
+                color: color,
+                fontSize: 9,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            label,
+            style: GoogleFonts.inter(
+              color: Colors.white54,
+              fontSize: 11,
+              height: 1.4,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+// ─── _VishFlag data model ─────────────────────────────────────────────────────
+
+class _VishFlag {
+  final String emoji, title, desc;
+  final Color color;
+  const _VishFlag(this.emoji, this.title, this.desc, this.color);
+}
+
+// ─── _VishFlagRow ─────────────────────────────────────────────────────────────
+
+class _VishFlagRow extends StatelessWidget {
+  final _VishFlag flag;
+  const _VishFlagRow({required this.flag});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(flag.emoji, style: const TextStyle(fontSize: 16)),
           const SizedBox(width: 10),
           Expanded(
-              child: Text(label,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  flag.title,
+                  style: GoogleFonts.syne(
+                    color: flag.color,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  flag.desc,
                   style: GoogleFonts.inter(
-                      color: Colors.white54, fontSize: 11, height: 1.4))),
-        ]),
-      );
+                    color: Colors.white54,
+                    fontSize: 11,
+                    height: 1.4,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── _ProtectStep ─────────────────────────────────────────────────────────────
+
+class _ProtectStep extends StatelessWidget {
+  final String step, label;
+  final Color color;
+  const _ProtectStep(this.step, this.label, this.color);
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(bottom: 8),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 18,
+          height: 18,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: color.withAlpha(25),
+            border: Border.all(color: color.withAlpha(70)),
+          ),
+          child: Center(
+            child: Text(
+              step,
+              style: GoogleFonts.jetBrainsMono(
+                color: color,
+                fontSize: 8,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            label,
+            style: GoogleFonts.inter(
+              color: Colors.white54,
+              fontSize: 11,
+              height: 1.4,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
 }
 
 class _TypingDots extends StatefulWidget {
@@ -4582,8 +6239,9 @@ class _TypingDotsState extends State<_TypingDots>
   void initState() {
     super.initState();
     _ctrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 900))
-      ..repeat();
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    )..repeat();
   }
 
   @override
@@ -4594,31 +6252,36 @@ class _TypingDotsState extends State<_TypingDots>
 
   @override
   Widget build(BuildContext context) => AnimatedBuilder(
-        animation: _ctrl,
-        builder: (_, __) => Row(
-            mainAxisSize: MainAxisSize.min,
-            children: List.generate(3, (i) {
-              final delay = i / 3;
-              final t = (_ctrl.value - delay).clamp(0.0, 1.0);
-              final scale = 0.5 + 0.5 * sin(t * pi);
-              return Container(
-                margin: const EdgeInsets.symmetric(horizontal: 3),
-                width: 8 * scale,
-                height: 8 * scale,
-                decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: widget.color.withOpacity(0.4 + 0.6 * scale)),
-              );
-            })),
-      );
+    animation: _ctrl,
+    builder: (_, __) => Row(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(3, (i) {
+        final delay = i / 3;
+        final t = (_ctrl.value - delay).clamp(0.0, 1.0);
+        final scale = 0.5 + 0.5 * sin(t * pi);
+        return Container(
+          margin: const EdgeInsets.symmetric(horizontal: 3),
+          width: 8 * scale,
+          height: 8 * scale,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: widget.color.withOpacity(0.4 + 0.6 * scale),
+          ),
+        );
+      }),
+    ),
+  );
 }
 
 class _SearchCard extends StatefulWidget {
   final Map<String, dynamic> scenario;
   final bool revealed;
   final Color color;
-  const _SearchCard(
-      {required this.scenario, required this.revealed, required this.color});
+  const _SearchCard({
+    required this.scenario,
+    required this.revealed,
+    required this.color,
+  });
   @override
   State<_SearchCard> createState() => _SearchCardState();
 }
@@ -4632,8 +6295,9 @@ class _SearchCardState extends State<_SearchCard>
   void initState() {
     super.initState();
     _blink = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 1600))
-      ..repeat(reverse: true);
+      vsync: this,
+      duration: const Duration(milliseconds: 1600),
+    )..repeat(reverse: true);
   }
 
   @override
@@ -4652,408 +6316,572 @@ class _SearchCardState extends State<_SearchCard>
         s['total_results'] as String? ?? 'Cerca de 4 230 000 resultados';
     final elapsed = s['search_time_ms'] as String? ?? '0,43 segundos';
 
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Container(
-        decoration: BoxDecoration(
-          color: const Color(0xFF202124),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFF202124),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
               color: widget.revealed
                   ? widget.color.withAlpha(90)
-                  : Colors.white.withAlpha(14)),
-          boxShadow: [
-            BoxShadow(
+                  : Colors.white.withAlpha(14),
+            ),
+            boxShadow: [
+              BoxShadow(
                 color: Colors.black.withAlpha(60),
                 blurRadius: 18,
-                spreadRadius: -4)
-          ],
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: Column(children: [
-          Container(
-            height: 34,
-            color: const Color(0xFF292A2D),
-            child: Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
-              const SizedBox(width: 8),
-              Container(
-                constraints: const BoxConstraints(maxWidth: 180),
-                padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-                decoration: const BoxDecoration(
-                  color: Color(0xFF35363A),
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
-                ),
-                child: Row(mainAxisSize: MainAxisSize.min, children: [
-                  const Icon(Icons.language, size: 10, color: Colors.white38),
-                  const SizedBox(width: 5),
-                  Flexible(
-                      child: Text(
-                    query.length > 20 ? '${query.substring(0, 20)}…' : query,
-                    style:
-                        GoogleFonts.inter(color: Colors.white60, fontSize: 10),
-                    overflow: TextOverflow.ellipsis,
-                  )),
-                  const SizedBox(width: 6),
-                  const Icon(Icons.close, size: 9, color: Colors.white38),
-                ]),
+                spreadRadius: -4,
               ),
-              Container(
-                margin: const EdgeInsets.fromLTRB(2, 6, 0, 2),
-                width: 22,
-                height: 22,
-                decoration: BoxDecoration(
-                  color: Colors.white.withAlpha(8),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: const Icon(Icons.add, size: 11, color: Colors.white38),
-              ),
-            ]),
+            ],
           ),
-          Container(
-            height: 38,
-            color: const Color(0xFF35363A),
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Row(children: [
-              _NavBtn(Icons.arrow_back, enabled: false),
-              _NavBtn(Icons.arrow_forward, enabled: false),
-              _NavBtn(Icons.refresh, enabled: true),
-              const SizedBox(width: 4),
-              Expanded(
-                child: Container(
-                  height: 26,
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF202124),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Row(children: [
-                    Icon(Icons.lock,
-                        size: 10,
-                        color: widget.revealed
-                            ? const Color(0xFF5CB85C)
-                            : Colors.white38),
-                    const SizedBox(width: 5),
+          clipBehavior: Clip.antiAlias,
+          child: Column(
+            children: [
+              Container(
+                height: 34,
+                color: const Color(0xFF292A2D),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    const SizedBox(width: 8),
+                    Container(
+                      constraints: const BoxConstraints(maxWidth: 180),
+                      padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF35363A),
+                        borderRadius: BorderRadius.vertical(
+                          top: Radius.circular(8),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.language,
+                            size: 10,
+                            color: Colors.white38,
+                          ),
+                          const SizedBox(width: 5),
+                          Flexible(
+                            child: Text(
+                              query.length > 20
+                                  ? '${query.substring(0, 20)}…'
+                                  : query,
+                              style: GoogleFonts.inter(
+                                color: Colors.white60,
+                                fontSize: 10,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          const Icon(
+                            Icons.close,
+                            size: 9,
+                            color: Colors.white38,
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      margin: const EdgeInsets.fromLTRB(2, 6, 0, 2),
+                      width: 22,
+                      height: 22,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withAlpha(8),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: const Icon(
+                        Icons.add,
+                        size: 11,
+                        color: Colors.white38,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                height: 38,
+                color: const Color(0xFF35363A),
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Row(
+                  children: [
+                    _NavBtn(Icons.arrow_back, enabled: false),
+                    _NavBtn(Icons.arrow_forward, enabled: false),
+                    _NavBtn(Icons.refresh, enabled: true),
+                    const SizedBox(width: 4),
                     Expanded(
-                        child: Text(
-                      'google.com/search?q=${Uri.encodeComponent(query)}',
-                      style: GoogleFonts.jetBrainsMono(
-                          color: Colors.white54, fontSize: 8.5),
-                      overflow: TextOverflow.ellipsis,
-                    )),
-                    const Icon(Icons.star_border,
-                        size: 11, color: Colors.white38),
-                  ]),
-                ),
-              ),
-              const SizedBox(width: 4),
-              _NavBtn(Icons.more_vert, enabled: true),
-            ]),
-          ),
-          Container(
-            color: Colors.white,
-            child:
-                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(14, 12, 14, 0),
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(mainAxisSize: MainAxisSize.min, children: [
-                        _GL('G', 0xFF4285F4),
-                        _GL('o', 0xFFEA4335),
-                        _GL('o', 0xFFFBBC05),
-                        _GL('g', 0xFF4285F4),
-                        _GL('l', 0xFF34A853),
-                        _GL('e', 0xFFEA4335),
-                      ]),
-                      const SizedBox(height: 10),
-                      Container(
-                        height: 38,
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Container(
+                        height: 26,
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
                         decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: const Color(0xFFDFE1E5)),
-                          boxShadow: [
-                            BoxShadow(
-                                color: Colors.black.withAlpha(14),
-                                blurRadius: 5,
-                                offset: const Offset(0, 2))
+                          color: const Color(0xFF202124),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.lock,
+                              size: 10,
+                              color: widget.revealed
+                                  ? const Color(0xFF5CB85C)
+                                  : Colors.white38,
+                            ),
+                            const SizedBox(width: 5),
+                            Expanded(
+                              child: Text(
+                                'google.com/search?q=${Uri.encodeComponent(query)}',
+                                style: GoogleFonts.jetBrainsMono(
+                                  color: Colors.white54,
+                                  fontSize: 8.5,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            const Icon(
+                              Icons.star_border,
+                              size: 11,
+                              color: Colors.white38,
+                            ),
                           ],
                         ),
-                        child: Row(children: [
-                          const Icon(Icons.search,
-                              color: Color(0xFF4285F4), size: 17),
-                          const SizedBox(width: 8),
-                          Expanded(
-                              child: Text(query,
-                                  style: const TextStyle(
-                                      color: Color(0xFF202124), fontSize: 13),
-                                  overflow: TextOverflow.ellipsis)),
-                          const Icon(Icons.mic,
-                              color: Color(0xFF4285F4), size: 17),
-                          const SizedBox(width: 8),
-                          const Icon(Icons.image_search,
-                              color: Color(0xFF34A853), size: 17),
-                        ]),
                       ),
-                      const SizedBox(height: 8),
-                      SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(children: [
-                          _STab('Todos', true),
-                          _STab('Imagens', false),
-                          _STab('Vídeos', false),
-                          _STab('Notícias', false),
-                          _STab('Shopping', false),
-                        ]),
-                      ),
-                    ]),
-              ),
-              Divider(height: 1, thickness: 1, color: const Color(0xFFDFE1E5)),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(14, 6, 14, 0),
-                child: Row(children: [
-                  Expanded(
-                      child: Text('$totalHits ($elapsed)',
-                          style: const TextStyle(
-                              color: Color(0xFF70757A), fontSize: 10),
-                          overflow: TextOverflow.ellipsis)),
-                  if (widget.revealed)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 7, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFF4444).withAlpha(14),
-                        borderRadius: BorderRadius.circular(4),
-                        border: Border.all(
-                            color: const Color(0xFFFF4444).withAlpha(60)),
-                      ),
-                      child: Row(mainAxisSize: MainAxisSize.min, children: [
-                        const Icon(Icons.warning_amber_rounded,
-                            size: 9, color: Color(0xFFFF4444)),
-                        const SizedBox(width: 3),
-                        Text(_attackLabel(attackType),
-                            style: const TextStyle(
-                                color: Color(0xFFFF4444), fontSize: 9)),
-                      ]),
                     ),
-                ]),
+                    const SizedBox(width: 4),
+                    _NavBtn(Icons.more_vert, enabled: true),
+                  ],
+                ),
               ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(14, 8, 14, 14),
+              Container(
+                color: Colors.white,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: results.asMap().entries.map((e) {
-                    final i = e.key;
-                    final r = e.value;
-                    final malicious = r['is_malicious'] as bool? ?? false;
-                    final isAd = r['is_ad'] as bool? ?? false;
-                    final isSponsored = r['is_sponsored'] as bool? ?? false;
-                    final badge = r['badge'] as String?;
-                    final rating = r['rating'] as double?;
-                    final sitelinks =
-                        (r['sitelinks'] as List?)?.cast<String>() ?? [];
-                    final clues =
-                        (r['threat_clues'] as List?)?.cast<String>() ?? [];
-                    final showThreat = widget.revealed && malicious;
-                    final tapped = _tapped == i;
-
-                    return GestureDetector(
-                      onTap: () => setState(() => _tapped = tapped ? -1 : i),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 180),
-                        margin: const EdgeInsets.only(bottom: 16),
-                        padding: showThreat
-                            ? const EdgeInsets.all(9)
-                            : (tapped
-                                ? const EdgeInsets.all(6)
-                                : EdgeInsets.zero),
-                        decoration: showThreat
-                            ? BoxDecoration(
-                                color: const Color(0xFFFF4444).withAlpha(8),
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(
-                                    color:
-                                        const Color(0xFFFF4444).withAlpha(55)))
-                            : (tapped
-                                ? BoxDecoration(
-                                    color: const Color(0xFFF8F9FA),
-                                    borderRadius: BorderRadius.circular(6))
-                                : null),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (isAd || isSponsored || badge != null)
-                              Padding(
-                                padding: const EdgeInsets.only(bottom: 3),
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 5, vertical: 1),
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                        color: showThreat
-                                            ? const Color(0xFFFF4444)
-                                            : const Color(0xFF70757A)),
-                                    borderRadius: BorderRadius.circular(3),
-                                  ),
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(14, 12, 14, 0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              _GL('G', 0xFF4285F4),
+                              _GL('o', 0xFFEA4335),
+                              _GL('o', 0xFFFBBC05),
+                              _GL('g', 0xFF4285F4),
+                              _GL('l', 0xFF34A853),
+                              _GL('e', 0xFFEA4335),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          Container(
+                            height: 38,
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: const Color(0xFFDFE1E5),
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withAlpha(14),
+                                  blurRadius: 5,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.search,
+                                  color: Color(0xFF4285F4),
+                                  size: 17,
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
                                   child: Text(
-                                    isSponsored
-                                        ? 'Patrocinado'
-                                        : isAd
-                                            ? 'Anúncio'
-                                            : badge!,
-                                    style: TextStyle(
-                                        fontSize: 9,
-                                        color: showThreat
-                                            ? const Color(0xFFFF4444)
-                                            : const Color(0xFF70757A)),
+                                    query,
+                                    style: const TextStyle(
+                                      color: Color(0xFF202124),
+                                      fontSize: 13,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
-                              ),
-                            Row(children: [
-                              Container(
-                                width: 14,
-                                height: 14,
-                                margin: const EdgeInsets.only(right: 5),
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: showThreat
-                                      ? const Color(0xFFFF4444).withAlpha(18)
-                                      : const Color(0xFFE8F0FE),
+                                const Icon(
+                                  Icons.mic,
+                                  color: Color(0xFF4285F4),
+                                  size: 17,
                                 ),
-                                child: Icon(Icons.language,
-                                    size: 8,
-                                    color: showThreat
-                                        ? const Color(0xFFFF4444)
-                                        : const Color(0xFF4285F4)),
-                              ),
-                              Expanded(
-                                child: Text(r['url'] as String? ?? '',
-                                    style: TextStyle(
-                                        color: showThreat
-                                            ? const Color(0xFFCC3300)
-                                            : const Color(0xFF202124),
-                                        fontSize: 11),
-                                    overflow: TextOverflow.ellipsis),
-                              ),
-                              if (showThreat)
-                                AnimatedBuilder(
-                                  animation: _blink,
-                                  builder: (_, __) => Icon(
-                                      Icons.warning_amber_rounded,
-                                      size: 12,
-                                      color: Color.lerp(
-                                          const Color(0xFFFF4444),
-                                          const Color(0xFFFF8888),
-                                          _blink.value)),
+                                const SizedBox(width: 8),
+                                const Icon(
+                                  Icons.image_search,
+                                  color: Color(0xFF34A853),
+                                  size: 17,
                                 ),
-                            ]),
-                            const SizedBox(height: 2),
-                            Text(r['title'] as String? ?? '',
-                                style: TextStyle(
-                                    color: showThreat
-                                        ? const Color(0xFFCC0000)
-                                        : const Color(0xFF1558D6),
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w400,
-                                    decoration: TextDecoration.underline,
-                                    decorationColor: showThreat
-                                        ? const Color(0xFFCC0000)
-                                        : const Color(0xFF1558D6)),
-                                overflow: TextOverflow.ellipsis),
-                            const SizedBox(height: 3),
-                            Text(r['description'] as String? ?? '',
-                                style: const TextStyle(
-                                    color: Color(0xFF4D5156),
-                                    fontSize: 12,
-                                    height: 1.4),
-                                maxLines: 3,
-                                overflow: TextOverflow.ellipsis),
-                            if (rating != null) ...[
-                              const SizedBox(height: 4),
-                              Row(children: [
-                                ...List.generate(
-                                    5,
-                                    (s) => Icon(
-                                        s < rating.floor()
-                                            ? Icons.star
-                                            : Icons.star_border,
-                                        size: 11,
-                                        color: const Color(0xFFFBBC05))),
-                                const SizedBox(width: 4),
-                                Text(rating.toStringAsFixed(1),
-                                    style: const TextStyle(
-                                        color: Color(0xFF70757A),
-                                        fontSize: 10)),
-                              ]),
-                            ],
-                            if (sitelinks.isNotEmpty && !showThreat) ...[
-                              const SizedBox(height: 5),
-                              Wrap(
-                                  spacing: 10,
-                                  children: sitelinks
-                                      .map((sl) => Text(sl,
-                                          style: const TextStyle(
-                                              color: Color(0xFF1558D6),
-                                              fontSize: 11,
-                                              decoration:
-                                                  TextDecoration.underline)))
-                                      .toList()),
-                            ],
-                            if (showThreat) ...[
-                              const SizedBox(height: 6),
-                              if (clues.isEmpty)
-                                Row(children: const [
-                                  Icon(Icons.warning_amber_rounded,
-                                      color: Color(0xFFFF4444), size: 11),
-                                  SizedBox(width: 4),
-                                  Flexible(
-                                      child: Text(
-                                          'Domínio falso — dados em risco',
-                                          style: TextStyle(
-                                              color: Color(0xFFFF4444),
-                                              fontSize: 10))),
-                                ])
-                              else
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: clues
-                                      .map((c) => Padding(
-                                            padding: const EdgeInsets.only(
-                                                bottom: 2),
-                                            child: Row(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  const Text('✗ ',
-                                                      style: TextStyle(
-                                                          color:
-                                                              Color(0xFFFF4444),
-                                                          fontSize: 10)),
-                                                  Expanded(
-                                                      child: Text(c,
-                                                          style: const TextStyle(
-                                                              color: Color(
-                                                                  0xFFFF4444),
-                                                              fontSize: 9,
-                                                              height: 1.3))),
-                                                ]),
-                                          ))
-                                      .toList(),
-                                ),
-                            ],
-                          ],
-                        ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              children: [
+                                _STab('Todos', true),
+                                _STab('Imagens', false),
+                                _STab('Vídeos', false),
+                                _STab('Notícias', false),
+                                _STab('Shopping', false),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
-                    );
-                  }).toList(),
+                    ),
+                    Divider(
+                      height: 1,
+                      thickness: 1,
+                      color: const Color(0xFFDFE1E5),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(14, 6, 14, 0),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              '$totalHits ($elapsed)',
+                              style: const TextStyle(
+                                color: Color(0xFF70757A),
+                                fontSize: 10,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (widget.revealed)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 7,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFF4444).withAlpha(14),
+                                borderRadius: BorderRadius.circular(4),
+                                border: Border.all(
+                                  color: const Color(0xFFFF4444).withAlpha(60),
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(
+                                    Icons.warning_amber_rounded,
+                                    size: 9,
+                                    color: Color(0xFFFF4444),
+                                  ),
+                                  const SizedBox(width: 3),
+                                  Text(
+                                    _attackLabel(attackType),
+                                    style: const TextStyle(
+                                      color: Color(0xFFFF4444),
+                                      fontSize: 9,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(14, 8, 14, 14),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: results.asMap().entries.map((e) {
+                          final i = e.key;
+                          final r = e.value;
+                          final malicious = r['is_malicious'] as bool? ?? false;
+                          final isAd = r['is_ad'] as bool? ?? false;
+                          final isSponsored =
+                              r['is_sponsored'] as bool? ?? false;
+                          final badge = r['badge'] as String?;
+                          final rating = r['rating'] as double?;
+                          final sitelinks =
+                              (r['sitelinks'] as List?)?.cast<String>() ?? [];
+                          final clues =
+                              (r['threat_clues'] as List?)?.cast<String>() ??
+                              [];
+                          final showThreat = widget.revealed && malicious;
+                          final tapped = _tapped == i;
+
+                          return GestureDetector(
+                            onTap: () =>
+                                setState(() => _tapped = tapped ? -1 : i),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 180),
+                              margin: const EdgeInsets.only(bottom: 16),
+                              padding: showThreat
+                                  ? const EdgeInsets.all(9)
+                                  : (tapped
+                                        ? const EdgeInsets.all(6)
+                                        : EdgeInsets.zero),
+                              decoration: showThreat
+                                  ? BoxDecoration(
+                                      color: const Color(
+                                        0xFFFF4444,
+                                      ).withAlpha(8),
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(
+                                        color: const Color(
+                                          0xFFFF4444,
+                                        ).withAlpha(55),
+                                      ),
+                                    )
+                                  : (tapped
+                                        ? BoxDecoration(
+                                            color: const Color(0xFFF8F9FA),
+                                            borderRadius: BorderRadius.circular(
+                                              6,
+                                            ),
+                                          )
+                                        : null),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  if (isAd || isSponsored || badge != null)
+                                    Padding(
+                                      padding: const EdgeInsets.only(bottom: 3),
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 5,
+                                          vertical: 1,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          border: Border.all(
+                                            color: showThreat
+                                                ? const Color(0xFFFF4444)
+                                                : const Color(0xFF70757A),
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            3,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          isSponsored
+                                              ? 'Patrocinado'
+                                              : isAd
+                                              ? 'Anúncio'
+                                              : badge!,
+                                          style: TextStyle(
+                                            fontSize: 9,
+                                            color: showThreat
+                                                ? const Color(0xFFFF4444)
+                                                : const Color(0xFF70757A),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  Row(
+                                    children: [
+                                      Container(
+                                        width: 14,
+                                        height: 14,
+                                        margin: const EdgeInsets.only(right: 5),
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: showThreat
+                                              ? const Color(
+                                                  0xFFFF4444,
+                                                ).withAlpha(18)
+                                              : const Color(0xFFE8F0FE),
+                                        ),
+                                        child: Icon(
+                                          Icons.language,
+                                          size: 8,
+                                          color: showThreat
+                                              ? const Color(0xFFFF4444)
+                                              : const Color(0xFF4285F4),
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: Text(
+                                          r['url'] as String? ?? '',
+                                          style: TextStyle(
+                                            color: showThreat
+                                                ? const Color(0xFFCC3300)
+                                                : const Color(0xFF202124),
+                                            fontSize: 11,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      if (showThreat)
+                                        AnimatedBuilder(
+                                          animation: _blink,
+                                          builder: (_, __) => Icon(
+                                            Icons.warning_amber_rounded,
+                                            size: 12,
+                                            color: Color.lerp(
+                                              const Color(0xFFFF4444),
+                                              const Color(0xFFFF8888),
+                                              _blink.value,
+                                            ),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    r['title'] as String? ?? '',
+                                    style: TextStyle(
+                                      color: showThreat
+                                          ? const Color(0xFFCC0000)
+                                          : const Color(0xFF1558D6),
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w400,
+                                      decoration: TextDecoration.underline,
+                                      decorationColor: showThreat
+                                          ? const Color(0xFFCC0000)
+                                          : const Color(0xFF1558D6),
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 3),
+                                  Text(
+                                    r['description'] as String? ?? '',
+                                    style: const TextStyle(
+                                      color: Color(0xFF4D5156),
+                                      fontSize: 12,
+                                      height: 1.4,
+                                    ),
+                                    maxLines: 3,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  if (rating != null) ...[
+                                    const SizedBox(height: 4),
+                                    Row(
+                                      children: [
+                                        ...List.generate(
+                                          5,
+                                          (s) => Icon(
+                                            s < rating.floor()
+                                                ? Icons.star
+                                                : Icons.star_border,
+                                            size: 11,
+                                            color: const Color(0xFFFBBC05),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          rating.toStringAsFixed(1),
+                                          style: const TextStyle(
+                                            color: Color(0xFF70757A),
+                                            fontSize: 10,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                  if (sitelinks.isNotEmpty && !showThreat) ...[
+                                    const SizedBox(height: 5),
+                                    Wrap(
+                                      spacing: 10,
+                                      children: sitelinks
+                                          .map(
+                                            (sl) => Text(
+                                              sl,
+                                              style: const TextStyle(
+                                                color: Color(0xFF1558D6),
+                                                fontSize: 11,
+                                                decoration:
+                                                    TextDecoration.underline,
+                                              ),
+                                            ),
+                                          )
+                                          .toList(),
+                                    ),
+                                  ],
+                                  if (showThreat) ...[
+                                    const SizedBox(height: 6),
+                                    if (clues.isEmpty)
+                                      Row(
+                                        children: const [
+                                          Icon(
+                                            Icons.warning_amber_rounded,
+                                            color: Color(0xFFFF4444),
+                                            size: 11,
+                                          ),
+                                          SizedBox(width: 4),
+                                          Flexible(
+                                            child: Text(
+                                              'Domínio falso — dados em risco',
+                                              style: TextStyle(
+                                                color: Color(0xFFFF4444),
+                                                fontSize: 10,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      )
+                                    else
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: clues
+                                            .map(
+                                              (c) => Padding(
+                                                padding: const EdgeInsets.only(
+                                                  bottom: 2,
+                                                ),
+                                                child: Row(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    const Text(
+                                                      '✗ ',
+                                                      style: TextStyle(
+                                                        color: Color(
+                                                          0xFFFF4444,
+                                                        ),
+                                                        fontSize: 10,
+                                                      ),
+                                                    ),
+                                                    Expanded(
+                                                      child: Text(
+                                                        c,
+                                                        style: const TextStyle(
+                                                          color: Color(
+                                                            0xFFFF4444,
+                                                          ),
+                                                          fontSize: 9,
+                                                          height: 1.3,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            )
+                                            .toList(),
+                                      ),
+                                  ],
+                                ],
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ]),
+            ],
           ),
-        ]),
-      ),
-    ]);
+        ),
+      ],
+    );
   }
 
   String _attackLabel(String t) {
@@ -5076,10 +6904,13 @@ class _NavBtn extends StatelessWidget {
   const _NavBtn(this.icon, {required this.enabled});
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 2),
-        child: Icon(icon,
-            size: 14, color: enabled ? Colors.white54 : Colors.white24),
-      );
+    padding: const EdgeInsets.symmetric(horizontal: 2),
+    child: Icon(
+      icon,
+      size: 14,
+      color: enabled ? Colors.white54 : Colors.white24,
+    ),
+  );
 }
 
 class _GL extends StatelessWidget {
@@ -5087,9 +6918,14 @@ class _GL extends StatelessWidget {
   final int c;
   const _GL(this.l, this.c);
   @override
-  Widget build(BuildContext context) => Text(l,
-      style: TextStyle(
-          color: Color(c), fontSize: 20, fontWeight: FontWeight.w500));
+  Widget build(BuildContext context) => Text(
+    l,
+    style: TextStyle(
+      color: Color(c),
+      fontSize: 20,
+      fontWeight: FontWeight.w500,
+    ),
+  );
 }
 
 class _STab extends StatelessWidget {
@@ -5098,25 +6934,34 @@ class _STab extends StatelessWidget {
   const _STab(this.label, this.active);
   @override
   Widget build(BuildContext context) => Container(
-      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
-      decoration: active
-          ? const BoxDecoration(
-              border: Border(
-                  bottom: BorderSide(color: Color(0xFF1A73E8), width: 3)))
-          : null,
-      child: Text(label,
-          style: TextStyle(
-              color: active ? const Color(0xFF1A73E8) : const Color(0xFF70757A),
-              fontSize: 12,
-              fontWeight: active ? FontWeight.w600 : FontWeight.normal)));
+    padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
+    decoration: active
+        ? const BoxDecoration(
+            border: Border(
+              bottom: BorderSide(color: Color(0xFF1A73E8), width: 3),
+            ),
+          )
+        : null,
+    child: Text(
+      label,
+      style: TextStyle(
+        color: active ? const Color(0xFF1A73E8) : const Color(0xFF70757A),
+        fontSize: 12,
+        fontWeight: active ? FontWeight.w600 : FontWeight.normal,
+      ),
+    ),
+  );
 }
 
 class _AnglerCard extends StatefulWidget {
   final Map<String, dynamic> scenario;
   final bool revealed;
   final Color color;
-  const _AnglerCard(
-      {required this.scenario, required this.revealed, required this.color});
+  const _AnglerCard({
+    required this.scenario,
+    required this.revealed,
+    required this.color,
+  });
   @override
   State<_AnglerCard> createState() => _AnglerCardState();
 }
@@ -5129,8 +6974,9 @@ class _AnglerCardState extends State<_AnglerCard>
   void initState() {
     super.initState();
     _pulse = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 1200))
-      ..repeat(reverse: true);
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..repeat(reverse: true);
   }
 
   @override
@@ -5254,130 +7100,179 @@ class _AnglerCardState extends State<_AnglerCard>
         color: bg,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-            color: widget.revealed
-                ? widget.color.withAlpha(100)
-                : Colors.white.withAlpha(20)),
+          color: widget.revealed
+              ? widget.color.withAlpha(100)
+              : Colors.white.withAlpha(20),
+        ),
       ),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Container(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
-          decoration: BoxDecoration(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
+            decoration: BoxDecoration(
               color: header,
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(20))),
-          child: Row(children: [
-            Text(sym,
-                style: TextStyle(
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(20),
+              ),
+            ),
+            child: Row(
+              children: [
+                Text(
+                  sym,
+                  style: TextStyle(
                     color: accent,
                     fontSize: sym.length == 1 ? 20 : 14,
-                    fontWeight: FontWeight.bold)),
-            const SizedBox(width: 8),
-            Text(label,
-                style: GoogleFonts.inter(color: Colors.white54, fontSize: 12)),
-            const Spacer(),
-            AnimatedBuilder(
-              animation: _pulse,
-              builder: (_, __) => Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: accent.withOpacity(0.10 + _pulse.value * 0.08),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Row(mainAxisSize: MainAxisSize.min, children: [
-                  Container(
-                    width: 6,
-                    height: 6,
-                    decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: accent.withOpacity(0.55 + _pulse.value * 0.45)),
+                    fontWeight: FontWeight.bold,
                   ),
-                  const SizedBox(width: 5),
-                  Text('ao vivo',
-                      style: GoogleFonts.jetBrainsMono(
-                          color: accent, fontSize: 9)),
-                ]),
-              ),
-            ),
-          ]),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(14),
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            _SocialPost(
-              avatarLetter: origUser.replaceAll('@', '').isNotEmpty
-                  ? origUser.replaceAll('@', '')[0].toUpperCase()
-                  : 'U',
-              handle: origUser,
-              name: origUser.replaceAll('@', '').replaceAll('_', ' '),
-              body: complaint,
-              bg: bubble,
-              accent: accent,
-              reactionIcons: reactionIcons,
-              isVerified: false,
-              revealed: widget.revealed,
-              isMalicious: false,
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: Row(children: [
-                Container(
-                    width: 2, height: 18, color: Colors.white.withAlpha(30)),
-                const SizedBox(width: 10),
-                Text('resposta de conta de suporte',
-                    style: GoogleFonts.jetBrainsMono(
-                        color: widget.color,
-                        fontSize: 9,
-                        fontWeight: FontWeight.w600)),
-              ]),
-            ),
-            _SocialPost(
-              avatarLetter: brand.isNotEmpty ? brand[0].toUpperCase() : 'S',
-              handle: fakeAcc['handle'] as String? ?? '@${brand}Suporte',
-              name: fakeAcc['name'] as String? ?? '$brand Suporte',
-              body: reply,
-              link: link,
-              bg: widget.color.withAlpha(14),
-              accent: widget.color,
-              reactionIcons: reactionIcons,
-              isVerified: isVerified,
-              followers: followers,
-              createdDate: created,
-              revealed: widget.revealed,
-              isMalicious: true,
-            ),
-            if (widget.revealed) ...[
-              const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFF4444).withAlpha(10),
-                  borderRadius: BorderRadius.circular(10),
-                  border:
-                      Border.all(color: const Color(0xFFFF4444).withAlpha(50)),
                 ),
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Angler Phishing — sinais',
+                const SizedBox(width: 8),
+                Text(
+                  label,
+                  style: GoogleFonts.inter(color: Colors.white54, fontSize: 12),
+                ),
+                const Spacer(),
+                AnimatedBuilder(
+                  animation: _pulse,
+                  builder: (_, __) => Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: accent.withOpacity(0.10 + _pulse.value * 0.08),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 6,
+                          height: 6,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: accent.withOpacity(
+                              0.55 + _pulse.value * 0.45,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 5),
+                        Text(
+                          'ao vivo',
                           style: GoogleFonts.jetBrainsMono(
-                              color: const Color(0xFFFF4444),
-                              fontSize: 10,
-                              fontWeight: FontWeight.w700)),
-                      const SizedBox(height: 6),
-                      ...(_buildFlags(
-                          redFlags, followers, isVerified, created)),
-                    ]),
-              ),
-            ],
-          ]),
-        ),
-      ]),
+                            color: accent,
+                            fontSize: 9,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _SocialPost(
+                  avatarLetter: origUser.replaceAll('@', '').isNotEmpty
+                      ? origUser.replaceAll('@', '')[0].toUpperCase()
+                      : 'U',
+                  handle: origUser,
+                  name: origUser.replaceAll('@', '').replaceAll('_', ' '),
+                  body: complaint,
+                  bg: bubble,
+                  accent: accent,
+                  reactionIcons: reactionIcons,
+                  isVerified: false,
+                  revealed: widget.revealed,
+                  isMalicious: false,
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 2,
+                        height: 18,
+                        color: Colors.white.withAlpha(30),
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        'resposta de conta de suporte',
+                        style: GoogleFonts.jetBrainsMono(
+                          color: widget.color,
+                          fontSize: 9,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                _SocialPost(
+                  avatarLetter: brand.isNotEmpty ? brand[0].toUpperCase() : 'S',
+                  handle: fakeAcc['handle'] as String? ?? '@${brand}Suporte',
+                  name: fakeAcc['name'] as String? ?? '$brand Suporte',
+                  body: reply,
+                  link: link,
+                  bg: widget.color.withAlpha(14),
+                  accent: widget.color,
+                  reactionIcons: reactionIcons,
+                  isVerified: isVerified,
+                  followers: followers,
+                  createdDate: created,
+                  revealed: widget.revealed,
+                  isMalicious: true,
+                ),
+                if (widget.revealed) ...[
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFF4444).withAlpha(10),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: const Color(0xFFFF4444).withAlpha(50),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Angler Phishing — sinais',
+                          style: GoogleFonts.jetBrainsMono(
+                            color: const Color(0xFFFF4444),
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        ...(_buildFlags(
+                          redFlags,
+                          followers,
+                          isVerified,
+                          created,
+                        )),
+                      ],
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
   List<Widget> _buildFlags(
-      List<String> flags, int followers, bool verified, String created) {
+    List<String> flags,
+    int followers,
+    bool verified,
+    String created,
+  ) {
     final list = flags.isNotEmpty
         ? flags
         : [
@@ -5388,20 +7283,30 @@ class _AnglerCardState extends State<_AnglerCard>
             'Suporte legítimo nunca envia links por DM',
           ];
     return list
-        .map((c) => Padding(
-              padding: const EdgeInsets.only(bottom: 3),
-              child:
-                  Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                const Text('✗ ',
-                    style: TextStyle(color: Color(0xFFFF4444), fontSize: 10)),
+        .map(
+          (c) => Padding(
+            padding: const EdgeInsets.only(bottom: 3),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  '✗ ',
+                  style: TextStyle(color: Color(0xFFFF4444), fontSize: 10),
+                ),
                 Expanded(
-                    child: Text(c,
-                        style: const TextStyle(
-                            color: Color(0xFFFF4444),
-                            fontSize: 10,
-                            height: 1.3))),
-              ]),
-            ))
+                  child: Text(
+                    c,
+                    style: const TextStyle(
+                      color: Color(0xFFFF4444),
+                      fontSize: 10,
+                      height: 1.3,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        )
         .toList();
   }
 }
@@ -5440,83 +7345,124 @@ class _SocialPost extends StatelessWidget {
         color: bg,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-            color: showWarn
-                ? const Color(0xFFFF4444).withAlpha(80)
-                : Colors.white.withAlpha(8)),
+          color: showWarn
+              ? const Color(0xFFFF4444).withAlpha(80)
+              : Colors.white.withAlpha(8),
+        ),
       ),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: accent.withAlpha(30),
-              border: Border.all(color: accent.withAlpha(80)),
-            ),
-            child: Center(
-                child: Text(avatarLetter,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: accent.withAlpha(30),
+                  border: Border.all(color: accent.withAlpha(80)),
+                ),
+                child: Center(
+                  child: Text(
+                    avatarLetter,
                     style: TextStyle(
-                        color: accent,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700))),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-              child: Column(
+                      color: accent,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                Row(children: [
-                  Flexible(
-                      child: Text(name,
-                          style: GoogleFonts.inter(
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            name,
+                            style: GoogleFonts.inter(
                               color: Colors.white,
                               fontSize: 13,
-                              fontWeight: FontWeight.w700),
-                          overflow: TextOverflow.ellipsis)),
-                  if (isVerified) ...[
-                    const SizedBox(width: 3),
-                    Icon(Icons.verified, color: accent, size: 13),
-                  ] else if (showWarn) ...[
-                    const SizedBox(width: 3),
-                    const Icon(Icons.warning_amber_rounded,
-                        color: Color(0xFFFF4444), size: 12),
-                  ],
-                ]),
-                Text(handle,
-                    style:
-                        GoogleFonts.inter(color: Colors.white38, fontSize: 11),
-                    overflow: TextOverflow.ellipsis),
-                if (followers != null)
-                  Text('$followers seguidores',
+                              fontWeight: FontWeight.w700,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (isVerified) ...[
+                          const SizedBox(width: 3),
+                          Icon(Icons.verified, color: accent, size: 13),
+                        ] else if (showWarn) ...[
+                          const SizedBox(width: 3),
+                          const Icon(
+                            Icons.warning_amber_rounded,
+                            color: Color(0xFFFF4444),
+                            size: 12,
+                          ),
+                        ],
+                      ],
+                    ),
+                    Text(
+                      handle,
                       style: GoogleFonts.inter(
-                          color: Colors.white30, fontSize: 10)),
-              ])),
-        ]),
-        const SizedBox(height: 8),
-        Text(body,
+                        color: Colors.white38,
+                        fontSize: 11,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    if (followers != null)
+                      Text(
+                        '$followers seguidores',
+                        style: GoogleFonts.inter(
+                          color: Colors.white30,
+                          fontSize: 10,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            body,
             style: GoogleFonts.inter(
-                color: Colors.white70, fontSize: 13, height: 1.5)),
-        if (link != null && link!.isNotEmpty) ...[
-          const SizedBox(height: 6),
-          Text(link!,
+              color: Colors.white70,
+              fontSize: 13,
+              height: 1.5,
+            ),
+          ),
+          if (link != null && link!.isNotEmpty) ...[
+            const SizedBox(height: 6),
+            Text(
+              link!,
               style: TextStyle(
-                  color: showWarn ? const Color(0xFFFF4444) : accent,
-                  fontSize: 12,
-                  decoration: TextDecoration.underline,
-                  decorationColor: showWarn ? const Color(0xFFFF4444) : accent),
-              overflow: TextOverflow.ellipsis),
-        ],
-        const SizedBox(height: 8),
-        Row(
+                color: showWarn ? const Color(0xFFFF4444) : accent,
+                fontSize: 12,
+                decoration: TextDecoration.underline,
+                decorationColor: showWarn ? const Color(0xFFFF4444) : accent,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+          const SizedBox(height: 8),
+          Row(
             children: reactionIcons
                 .take(3)
-                .map((icon) => Padding(
-                      padding: const EdgeInsets.only(right: 16),
-                      child: Icon(icon, color: Colors.white38, size: 14),
-                    ))
-                .toList()),
-      ]),
+                .map(
+                  (icon) => Padding(
+                    padding: const EdgeInsets.only(right: 16),
+                    child: Icon(icon, color: Colors.white38, size: 14),
+                  ),
+                )
+                .toList(),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -5525,8 +7471,11 @@ class _WhalingCard extends StatefulWidget {
   final Map<String, dynamic> scenario;
   final bool revealed;
   final Color color;
-  const _WhalingCard(
-      {required this.scenario, required this.revealed, required this.color});
+  const _WhalingCard({
+    required this.scenario,
+    required this.revealed,
+    required this.color,
+  });
   @override
   State<_WhalingCard> createState() => _WhalingCardState();
 }
@@ -5536,8 +7485,8 @@ class _WhalingCardState extends State<_WhalingCard> {
 
   @override
   Widget build(BuildContext context) {
-    final vector =
-        (widget.scenario['attack_vector'] as String? ?? 'email').toLowerCase();
+    final vector = (widget.scenario['attack_vector'] as String? ?? 'email')
+        .toLowerCase();
     switch (vector) {
       case 'slack':
       case 'teams':
@@ -5554,17 +7503,19 @@ class _WhalingCardState extends State<_WhalingCard> {
   }
 
   BoxDecoration _outerBox(Color bg) => BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-            color: widget.revealed
-                ? widget.color.withAlpha(100)
-                : Colors.white.withAlpha(20)),
-      );
+    color: bg,
+    borderRadius: BorderRadius.circular(20),
+    border: Border.all(
+      color: widget.revealed
+          ? widget.color.withAlpha(100)
+          : Colors.white.withAlpha(20),
+    ),
+  );
 
   Widget _analysisPanel() {
     final s = widget.scenario;
-    final clues = (s['red_flags'] as List?)?.cast<String>() ??
+    final clues =
+        (s['red_flags'] as List?)?.cast<String>() ??
         (s['whaling_clues'] as List?)?.cast<String>() ??
         [
           'Pedido financeiro urgente fora dos canais normais',
@@ -5579,28 +7530,44 @@ class _WhalingCardState extends State<_WhalingCard> {
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: const Color(0xFFFF6B35).withAlpha(50)),
       ),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text('Análise Whaling',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Análise Whaling',
             style: GoogleFonts.jetBrainsMono(
-                color: const Color(0xFFFF6B35),
-                fontSize: 10,
-                fontWeight: FontWeight.w700)),
-        const SizedBox(height: 6),
-        ...clues.map((c) => Padding(
+              color: const Color(0xFFFF6B35),
+              fontSize: 10,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 6),
+          ...clues.map(
+            (c) => Padding(
               padding: const EdgeInsets.only(bottom: 3),
-              child:
-                  Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                const Text('⚡ ',
-                    style: TextStyle(color: Color(0xFFFF6B35), fontSize: 10)),
-                Expanded(
-                    child: Text(c,
-                        style: const TextStyle(
-                            color: Color(0xFFFF6B35),
-                            fontSize: 10,
-                            height: 1.3))),
-              ]),
-            )),
-      ]),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    '⚡ ',
+                    style: TextStyle(color: Color(0xFFFF6B35), fontSize: 10),
+                  ),
+                  Expanded(
+                    child: Text(
+                      c,
+                      style: const TextStyle(
+                        color: Color(0xFFFF6B35),
+                        fontSize: 10,
+                        height: 1.3,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -5620,160 +7587,242 @@ class _WhalingCardState extends State<_WhalingCard> {
 
     return Container(
       decoration: _outerBox(const Color(0xFF0D1520)),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Container(
-          padding: const EdgeInsets.fromLTRB(14, 12, 14, 10),
-          decoration: BoxDecoration(
-            color: const Color(0xFF161E2E),
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-            border:
-                Border(bottom: BorderSide(color: Colors.white.withAlpha(10))),
-          ),
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Row(children: [
-              const Icon(Icons.arrow_back, size: 14, color: Colors.white38),
-              const SizedBox(width: 10),
-              const Icon(Icons.archive_outlined,
-                  size: 14, color: Colors.white38),
-              const SizedBox(width: 10),
-              const Icon(Icons.delete_outline, size: 14, color: Colors.white38),
-              const Spacer(),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                    color: const Color(0xFFFF4444).withAlpha(25),
-                    borderRadius: BorderRadius.circular(6),
-                    border: Border.all(
-                        color: const Color(0xFFFF4444).withAlpha(80))),
-                child: Text(urgency,
-                    style: GoogleFonts.jetBrainsMono(
-                        color: const Color(0xFFFF4444),
-                        fontSize: 9,
-                        fontWeight: FontWeight.w700)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.fromLTRB(14, 12, 14, 10),
+            decoration: BoxDecoration(
+              color: const Color(0xFF161E2E),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(20),
               ),
-            ]),
-            const SizedBox(height: 10),
-            Text(subject,
-                style: GoogleFonts.inter(
+              border: Border(
+                bottom: BorderSide(color: Colors.white.withAlpha(10)),
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.arrow_back,
+                      size: 14,
+                      color: Colors.white38,
+                    ),
+                    const SizedBox(width: 10),
+                    const Icon(
+                      Icons.archive_outlined,
+                      size: 14,
+                      color: Colors.white38,
+                    ),
+                    const SizedBox(width: 10),
+                    const Icon(
+                      Icons.delete_outline,
+                      size: 14,
+                      color: Colors.white38,
+                    ),
+                    const Spacer(),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFF4444).withAlpha(25),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: const Color(0xFFFF4444).withAlpha(80),
+                        ),
+                      ),
+                      child: Text(
+                        urgency,
+                        style: GoogleFonts.jetBrainsMono(
+                          color: const Color(0xFFFF4444),
+                          fontSize: 9,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  subject,
+                  style: GoogleFonts.inter(
                     color: Colors.white,
                     fontSize: 14,
-                    fontWeight: FontWeight.w700)),
-            const SizedBox(height: 8),
-            _ERow('De', '$senderName <$senderDomain>',
-                highlight: widget.revealed),
-            _ERow('Para', targetRole),
-            if (cc.isNotEmpty) _ERow('CC', cc.join(', ')),
-          ]),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(14),
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Row(children: [
-              _Avatar(senderName, widget.color, 42),
-              const SizedBox(width: 10),
-              Expanded(
-                  child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                    Text(senderName,
-                        style: GoogleFonts.inter(
-                            color: Colors.white,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600),
-                        overflow: TextOverflow.ellipsis),
-                    Text(senderRole,
-                        style: GoogleFonts.inter(
-                            color: Colors.white38, fontSize: 10),
-                        overflow: TextOverflow.ellipsis),
-                    if (widget.revealed)
-                      Text(senderDomain,
-                          style: GoogleFonts.jetBrainsMono(
-                              color: const Color(0xFFFF6B6B), fontSize: 9),
-                          overflow: TextOverflow.ellipsis),
-                  ])),
-            ]),
-            const SizedBox(height: 10),
-            Divider(color: Colors.white.withAlpha(12)),
-            const SizedBox(height: 8),
-            AnimatedCrossFade(
-              duration: const Duration(milliseconds: 260),
-              crossFadeState: _expanded
-                  ? CrossFadeState.showSecond
-                  : CrossFadeState.showFirst,
-              firstChild: Text(
-                  body.length > 280 ? '${body.substring(0, 280)}…' : body,
-                  style: GoogleFonts.inter(
-                      color: Colors.white70, fontSize: 12, height: 1.6)),
-              secondChild: Text(body,
-                  style: GoogleFonts.inter(
-                      color: Colors.white70, fontSize: 12, height: 1.6)),
-            ),
-            if (body.length > 280)
-              GestureDetector(
-                onTap: () => setState(() => _expanded = !_expanded),
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: Text(_expanded ? 'Mostrar menos ▲' : 'Ver mais ▼',
-                      style:
-                          GoogleFonts.inter(color: widget.color, fontSize: 11)),
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
-              ),
-            if (signature.isNotEmpty) ...[
-              const SizedBox(height: 10),
-              Divider(color: Colors.white.withAlpha(10)),
-              Text(signature,
-                  style: GoogleFonts.inter(
-                      color: Colors.white30, fontSize: 10, height: 1.5)),
-            ],
-            if (attachments.isNotEmpty) ...[
-              const SizedBox(height: 10),
-              Wrap(
-                  spacing: 8,
-                  runSpacing: 6,
-                  children: attachments
-                      .map((a) => Container(
+                const SizedBox(height: 8),
+                _ERow(
+                  'De',
+                  '$senderName <$senderDomain>',
+                  highlight: widget.revealed,
+                ),
+                _ERow('Para', targetRole),
+                if (cc.isNotEmpty) _ERow('CC', cc.join(', ')),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    _Avatar(senderName, widget.color, 42),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            senderName,
+                            style: GoogleFonts.inter(
+                              color: Colors.white,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          Text(
+                            senderRole,
+                            style: GoogleFonts.inter(
+                              color: Colors.white38,
+                              fontSize: 10,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          if (widget.revealed)
+                            Text(
+                              senderDomain,
+                              style: GoogleFonts.jetBrainsMono(
+                                color: const Color(0xFFFF6B6B),
+                                fontSize: 9,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Divider(color: Colors.white.withAlpha(12)),
+                const SizedBox(height: 8),
+                AnimatedCrossFade(
+                  duration: const Duration(milliseconds: 260),
+                  crossFadeState: _expanded
+                      ? CrossFadeState.showSecond
+                      : CrossFadeState.showFirst,
+                  firstChild: Text(
+                    body.length > 280 ? '${body.substring(0, 280)}…' : body,
+                    style: GoogleFonts.inter(
+                      color: Colors.white70,
+                      fontSize: 12,
+                      height: 1.6,
+                    ),
+                  ),
+                  secondChild: Text(
+                    body,
+                    style: GoogleFonts.inter(
+                      color: Colors.white70,
+                      fontSize: 12,
+                      height: 1.6,
+                    ),
+                  ),
+                ),
+                if (body.length > 280)
+                  GestureDetector(
+                    onTap: () => setState(() => _expanded = !_expanded),
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Text(
+                        _expanded ? 'Mostrar menos ▲' : 'Ver mais ▼',
+                        style: GoogleFonts.inter(
+                          color: widget.color,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ),
+                  ),
+                if (signature.isNotEmpty) ...[
+                  const SizedBox(height: 10),
+                  Divider(color: Colors.white.withAlpha(10)),
+                  Text(
+                    signature,
+                    style: GoogleFonts.inter(
+                      color: Colors.white30,
+                      fontSize: 10,
+                      height: 1.5,
+                    ),
+                  ),
+                ],
+                if (attachments.isNotEmpty) ...[
+                  const SizedBox(height: 10),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 6,
+                    children: attachments
+                        .map(
+                          (a) => Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 9, vertical: 5),
+                              horizontal: 9,
+                              vertical: 5,
+                            ),
                             decoration: BoxDecoration(
                               color: widget.revealed
                                   ? const Color(0xFFFF4444).withAlpha(12)
                                   : Colors.white.withAlpha(8),
                               borderRadius: BorderRadius.circular(7),
                               border: Border.all(
-                                  color: widget.revealed
-                                      ? const Color(0xFFFF4444).withAlpha(60)
-                                      : Colors.white.withAlpha(20)),
+                                color: widget.revealed
+                                    ? const Color(0xFFFF4444).withAlpha(60)
+                                    : Colors.white.withAlpha(20),
+                              ),
                             ),
-                            child:
-                                Row(mainAxisSize: MainAxisSize.min, children: [
-                              Icon(
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
                                   a.endsWith('.pdf')
                                       ? Icons.picture_as_pdf
                                       : Icons.attach_file,
                                   size: 11,
                                   color: widget.revealed
                                       ? const Color(0xFFFF4444)
-                                      : Colors.white54),
-                              const SizedBox(width: 5),
-                              Text(a,
+                                      : Colors.white54,
+                                ),
+                                const SizedBox(width: 5),
+                                Text(
+                                  a,
                                   style: GoogleFonts.jetBrainsMono(
-                                      color: widget.revealed
-                                          ? const Color(0xFFFF4444)
-                                          : Colors.white54,
-                                      fontSize: 9)),
-                            ]),
-                          ))
-                      .toList()),
-            ],
-            if (widget.revealed) ...[
-              const SizedBox(height: 12),
-              _analysisPanel(),
-            ],
-          ]),
-        ),
-      ]),
+                                    color: widget.revealed
+                                        ? const Color(0xFFFF4444)
+                                        : Colors.white54,
+                                    fontSize: 9,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                        .toList(),
+                  ),
+                ],
+                if (widget.revealed) ...[
+                  const SizedBox(height: 12),
+                  _analysisPanel(),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -5782,8 +7831,9 @@ class _WhalingCardState extends State<_WhalingCard> {
     final isSlack =
         (s['attack_vector'] as String? ?? '').toLowerCase() == 'slack';
     final bg = isSlack ? const Color(0xFF1A1D21) : const Color(0xFF1B2838);
-    final headerBg =
-        isSlack ? const Color(0xFF4A154B) : const Color(0xFF6264A7);
+    final headerBg = isSlack
+        ? const Color(0xFF4A154B)
+        : const Color(0xFF6264A7);
     final senderName = s['sender_name'] as String? ?? 'CEO';
     final body = s['email_body'] as String? ?? s['message'] as String? ?? '';
     final channel = s['channel'] as String? ?? '#finanças';
@@ -5792,85 +7842,128 @@ class _WhalingCardState extends State<_WhalingCard> {
 
     return Container(
       decoration: _outerBox(bg),
-      child: Column(children: [
-        Container(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
-          decoration: BoxDecoration(
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
+            decoration: BoxDecoration(
               color: headerBg,
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(20))),
-          child: Row(children: [
-            Text(isSlack ? '#' : '⊞',
-                style: const TextStyle(
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(20),
+              ),
+            ),
+            child: Row(
+              children: [
+                Text(
+                  isSlack ? '#' : '⊞',
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 18,
-                    fontWeight: FontWeight.bold)),
-            const SizedBox(width: 8),
-            Text('$platform — $channel',
-                style: GoogleFonts.inter(color: Colors.white70, fontSize: 12)),
-            const Spacer(),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-              decoration: BoxDecoration(
-                color: const Color(0xFFFF4444).withAlpha(30),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Text(urgency,
-                  style: GoogleFonts.jetBrainsMono(
-                      color: const Color(0xFFFF4444), fontSize: 9)),
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  '$platform — $channel',
+                  style: GoogleFonts.inter(color: Colors.white70, fontSize: 12),
+                ),
+                const Spacer(),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFF4444).withAlpha(30),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    urgency,
+                    style: GoogleFonts.jetBrainsMono(
+                      color: const Color(0xFFFF4444),
+                      fontSize: 9,
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ]),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(14),
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              _Avatar(senderName, widget.color, 36),
-              const SizedBox(width: 10),
-              Expanded(
-                  child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                    Row(children: [
-                      Text(senderName,
-                          style: GoogleFonts.inter(
-                              color: Colors.white,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700)),
-                      if (widget.revealed) ...[
-                        const SizedBox(width: 4),
-                        const Icon(Icons.warning_amber_rounded,
-                            color: Color(0xFFFF4444), size: 12),
-                      ],
-                    ]),
-                    Text('Hoje às ${TimeOfDay.now().format(context)}',
-                        style: GoogleFonts.inter(
-                            color: Colors.white38, fontSize: 10)),
-                  ])),
-            ]),
-            const SizedBox(height: 10),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.white.withAlpha(6),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                    color: widget.revealed
-                        ? const Color(0xFFFF4444).withAlpha(60)
-                        : Colors.white.withAlpha(10)),
-              ),
-              child: Text(body,
-                  style: GoogleFonts.inter(
-                      color: Colors.white70, fontSize: 13, height: 1.5)),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _Avatar(senderName, widget.color, 36),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                senderName,
+                                style: GoogleFonts.inter(
+                                  color: Colors.white,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              if (widget.revealed) ...[
+                                const SizedBox(width: 4),
+                                const Icon(
+                                  Icons.warning_amber_rounded,
+                                  color: Color(0xFFFF4444),
+                                  size: 12,
+                                ),
+                              ],
+                            ],
+                          ),
+                          Text(
+                            'Hoje às ${TimeOfDay.now().format(context)}',
+                            style: GoogleFonts.inter(
+                              color: Colors.white38,
+                              fontSize: 10,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withAlpha(6),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: widget.revealed
+                          ? const Color(0xFFFF4444).withAlpha(60)
+                          : Colors.white.withAlpha(10),
+                    ),
+                  ),
+                  child: Text(
+                    body,
+                    style: GoogleFonts.inter(
+                      color: Colors.white70,
+                      fontSize: 13,
+                      height: 1.5,
+                    ),
+                  ),
+                ),
+                if (widget.revealed) ...[
+                  const SizedBox(height: 12),
+                  _analysisPanel(),
+                ],
+              ],
             ),
-            if (widget.revealed) ...[
-              const SizedBox(height: 12),
-              _analysisPanel(),
-            ],
-          ]),
-        ),
-      ]),
+          ),
+        ],
+      ),
     );
   }
 
@@ -5885,92 +7978,130 @@ class _WhalingCardState extends State<_WhalingCard> {
 
     return Container(
       decoration: _outerBox(const Color(0xFF0D1520)),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: const Color(0xFF161E2E),
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          child: Row(children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: widget.color.withAlpha(20),
-                borderRadius: BorderRadius.circular(8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: const Color(0xFF161E2E),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(20),
               ),
-              child: Icon(Icons.description_outlined,
-                  color: widget.color, size: 20),
             ),
-            const SizedBox(width: 10),
-            Expanded(
-                child: Column(
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: widget.color.withAlpha(20),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    Icons.description_outlined,
+                    color: widget.color,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                  Text(subject,
-                      style: GoogleFonts.inter(
+                      Text(
+                        subject,
+                        style: GoogleFonts.inter(
                           color: Colors.white,
                           fontSize: 13,
-                          fontWeight: FontWeight.w700),
-                      overflow: TextOverflow.ellipsis),
-                  Text('De: $sender',
-                      style: GoogleFonts.inter(
-                          color: Colors.white38, fontSize: 11),
-                      overflow: TextOverflow.ellipsis),
-                ])),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-              decoration: BoxDecoration(
-                  color: const Color(0xFFFF4444).withAlpha(20),
-                  borderRadius: BorderRadius.circular(5),
-                  border:
-                      Border.all(color: const Color(0xFFFF4444).withAlpha(60))),
-              child: Text('URGENTE',
-                  style: GoogleFonts.jetBrainsMono(
+                          fontWeight: FontWeight.w700,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        'De: $sender',
+                        style: GoogleFonts.inter(
+                          color: Colors.white38,
+                          fontSize: 11,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 7,
+                    vertical: 3,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFF4444).withAlpha(20),
+                    borderRadius: BorderRadius.circular(5),
+                    border: Border.all(
+                      color: const Color(0xFFFF4444).withAlpha(60),
+                    ),
+                  ),
+                  child: Text(
+                    'URGENTE',
+                    style: GoogleFonts.jetBrainsMono(
                       color: const Color(0xFFFF4444),
                       fontSize: 9,
-                      fontWeight: FontWeight.w700)),
-            ),
-          ]),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(14),
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(body,
-                style: GoogleFonts.inter(
-                    color: Colors.white70, fontSize: 12, height: 1.6)),
-            if (amount.isNotEmpty || iban.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: widget.revealed
-                      ? const Color(0xFFFF4444).withAlpha(10)
-                      : Colors.white.withAlpha(5),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                      color: widget.revealed
-                          ? const Color(0xFFFF4444).withAlpha(60)
-                          : Colors.white.withAlpha(14)),
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                 ),
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (amount.isNotEmpty)
-                        _IRow('Valor', amount, widget.revealed),
-                      if (iban.isNotEmpty) _IRow('IBAN', iban, widget.revealed),
-                      if (deadline.isNotEmpty) _IRow('Prazo', deadline, false),
-                    ]),
-              ),
-            ],
-            if (widget.revealed) ...[
-              const SizedBox(height: 12),
-              _analysisPanel(),
-            ],
-          ]),
-        ),
-      ]),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  body,
+                  style: GoogleFonts.inter(
+                    color: Colors.white70,
+                    fontSize: 12,
+                    height: 1.6,
+                  ),
+                ),
+                if (amount.isNotEmpty || iban.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: widget.revealed
+                          ? const Color(0xFFFF4444).withAlpha(10)
+                          : Colors.white.withAlpha(5),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: widget.revealed
+                            ? const Color(0xFFFF4444).withAlpha(60)
+                            : Colors.white.withAlpha(14),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (amount.isNotEmpty)
+                          _IRow('Valor', amount, widget.revealed),
+                        if (iban.isNotEmpty)
+                          _IRow('IBAN', iban, widget.revealed),
+                        if (deadline.isNotEmpty)
+                          _IRow('Prazo', deadline, false),
+                      ],
+                    ),
+                  ),
+                ],
+                if (widget.revealed) ...[
+                  const SizedBox(height: 12),
+                  _analysisPanel(),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -5984,90 +8115,128 @@ class _WhalingCardState extends State<_WhalingCard> {
 
     return Container(
       decoration: _outerBox(const Color(0xFF0D1520)),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: const Color(0xFF161E2E),
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          child: Row(children: [
-            Container(
-              width: 42,
-              height: 42,
-              decoration: BoxDecoration(
-                color: widget.color.withAlpha(20),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: widget.color.withAlpha(60)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: const Color(0xFF161E2E),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(20),
               ),
-              child: Icon(Icons.calendar_month, color: widget.color, size: 20),
             ),
-            const SizedBox(width: 10),
-            Expanded(
-                child: Column(
+            child: Row(
+              children: [
+                Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color: widget.color.withAlpha(20),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: widget.color.withAlpha(60)),
+                  ),
+                  child: Icon(
+                    Icons.calendar_month,
+                    color: widget.color,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                  Text(subject,
-                      style: GoogleFonts.inter(
+                      Text(
+                        subject,
+                        style: GoogleFonts.inter(
                           color: Colors.white,
                           fontSize: 13,
-                          fontWeight: FontWeight.w700),
-                      overflow: TextOverflow.ellipsis),
-                  Text('$sender · $time',
-                      style: GoogleFonts.inter(
-                          color: Colors.white38, fontSize: 11),
-                      overflow: TextOverflow.ellipsis),
-                ])),
-          ]),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(14),
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(body,
-                style: GoogleFonts.inter(
-                    color: Colors.white70, fontSize: 12, height: 1.6)),
-            if (link.isNotEmpty) ...[
-              const SizedBox(height: 10),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                decoration: BoxDecoration(
-                  color: widget.revealed
-                      ? const Color(0xFFFF4444).withAlpha(10)
-                      : widget.color.withAlpha(10),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                      color: widget.revealed
-                          ? const Color(0xFFFF4444).withAlpha(60)
-                          : widget.color.withAlpha(40)),
+                          fontWeight: FontWeight.w700,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        '$sender · $time',
+                        style: GoogleFonts.inter(
+                          color: Colors.white38,
+                          fontSize: 11,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
                 ),
-                child: Row(children: [
-                  Icon(Icons.videocam_outlined,
-                      size: 14,
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  body,
+                  style: GoogleFonts.inter(
+                    color: Colors.white70,
+                    fontSize: 12,
+                    height: 1.6,
+                  ),
+                ),
+                if (link.isNotEmpty) ...[
+                  const SizedBox(height: 10),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
                       color: widget.revealed
-                          ? const Color(0xFFFF4444)
-                          : widget.color),
-                  const SizedBox(width: 8),
-                  Expanded(
-                      child: Text(link,
-                          style: TextStyle(
+                          ? const Color(0xFFFF4444).withAlpha(10)
+                          : widget.color.withAlpha(10),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: widget.revealed
+                            ? const Color(0xFFFF4444).withAlpha(60)
+                            : widget.color.withAlpha(40),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.videocam_outlined,
+                          size: 14,
+                          color: widget.revealed
+                              ? const Color(0xFFFF4444)
+                              : widget.color,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            link,
+                            style: TextStyle(
                               color: widget.revealed
                                   ? const Color(0xFFFF6B6B)
                                   : widget.color,
                               fontSize: 11,
-                              decoration: TextDecoration.underline),
-                          overflow: TextOverflow.ellipsis)),
-                ]),
-              ),
-            ],
-            if (widget.revealed) ...[
-              const SizedBox(height: 12),
-              _analysisPanel(),
-            ],
-          ]),
-        ),
-      ]),
+                              decoration: TextDecoration.underline,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+                if (widget.revealed) ...[
+                  const SizedBox(height: 12),
+                  _analysisPanel(),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -6079,19 +8248,24 @@ class _Avatar extends StatelessWidget {
   const _Avatar(this.name, this.color, this.size);
   @override
   Widget build(BuildContext context) => Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: color.withAlpha(25),
-            border: Border.all(color: color.withAlpha(80), width: 1.5)),
-        child: Center(
-            child: Text(
-          name.isNotEmpty ? name[0].toUpperCase() : '?',
-          style: GoogleFonts.syne(
-              color: color, fontSize: size * 0.38, fontWeight: FontWeight.w700),
-        )),
-      );
+    width: size,
+    height: size,
+    decoration: BoxDecoration(
+      shape: BoxShape.circle,
+      color: color.withAlpha(25),
+      border: Border.all(color: color.withAlpha(80), width: 1.5),
+    ),
+    child: Center(
+      child: Text(
+        name.isNotEmpty ? name[0].toUpperCase() : '?',
+        style: GoogleFonts.syne(
+          color: color,
+          fontSize: size * 0.38,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    ),
+  );
 }
 
 class _ERow extends StatelessWidget {
@@ -6100,23 +8274,31 @@ class _ERow extends StatelessWidget {
   const _ERow(this.label, this.value, {this.highlight = false});
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.only(bottom: 4),
-        child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          SizedBox(
-              width: 30,
-              child: Text('$label:',
-                  style:
-                      GoogleFonts.inter(color: Colors.white38, fontSize: 11))),
-          const SizedBox(width: 6),
-          Expanded(
-              child: Text(value,
-                  style: GoogleFonts.jetBrainsMono(
-                      color:
-                          highlight ? const Color(0xFFFF6B6B) : Colors.white60,
-                      fontSize: 10),
-                  overflow: TextOverflow.ellipsis)),
-        ]),
-      );
+    padding: const EdgeInsets.only(bottom: 4),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 30,
+          child: Text(
+            '$label:',
+            style: GoogleFonts.inter(color: Colors.white38, fontSize: 11),
+          ),
+        ),
+        const SizedBox(width: 6),
+        Expanded(
+          child: Text(
+            value,
+            style: GoogleFonts.jetBrainsMono(
+              color: highlight ? const Color(0xFFFF6B6B) : Colors.white60,
+              fontSize: 10,
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    ),
+  );
 }
 
 class _IRow extends StatelessWidget {
@@ -6125,28 +8307,38 @@ class _IRow extends StatelessWidget {
   const _IRow(this.label, this.value, this.highlight);
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.only(bottom: 6),
-        child: Row(children: [
-          Text('$label: ',
-              style: GoogleFonts.inter(color: Colors.white38, fontSize: 11)),
-          Expanded(
-              child: Text(value,
-                  style: GoogleFonts.jetBrainsMono(
-                      color:
-                          highlight ? const Color(0xFFFF6B6B) : Colors.white70,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600),
-                  overflow: TextOverflow.ellipsis)),
-        ]),
-      );
+    padding: const EdgeInsets.only(bottom: 6),
+    child: Row(
+      children: [
+        Text(
+          '$label: ',
+          style: GoogleFonts.inter(color: Colors.white38, fontSize: 11),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            style: GoogleFonts.jetBrainsMono(
+              color: highlight ? const Color(0xFFFF6B6B) : Colors.white70,
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    ),
+  );
 }
 
 class _QuishingCard extends StatefulWidget {
   final Map<String, dynamic> scenario;
   final bool revealed;
   final Color color;
-  const _QuishingCard(
-      {required this.scenario, required this.revealed, required this.color});
+  const _QuishingCard({
+    required this.scenario,
+    required this.revealed,
+    required this.color,
+  });
   @override
   State<_QuishingCard> createState() => _QuishingCardState();
 }
@@ -6160,8 +8352,9 @@ class _QuishingCardState extends State<_QuishingCard>
   void initState() {
     super.initState();
     _pulse = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 1400))
-      ..repeat(reverse: true);
+      vsync: this,
+      duration: const Duration(milliseconds: 1400),
+    )..repeat(reverse: true);
   }
 
   @override
@@ -6173,222 +8366,309 @@ class _QuishingCardState extends State<_QuishingCard>
   @override
   Widget build(BuildContext context) {
     final s = widget.scenario;
-    final context_ = s['context'] as String? ??
+    final context_ =
+        s['context'] as String? ??
         s['description'] as String? ??
         'Encontrou este código QR num local público.';
-    final fakeUrl = s['fake_url'] as String? ??
+    final fakeUrl =
+        s['fake_url'] as String? ??
         s['malicious_url'] as String? ??
         'hxxps://secure-verify.net/login';
     final legitimateDomain =
         s['legitimate_domain'] as String? ?? s['brand'] as String? ?? 'Banco';
-    final placement = s['placement'] as String? ??
+    final placement =
+        s['placement'] as String? ??
         s['location'] as String? ??
         'Cartaz público';
     final redFlags = (s['red_flags'] as List?)?.cast<String>() ?? <String>[];
 
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Container(
-        decoration: BoxDecoration(
-          color: const Color(0xFF0D1520),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFF0D1520),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
               color: widget.revealed
                   ? widget.color.withAlpha(100)
-                  : Colors.white.withAlpha(20)),
-          boxShadow: [
-            BoxShadow(
+                  : Colors.white.withAlpha(20),
+            ),
+            boxShadow: [
+              BoxShadow(
                 color: Colors.black.withAlpha(60),
                 blurRadius: 18,
-                spreadRadius: -4),
-          ],
-        ),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Container(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
-            decoration: BoxDecoration(
-              color: const Color(0xFF161E2E),
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(20)),
-              border:
-                  Border(bottom: BorderSide(color: Colors.white.withAlpha(10))),
-            ),
-            child: Row(children: [
-              const Icon(Icons.qr_code_scanner_rounded,
-                  size: 16, color: Color(0xFFFFCC00)),
-              const SizedBox(width: 8),
-              Text('Quishing – QR Code',
-                  style: GoogleFonts.jetBrainsMono(
-                      color: const Color(0xFFFFCC00),
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700)),
-              const Spacer(),
-              AnimatedBuilder(
-                animation: _pulse,
-                builder: (_, __) => Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFFCC00)
-                        .withOpacity(0.08 + _pulse.value * 0.08),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(placement,
-                      style: GoogleFonts.inter(
-                          color: const Color(0xFFFFCC00), fontSize: 9)),
-                ),
+                spreadRadius: -4,
               ),
-            ]),
+            ],
           ),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child:
-                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              // Context description
-              Text(context_,
-                  style: GoogleFonts.inter(
-                      color: Colors.white70, fontSize: 13, height: 1.4)),
-              const SizedBox(height: 16),
-
-              // QR code + tap-to-scan
-              Center(
-                child: GestureDetector(
-                  onTap: () => setState(() => _scanned = true),
-                  child: AnimatedBuilder(
-                    animation: _pulse,
-                    builder: (_, child) => Container(
-                      width: 160,
-                      height: 160,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(
-                          color: (_scanned || widget.revealed)
-                              ? widget.color
-                                  .withOpacity(0.4 + _pulse.value * 0.3)
-                              : const Color(0xFFFFCC00)
-                                  .withOpacity(0.2 + _pulse.value * 0.2),
-                          width: 2.5,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: (_scanned || widget.revealed)
-                                ? widget.color.withOpacity(_pulse.value * 0.25)
-                                : const Color(0xFFFFCC00)
-                                    .withOpacity(_pulse.value * 0.15),
-                            blurRadius: 18,
-                          ),
-                        ],
-                      ),
-                      child: child,
-                    ),
-                    child: Stack(alignment: Alignment.center, children: [
-                      Padding(
-                        padding: const EdgeInsets.all(10),
-                        child: CustomPaint(
-                            size: const Size(140, 140), painter: _QrPainter()),
-                      ),
-                      if (!_scanned)
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withAlpha(170),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text('Toca para escanear',
-                              style: GoogleFonts.inter(
-                                  color: Colors.white,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w600)),
-                        ),
-                    ]),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF161E2E),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(20),
+                  ),
+                  border: Border(
+                    bottom: BorderSide(color: Colors.white.withAlpha(10)),
                   ),
                 ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.qr_code_scanner_rounded,
+                      size: 16,
+                      color: Color(0xFFFFCC00),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Quishing – QR Code',
+                      style: GoogleFonts.jetBrainsMono(
+                        color: const Color(0xFFFFCC00),
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const Spacer(),
+                    AnimatedBuilder(
+                      animation: _pulse,
+                      builder: (_, __) => Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(
+                            0xFFFFCC00,
+                          ).withOpacity(0.08 + _pulse.value * 0.08),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          placement,
+                          style: GoogleFonts.inter(
+                            color: const Color(0xFFFFCC00),
+                            fontSize: 9,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 16),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Context description
+                    Text(
+                      context_,
+                      style: GoogleFonts.inter(
+                        color: Colors.white70,
+                        fontSize: 13,
+                        height: 1.4,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
 
-              if (_scanned || widget.revealed)
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFF4444).withAlpha(15),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                        color: const Color(0xFFFF4444).withAlpha(60)),
-                  ),
-                  child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(children: [
-                          const Icon(Icons.link_rounded,
-                              size: 12, color: Color(0xFFFF4444)),
-                          const SizedBox(width: 6),
-                          Text('URL de destino',
+                    // QR code + tap-to-scan
+                    Center(
+                      child: GestureDetector(
+                        onTap: () => setState(() => _scanned = true),
+                        child: AnimatedBuilder(
+                          animation: _pulse,
+                          builder: (_, child) => Container(
+                            width: 160,
+                            height: 160,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: (_scanned || widget.revealed)
+                                    ? widget.color.withOpacity(
+                                        0.4 + _pulse.value * 0.3,
+                                      )
+                                    : const Color(
+                                        0xFFFFCC00,
+                                      ).withOpacity(0.2 + _pulse.value * 0.2),
+                                width: 2.5,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: (_scanned || widget.revealed)
+                                      ? widget.color.withOpacity(
+                                          _pulse.value * 0.25,
+                                        )
+                                      : const Color(
+                                          0xFFFFCC00,
+                                        ).withOpacity(_pulse.value * 0.15),
+                                  blurRadius: 18,
+                                ),
+                              ],
+                            ),
+                            child: child,
+                          ),
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(10),
+                                child: CustomPaint(
+                                  size: const Size(140, 140),
+                                  painter: _QrPainter(),
+                                ),
+                              ),
+                              if (!_scanned)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 6,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black.withAlpha(170),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Text(
+                                    'Toca para escanear',
+                                    style: GoogleFonts.inter(
+                                      color: Colors.white,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    if (_scanned || widget.revealed)
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFF4444).withAlpha(15),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: const Color(0xFFFF4444).withAlpha(60),
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.link_rounded,
+                                  size: 12,
+                                  color: Color(0xFFFF4444),
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  'URL de destino',
+                                  style: GoogleFonts.jetBrainsMono(
+                                    color: const Color(0xFFFF4444),
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              fakeUrl,
                               style: GoogleFonts.jetBrainsMono(
-                                  color: const Color(0xFFFF4444),
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w700)),
-                        ]),
-                        const SizedBox(height: 6),
-                        Text(fakeUrl,
-                            style: GoogleFonts.jetBrainsMono(
                                 color: Colors.white70,
                                 fontSize: 10,
-                                height: 1.3)),
-                        const SizedBox(height: 6),
-                        Row(children: [
-                          const Icon(Icons.business_rounded,
-                              size: 10, color: Colors.white38),
-                          const SizedBox(width: 4),
-                          Text('Imita: $legitimateDomain',
-                              style: GoogleFonts.inter(
-                                  color: Colors.white38, fontSize: 10)),
-                        ]),
-                      ]),
-                ),
+                                height: 1.3,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.business_rounded,
+                                  size: 10,
+                                  color: Colors.white38,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'Imita: $legitimateDomain',
+                                  style: GoogleFonts.inter(
+                                    color: Colors.white38,
+                                    fontSize: 10,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
 
-              if (widget.revealed && redFlags.isNotEmpty) ...[
-                const SizedBox(height: 12),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: widget.color.withAlpha(12),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: widget.color.withAlpha(50)),
-                  ),
-                  child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Sinais de alerta',
-                            style: GoogleFonts.jetBrainsMono(
+                    if (widget.revealed && redFlags.isNotEmpty) ...[
+                      const SizedBox(height: 12),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: widget.color.withAlpha(12),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: widget.color.withAlpha(50)),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Sinais de alerta',
+                              style: GoogleFonts.jetBrainsMono(
                                 color: widget.color,
                                 fontSize: 10,
-                                fontWeight: FontWeight.w700)),
-                        const SizedBox(height: 6),
-                        ...redFlags.map((f) => Padding(
-                              padding: const EdgeInsets.only(bottom: 3),
-                              child: Row(
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            ...redFlags.map(
+                              (f) => Padding(
+                                padding: const EdgeInsets.only(bottom: 3),
+                                child: Row(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text('⚠ ',
-                                        style: TextStyle(
-                                            color: widget.color, fontSize: 10)),
+                                    Text(
+                                      '⚠ ',
+                                      style: TextStyle(
+                                        color: widget.color,
+                                        fontSize: 10,
+                                      ),
+                                    ),
                                     Expanded(
-                                        child: Text(f,
-                                            style: TextStyle(
-                                                color: widget.color,
-                                                fontSize: 10,
-                                                height: 1.3))),
-                                  ]),
-                            )),
-                      ]),
+                                      child: Text(
+                                        f,
+                                        style: TextStyle(
+                                          color: widget.color,
+                                          fontSize: 10,
+                                          height: 1.3,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
-              ],
-            ]),
+              ),
+            ],
           ),
-        ]),
-      ),
-    ]);
+        ),
+      ],
+    );
   }
 }
 
@@ -6396,8 +8676,11 @@ class _PharmingCard extends StatefulWidget {
   final Map<String, dynamic> scenario;
   final bool revealed;
   final Color color;
-  const _PharmingCard(
-      {required this.scenario, required this.revealed, required this.color});
+  const _PharmingCard({
+    required this.scenario,
+    required this.revealed,
+    required this.color,
+  });
   @override
   State<_PharmingCard> createState() => _PharmingCardState();
 }
@@ -6410,8 +8693,9 @@ class _PharmingCardState extends State<_PharmingCard>
   void initState() {
     super.initState();
     _blink = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 900))
-      ..repeat(reverse: true);
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    )..repeat(reverse: true);
   }
 
   @override
@@ -6423,244 +8707,336 @@ class _PharmingCardState extends State<_PharmingCard>
   @override
   Widget build(BuildContext context) {
     final s = widget.scenario;
-    final legitimateDomain = s['legitimate_domain'] as String? ??
+    final legitimateDomain =
+        s['legitimate_domain'] as String? ??
         s['brand'] as String? ??
         'banco.pt';
-    final spoofedUrl = s['spoofed_url'] as String? ??
+    final spoofedUrl =
+        s['spoofed_url'] as String? ??
         s['fake_url'] as String? ??
         'http://banco-seguro.net/login';
     final pageTitle =
         s['page_title'] as String? ?? '$legitimateDomain – Acesso';
-    final formFields = (s['form_fields'] as List?)?.cast<String>() ??
+    final formFields =
+        (s['form_fields'] as List?)?.cast<String>() ??
         ['Utilizador', 'Palavra-passe', 'PIN'];
-    final attackMethod = s['attack_method'] as String? ??
+    final attackMethod =
+        s['attack_method'] as String? ??
         s['method'] as String? ??
         'Envenenamento de cache DNS';
     final redFlags = (s['red_flags'] as List?)?.cast<String>() ?? <String>[];
     final hasHttps = s['has_https'] as bool? ?? false;
 
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Container(
-        decoration: BoxDecoration(
-          color: const Color(0xFF202124),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFF202124),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
               color: widget.revealed
                   ? widget.color.withAlpha(90)
-                  : Colors.white.withAlpha(14)),
-          boxShadow: [
-            BoxShadow(
+                  : Colors.white.withAlpha(14),
+            ),
+            boxShadow: [
+              BoxShadow(
                 color: Colors.black.withAlpha(60),
                 blurRadius: 18,
-                spreadRadius: -4),
-          ],
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: Column(children: [
-          Container(
-            height: 34,
-            color: const Color(0xFF292A2D),
-            child: Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
-              const SizedBox(width: 8),
-              Container(
-                constraints: const BoxConstraints(maxWidth: 200),
-                padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-                decoration: const BoxDecoration(
-                  color: Color(0xFF35363A),
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
-                ),
-                child: Row(mainAxisSize: MainAxisSize.min, children: [
-                  const Icon(Icons.language, size: 10, color: Colors.white38),
-                  const SizedBox(width: 5),
-                  Flexible(
-                      child: Text(
-                    pageTitle.length > 22
-                        ? '${pageTitle.substring(0, 22)}…'
-                        : pageTitle,
-                    style:
-                        GoogleFonts.inter(color: Colors.white60, fontSize: 10),
-                    overflow: TextOverflow.ellipsis,
-                  )),
-                  const SizedBox(width: 6),
-                  const Icon(Icons.close, size: 9, color: Colors.white38),
-                ]),
+                spreadRadius: -4,
               ),
-            ]),
+            ],
           ),
-          Container(
-            height: 38,
-            color: const Color(0xFF35363A),
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Row(children: [
-              _NavBtn(Icons.arrow_back, enabled: false),
-              _NavBtn(Icons.arrow_forward, enabled: false),
-              _NavBtn(Icons.refresh, enabled: true),
-              const SizedBox(width: 4),
-              Expanded(
-                child: Container(
-                  height: 26,
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF202124),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Row(children: [
-                    AnimatedBuilder(
-                      animation: _blink,
-                      builder: (_, __) => Icon(
-                        hasHttps ? Icons.lock : Icons.lock_open_rounded,
-                        size: 10,
-                        color: hasHttps
-                            ? (widget.revealed
-                                ? const Color(0xFFFF6B6B)
-                                : const Color(0xFF5CB85C))
-                            : Color.lerp(const Color(0xFFFF6B6B),
-                                Colors.white38, _blink.value)!,
+          clipBehavior: Clip.antiAlias,
+          child: Column(
+            children: [
+              Container(
+                height: 34,
+                color: const Color(0xFF292A2D),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    const SizedBox(width: 8),
+                    Container(
+                      constraints: const BoxConstraints(maxWidth: 200),
+                      padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF35363A),
+                        borderRadius: BorderRadius.vertical(
+                          top: Radius.circular(8),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.language,
+                            size: 10,
+                            color: Colors.white38,
+                          ),
+                          const SizedBox(width: 5),
+                          Flexible(
+                            child: Text(
+                              pageTitle.length > 22
+                                  ? '${pageTitle.substring(0, 22)}…'
+                                  : pageTitle,
+                              style: GoogleFonts.inter(
+                                color: Colors.white60,
+                                fontSize: 10,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          const Icon(
+                            Icons.close,
+                            size: 9,
+                            color: Colors.white38,
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(width: 5),
-                    Expanded(
-                        child: Text(
-                      spoofedUrl,
-                      style: GoogleFonts.jetBrainsMono(
-                          color: widget.revealed
-                              ? const Color(0xFFFF6B6B)
-                              : Colors.white54,
-                          fontSize: 8.5),
-                      overflow: TextOverflow.ellipsis,
-                    )),
-                    const Icon(Icons.star_border,
-                        size: 11, color: Colors.white38),
-                  ]),
+                  ],
                 ),
               ),
-              const SizedBox(width: 4),
-              _NavBtn(Icons.more_vert, enabled: true),
-            ]),
-          ),
-          Container(
-            color: Colors.white,
-            padding: const EdgeInsets.all(20),
-            child: Column(children: [
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFB06EFF).withAlpha(18),
-                  borderRadius: BorderRadius.circular(8),
+                height: 38,
+                color: const Color(0xFF35363A),
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Row(
+                  children: [
+                    _NavBtn(Icons.arrow_back, enabled: false),
+                    _NavBtn(Icons.arrow_forward, enabled: false),
+                    _NavBtn(Icons.refresh, enabled: true),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Container(
+                        height: 26,
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF202124),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: Row(
+                          children: [
+                            AnimatedBuilder(
+                              animation: _blink,
+                              builder: (_, __) => Icon(
+                                hasHttps ? Icons.lock : Icons.lock_open_rounded,
+                                size: 10,
+                                color: hasHttps
+                                    ? (widget.revealed
+                                          ? const Color(0xFFFF6B6B)
+                                          : const Color(0xFF5CB85C))
+                                    : Color.lerp(
+                                        const Color(0xFFFF6B6B),
+                                        Colors.white38,
+                                        _blink.value,
+                                      )!,
+                              ),
+                            ),
+                            const SizedBox(width: 5),
+                            Expanded(
+                              child: Text(
+                                spoofedUrl,
+                                style: GoogleFonts.jetBrainsMono(
+                                  color: widget.revealed
+                                      ? const Color(0xFFFF6B6B)
+                                      : Colors.white54,
+                                  fontSize: 8.5,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            const Icon(
+                              Icons.star_border,
+                              size: 11,
+                              color: Colors.white38,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    _NavBtn(Icons.more_vert, enabled: true),
+                  ],
                 ),
-                child: Text(legitimateDomain.toUpperCase(),
-                    style: GoogleFonts.syne(
-                        color: const Color(0xFF333333),
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 2)),
               ),
-              const SizedBox(height: 6),
-              Text('Acesso à Conta',
-                  style: GoogleFonts.inter(
-                      color: const Color(0xFF555555), fontSize: 11)),
-              const SizedBox(height: 14),
-              ...formFields.map((field) => Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Container(
-                      height: 36,
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
+              Container(
+                color: Colors.white,
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
-                        border: Border.all(color: const Color(0xFFDDDDDD)),
+                        color: const Color(0xFFB06EFF).withAlpha(18),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        legitimateDomain.toUpperCase(),
+                        style: GoogleFonts.syne(
+                          color: const Color(0xFF333333),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 2,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Acesso à Conta',
+                      style: GoogleFonts.inter(
+                        color: const Color(0xFF555555),
+                        fontSize: 11,
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    ...formFields.map(
+                      (field) => Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Container(
+                          height: 36,
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: const Color(0xFFDDDDDD)),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              field,
+                              style: GoogleFonts.inter(
+                                color: const Color(0xFFAAAAAA),
+                                fontSize: 11,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Container(
+                      width: double.infinity,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFB06EFF),
                         borderRadius: BorderRadius.circular(6),
                       ),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(field,
-                            style: GoogleFonts.inter(
-                                color: const Color(0xFFAAAAAA), fontSize: 11)),
+                      child: Center(
+                        child: Text(
+                          'Entrar',
+                          style: GoogleFonts.inter(
+                            color: Colors.white,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
                       ),
                     ),
-                  )),
-              Container(
-                width: double.infinity,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFB06EFF),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Center(
-                  child: Text('Entrar',
-                      style: GoogleFonts.inter(
-                          color: Colors.white,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700)),
+                  ],
                 ),
               ),
-            ]),
+            ],
           ),
-        ]),
-      ),
-      const SizedBox(height: 12),
-      Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: const Color(0xFF0D1520),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.white.withAlpha(12)),
         ),
-        child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          const Icon(Icons.dns_outlined, size: 14, color: Color(0xFFB06EFF)),
-          const SizedBox(width: 8),
-          Expanded(
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                Text('Método de ataque',
-                    style: GoogleFonts.jetBrainsMono(
-                        color: const Color(0xFFB06EFF),
-                        fontSize: 10,
-                        fontWeight: FontWeight.w700)),
-                const SizedBox(height: 3),
-                Text(attackMethod,
-                    style: GoogleFonts.inter(
-                        color: Colors.white60, fontSize: 11, height: 1.3)),
-              ])),
-        ]),
-      ),
-      if (widget.revealed && redFlags.isNotEmpty) ...[
-        const SizedBox(height: 10),
+        const SizedBox(height: 12),
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: widget.color.withAlpha(12),
+            color: const Color(0xFF0D1520),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: widget.color.withAlpha(50)),
+            border: Border.all(color: Colors.white.withAlpha(12)),
           ),
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text('Sinais de alerta',
-                style: GoogleFonts.jetBrainsMono(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Icon(
+                Icons.dns_outlined,
+                size: 14,
+                color: Color(0xFFB06EFF),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Método de ataque',
+                      style: GoogleFonts.jetBrainsMono(
+                        color: const Color(0xFFB06EFF),
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      attackMethod,
+                      style: GoogleFonts.inter(
+                        color: Colors.white60,
+                        fontSize: 11,
+                        height: 1.3,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (widget.revealed && redFlags.isNotEmpty) ...[
+          const SizedBox(height: 10),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: widget.color.withAlpha(12),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: widget.color.withAlpha(50)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Sinais de alerta',
+                  style: GoogleFonts.jetBrainsMono(
                     color: widget.color,
                     fontSize: 10,
-                    fontWeight: FontWeight.w700)),
-            const SizedBox(height: 6),
-            ...redFlags.map((f) => Padding(
-                  padding: const EdgeInsets.only(bottom: 3),
-                  child: Row(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                ...redFlags.map(
+                  (f) => Padding(
+                    padding: const EdgeInsets.only(bottom: 3),
+                    child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('⚠ ',
-                            style:
-                                TextStyle(color: widget.color, fontSize: 10)),
+                        Text(
+                          '⚠ ',
+                          style: TextStyle(color: widget.color, fontSize: 10),
+                        ),
                         Expanded(
-                            child: Text(f,
-                                style: TextStyle(
-                                    color: widget.color,
-                                    fontSize: 10,
-                                    height: 1.3))),
-                      ]),
-                )),
-          ]),
-        ),
+                          child: Text(
+                            f,
+                            style: TextStyle(
+                              color: widget.color,
+                              fontSize: 10,
+                              height: 1.3,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ],
-    ]);
+    );
   }
 }
 
@@ -6674,12 +9050,18 @@ class _QrPainter extends CustomPainter {
     void drawCorner(double x, double y) {
       canvas.drawRect(Rect.fromLTWH(x, y, blockSize * 3, blockSize * 3), paint);
       canvas.drawRect(
-          Rect.fromLTWH(x + blockSize * 0.5, y + blockSize * 0.5, blockSize * 2,
-              blockSize * 2),
-          Paint()..color = Colors.white);
+        Rect.fromLTWH(
+          x + blockSize * 0.5,
+          y + blockSize * 0.5,
+          blockSize * 2,
+          blockSize * 2,
+        ),
+        Paint()..color = Colors.white,
+      );
       canvas.drawRect(
-          Rect.fromLTWH(x + blockSize, y + blockSize, blockSize, blockSize),
-          paint);
+        Rect.fromLTWH(x + blockSize, y + blockSize, blockSize, blockSize),
+        paint,
+      );
     }
 
     drawCorner(0, 0);
@@ -6706,13 +9088,13 @@ class _QrPainter extends CustomPainter {
       [2, 7],
       [4, 7],
       [6, 7],
-      [7, 7]
+      [7, 7],
     ];
     for (final p in positions) {
       canvas.drawRect(
-          Rect.fromLTWH(
-              p[0] * blockSize, p[1] * blockSize, blockSize, blockSize),
-          paint);
+        Rect.fromLTWH(p[0] * blockSize, p[1] * blockSize, blockSize, blockSize),
+        paint,
+      );
     }
   }
 

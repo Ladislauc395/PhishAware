@@ -11,7 +11,7 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
-  google_fonts: ^8.0.2
+  google_fonts: ^6.2.1
   google_generative_ai: ^0.4.6
   shared_preferences: ^2.3.2
   http: ^1.2.2
@@ -26,6 +26,8 @@ dependencies:
   path_provider: ^2.1.1 
   audioplayers: ^6.5.1
   record: ^6.1.1
+  permission_handler: ^11.3.1
+  animated_theme_switcher: ^2.0.10
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -41,4 +43,4 @@ flutter:
     - assets/sounds/start.mp3
     - assets/sounds/tick.mp3
     - assets/animations/
-    - assets/images/   
+    - assets/images/

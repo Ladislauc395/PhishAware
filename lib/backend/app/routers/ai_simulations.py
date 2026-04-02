@@ -1,11 +1,3 @@
-"""
-app/routers/ai_simulations.py
-
-Geração de simulações de phishing ULTRA-REALISTAS via Groq.
-Tipos: email | sms | whatsapp | login_page | url
-Inclui: brand_color, logo_url, suspicious_elements (tocáveis), layout_data
-Chave Groq lida de .env — cliente nunca a vê.
-"""
 
 import os
 import re
@@ -331,3 +323,5 @@ async def generate_simulation(body: GenerateRequest):
         if "401" in err or "invalid_api_key" in err.lower():
             raise HTTPException(status_code=401, detail="Chave Groq inválida no servidor.")
         raise HTTPException(status_code=500, detail=f"Erro ao gerar simulação: {err}")
+
+        

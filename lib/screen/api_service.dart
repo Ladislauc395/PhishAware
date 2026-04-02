@@ -6,7 +6,7 @@ import 'dart:io' show Platform;
 class ApiService {
   static String get _base {
     if (kIsWeb) return 'http://localhost:8000';
-    return 'http://10.238.20.68:8000';
+    return 'http://10.187.134.68:8000';
   }
 
   static String get baseUrl => _base;
@@ -17,8 +17,9 @@ class ApiService {
   static Future<Map<String, dynamic>> _get(String path) async {
     final res = await http.get(
       Uri.parse('$_base$path'),
-      headers:
-          authToken.isNotEmpty ? {'Authorization': 'Bearer $authToken'} : {},
+      headers: authToken.isNotEmpty
+          ? {'Authorization': 'Bearer $authToken'}
+          : {},
     );
     return jsonDecode(res.body);
   }
@@ -36,9 +37,14 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> register(
-          String name, String email, String password) =>
-      _post('/auth/register',
-          {'name': name, 'email': email, 'password': password});
+    String name,
+    String email,
+    String password,
+  ) => _post('/auth/register', {
+    'name': name,
+    'email': email,
+    'password': password,
+  });
 
   static Future<Map<String, dynamic>> login(String email, String password) =>
       _post('/auth/login', {'email': email, 'password': password});
@@ -50,9 +56,14 @@ class ApiService {
       _post('/auth/verify-code', {'email': email, 'code': code});
 
   static Future<Map<String, dynamic>> resetPassword(
-          String email, String code, String newPassword) =>
-      _post('/auth/reset-password',
-          {'email': email, 'code': code, 'new_password': newPassword});
+    String email,
+    String code,
+    String newPassword,
+  ) => _post('/auth/reset-password', {
+    'email': email,
+    'code': code,
+    'new_password': newPassword,
+  });
 
   static Future<List<dynamic>> getQuestions() async {
     final res = await http.get(Uri.parse('$_base/quiz/questions'));
@@ -60,21 +71,26 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> submitAnswer(
-          String questionId, String optionId) =>
-      _post('/quiz/answer', {
-        'question_id': questionId,
-        'selected_option_id': optionId,
-        'user_id': currentUserId,
-      });
+    String questionId,
+    String optionId,
+  ) => _post('/quiz/answer', {
+    'question_id': questionId,
+    'selected_option_id': optionId,
+    'user_id': currentUserId,
+  });
 
   static Future<List<dynamic>> getSimulations() async {
-    final res =
-        await http.get(Uri.parse('$_base/simulations/?user_id=$currentUserId'));
+    final res = await http.get(
+      Uri.parse('$_base/simulations/?user_id=$currentUserId'),
+    );
     return jsonDecode(res.body);
   }
 
   static Future<void> updateSimulationProgress(
-      String simId, int progress, bool completed) async {
+    String simId,
+    int progress,
+    bool completed,
+  ) async {
     await _post('/simulations/$simId/progress', {
       'simulation_id': simId,
       'progress': progress,
@@ -87,19 +103,22 @@ class ApiService {
       _get('/stats/?user_id=$currentUserId');
 
   static Future<Map<String, dynamic>> addXp(
-          int xp, bool correct, String category,
-          {String scenario = ''}) =>
-      _post('/stats/add-xp', {
-        'xp': xp,
-        'correct': correct,
-        'category': category,
-        'user_id': currentUserId,
-        if (scenario.isNotEmpty) 'scenario': scenario,
-      });
+    int xp,
+    bool correct,
+    String category, {
+    String scenario = '',
+  }) => _post('/stats/add-xp', {
+    'xp': xp,
+    'correct': correct,
+    'category': category,
+    'user_id': currentUserId,
+    if (scenario.isNotEmpty) 'scenario': scenario,
+  });
 
   static Future<List<dynamic>> getHistory() async {
-    final res = await http
-        .get(Uri.parse('$_base/stats/history?user_id=$currentUserId&limit=30'));
+    final res = await http.get(
+      Uri.parse('$_base/stats/history?user_id=$currentUserId&limit=30'),
+    );
     return jsonDecode(res.body);
   }
 
@@ -129,9 +148,13 @@ class ApiService {
   }
 
   static Future<String> sendChatMessage(
-      String message, List<Map<String, String>> history) async {
-    final res =
-        await _post('/chat/message', {'message': message, 'history': history});
+    String message,
+    List<Map<String, String>> history,
+  ) async {
+    final res = await _post('/chat/message', {
+      'message': message,
+      'history': history,
+    });
     return res['reply'] ?? 'Sem resposta.';
   }
 
@@ -169,13 +192,34 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> submitAdvancedSimAnswer(
-          String simType, String simId, bool isPhishing,
-          {int? timeSeconds}) =>
-      _post('/advanced-sims/answer', {
-        'sim_type': simType,
-        'sim_id': simId,
-        'user_answer': isPhishing,
-        'user_id': currentUserId,
-        if (timeSeconds != null) 'time_spent_seconds': timeSeconds,
-      });
+    String simType,
+    String simId,
+    bool isPhishing, {
+    int? timeSeconds,
+  }) => _post('/advanced-sims/answer', {
+    'sim_type': simType,
+    'sim_id': simId,
+    'user_answer': isPhishing,
+    'user_id': currentUserId,
+    if (timeSeconds != null) 'time_spent_seconds': timeSeconds,
+  });
+
+  static Future<Map<String, dynamic>> generateVishingClone({
+    required String audioPath,
+  }) async {
+    final req = http.MultipartRequest(
+      'POST',
+      Uri.parse('$_base/vishing-clone/generate'),
+    );
+    if (authToken.isNotEmpty) {
+      req.headers['Authorization'] = 'Bearer $authToken';
+    }
+    req.files.add(await http.MultipartFile.fromPath('audio', audioPath));
+    final res = await req.send();
+    if (res.statusCode != 200) {
+      throw Exception('Failed to generate vishing clone: ${res.statusCode}');
+    }
+    final resStr = await res.stream.bytesToString();
+    return jsonDecode(resStr) as Map<String, dynamic>;
+  }
 }

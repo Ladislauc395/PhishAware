@@ -6,6 +6,7 @@ import 'dashboard_screen.dart';
 import 'simulation_screen.dart';
 import 'tips_screen.dart';
 import 'ranking_screen.dart';
+import '../widgets/shimmer_widgets.dart';
 
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
@@ -46,9 +47,7 @@ class _MainShellState extends State<MainShell> {
 
   void _navigate(AppTab tab) {
     setState(() => _activeTab = tab);
-    if (tab == AppTab.dashboard) {
-      _loadData();
-    }
+    if (tab == AppTab.dashboard) _loadData();
   }
 
   Future<void> _onSimulationDone(String id) async {
@@ -56,15 +55,16 @@ class _MainShellState extends State<MainShell> {
   }
 
   Widget _buildBody() {
-    if (_loading) {
-      return const Center(
-        child: CircularProgressIndicator(color: AppColors.accent),
-      );
-    }
+    // ── Shimmer enquanto carrega o dashboard ──────────────────────────────
+    if (_loading) return const DashboardShimmer();
+
     switch (_activeTab) {
       case AppTab.dashboard:
         return DashboardScreen(
-            stats: _stats, onNavigate: _navigate, onRefresh: _loadData);
+          stats: _stats,
+          onNavigate: _navigate,
+          onRefresh: _loadData,
+        );
       case AppTab.simulations:
         return SimulationsScreen(
           simulations: _simulations,
@@ -85,11 +85,15 @@ class _MainShellState extends State<MainShell> {
         duration: const Duration(milliseconds: 300),
         child: KeyedSubtree(key: ValueKey(_activeTab), child: _buildBody()),
       ),
-      bottomNavigationBar:
-          _BottomNav(activeTab: _activeTab, onTabChange: _navigate),
+      bottomNavigationBar: _BottomNav(
+        activeTab: _activeTab,
+        onTabChange: _navigate,
+      ),
     );
   }
 }
+
+// ─── Bottom Nav ───────────────────────────────────────────────────────────────
 
 class _BottomNav extends StatelessWidget {
   final AppTab activeTab;
@@ -107,8 +111,8 @@ class _BottomNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        color: Color(0xFF0A0E14),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0A0E14),
         border: Border(top: BorderSide(color: AppColors.border, width: 1)),
       ),
       child: SafeArea(
@@ -118,12 +122,14 @@ class _BottomNav extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: _tabs
-                .map((t) => _NavItem(
-                      icon: t.$3,
-                      label: t.$2,
-                      isActive: activeTab == t.$1,
-                      onTap: () => onTabChange(t.$1),
-                    ))
+                .map(
+                  (t) => _NavItem(
+                    icon: t.$3,
+                    label: t.$2,
+                    isActive: activeTab == t.$1,
+                    onTap: () => onTabChange(t.$1),
+                  ),
+                )
                 .toList(),
           ),
         ),
@@ -162,9 +168,11 @@ class _NavItem extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon,
-                size: 22,
-                color: isActive ? AppColors.accent : AppColors.textMuted),
+            Icon(
+              icon,
+              size: 22,
+              color: isActive ? AppColors.accent : AppColors.textMuted,
+            ),
             const SizedBox(height: 4),
             Text(
               label,

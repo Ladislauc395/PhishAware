@@ -97,12 +97,16 @@ class _BgPainter extends CustomPainter {
     final offsetX = (progress * spacing) % spacing;
     final offsetY = (progress * spacing * 0.7) % spacing;
 
-    for (double x = -spacing + offsetX;
-        x < size.width + spacing;
-        x += spacing) {
-      for (double y = -spacing + offsetY;
-          y < size.height + spacing;
-          y += spacing) {
+    for (
+      double x = -spacing + offsetX;
+      x < size.width + spacing;
+      x += spacing
+    ) {
+      for (
+        double y = -spacing + offsetY;
+        y < size.height + spacing;
+        y += spacing
+      ) {
         canvas.drawCircle(Offset(x, y), 1.2, dotPaint);
       }
     }
@@ -156,12 +160,14 @@ class _AiLabHeroCard extends StatelessWidget {
           ),
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
-              color: const Color(0xFF00FF88).withValues(alpha: 0.392)),
+            color: const Color(0xFF00FF88).withValues(alpha: 0.392),
+          ),
           boxShadow: [
             BoxShadow(
-                color: const Color(0xFF00FF88).withValues(alpha: 0.118),
-                blurRadius: 30,
-                spreadRadius: -5)
+              color: const Color(0xFF00FF88).withValues(alpha: 0.118),
+              blurRadius: 30,
+              spreadRadius: -5,
+            ),
           ],
         ),
         child: Row(
@@ -178,64 +184,88 @@ class _AiLabHeroCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                      color: const Color(0xFF00FF88).withValues(alpha: 0.392),
-                      blurRadius: 16,
-                      spreadRadius: -4)
+                    color: const Color(0xFF00FF88).withValues(alpha: 0.392),
+                    blurRadius: 16,
+                    spreadRadius: -4,
+                  ),
                 ],
               ),
               child: const Center(
-                  child: Text('🧠', style: TextStyle(fontSize: 26))),
+                child: Text('🧠', style: TextStyle(fontSize: 26)),
+              ),
             ),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(children: [
-                    Text('AI Phishing Lab',
+                  Row(
+                    children: [
+                      Text(
+                        'AI Phishing Lab',
                         style: GoogleFonts.syne(
-                            color: Colors.white,
-                            fontSize: 17,
-                            fontWeight: FontWeight.w800)),
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF00FF88).withValues(alpha: 0.157),
-                        borderRadius: BorderRadius.circular(4),
-                        border: Border.all(
-                            color: const Color(0xFF00FF88)
-                                .withValues(alpha: 0.392)),
+                          color: Colors.white,
+                          fontSize: 17,
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
-                      child: Text('NOVO',
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(
+                            0xFF00FF88,
+                          ).withValues(alpha: 0.157),
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(
+                            color: const Color(
+                              0xFF00FF88,
+                            ).withValues(alpha: 0.392),
+                          ),
+                        ),
+                        child: Text(
+                          'NOVO',
                           style: GoogleFonts.jetBrainsMono(
-                              color: const Color(0xFF00FF88),
-                              fontSize: 8,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 1)),
-                    ),
-                  ]),
+                            color: const Color(0xFF00FF88),
+                            fontSize: 8,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 1,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                   const SizedBox(height: 4),
                   Text(
-                      'Simulações geradas por IA em tempo real + Análise Forense',
-                      style: GoogleFonts.inter(
-                          color: Colors.white.withValues(alpha: 0.392),
-                          fontSize: 11,
-                          height: 1.3)),
+                    'Simulações geradas por IA em tempo real + Análise Forense',
+                    style: GoogleFonts.inter(
+                      color: Colors.white.withValues(alpha: 0.392),
+                      fontSize: 11,
+                      height: 1.3,
+                    ),
+                  ),
                   const SizedBox(height: 10),
-                  Wrap(spacing: 6, children: [
-                    _MiniTag('📧 Email'),
-                    _MiniTag('💬 SMS'),
-                    _MiniTag('🔗 URL'),
-                    _MiniTag('🔬 Forense'),
-                  ]),
+                  Wrap(
+                    spacing: 6,
+                    children: [
+                      _MiniTag('📧 Email'),
+                      _MiniTag('💬 SMS'),
+                      _MiniTag('🔗 URL'),
+                      _MiniTag('🔬 Forense'),
+                    ],
+                  ),
                 ],
               ),
             ),
             const SizedBox(width: 8),
-            const Icon(Icons.arrow_forward_ios,
-                color: Color(0xFF00FF88), size: 16),
+            const Icon(
+              Icons.arrow_forward_ios,
+              color: Color(0xFF00FF88),
+              size: 16,
+            ),
           ],
         ),
       ),
@@ -248,16 +278,20 @@ class _MiniTag extends StatelessWidget {
   const _MiniTag(this.label);
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.039),
-          borderRadius: BorderRadius.circular(4),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.078)),
-        ),
-        child: Text(label,
-            style: GoogleFonts.inter(
-                color: Colors.white.withValues(alpha: 0.392), fontSize: 9)),
-      );
+    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+    decoration: BoxDecoration(
+      color: Colors.white.withValues(alpha: 0.039),
+      borderRadius: BorderRadius.circular(4),
+      border: Border.all(color: Colors.white.withValues(alpha: 0.078)),
+    ),
+    child: Text(
+      label,
+      style: GoogleFonts.inter(
+        color: Colors.white.withValues(alpha: 0.392),
+        fontSize: 9,
+      ),
+    ),
+  );
 }
 
 class _Header extends StatelessWidget {
@@ -274,8 +308,9 @@ class _Header extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFF0D1520).withValues(alpha: 0.784),
         borderRadius: BorderRadius.circular(24),
-        border:
-            Border.all(color: const Color(0xFF00FF88).withValues(alpha: 0.157)),
+        border: Border.all(
+          color: const Color(0xFF00FF88).withValues(alpha: 0.157),
+        ),
         boxShadow: [
           BoxShadow(
             color: const Color(0xFF00FF88).withValues(alpha: 0.059),
@@ -291,14 +326,16 @@ class _Header extends StatelessWidget {
             children: [
               Flexible(
                 child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFF00FF88).withValues(alpha: 0.078),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                        color:
-                            const Color(0xFF00FF88).withValues(alpha: 0.235)),
+                      color: const Color(0xFF00FF88).withValues(alpha: 0.235),
+                    ),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -307,17 +344,20 @@ class _Header extends StatelessWidget {
                         width: 6,
                         height: 6,
                         decoration: const BoxDecoration(
-                            color: Color(0xFF00FF88), shape: BoxShape.circle),
+                          color: Color(0xFF00FF88),
+                          shape: BoxShape.circle,
+                        ),
                       ),
                       const SizedBox(width: 6),
                       Flexible(
                         child: Text(
                           'MODO TREINO ACTIVO',
                           style: GoogleFonts.jetBrainsMono(
-                              color: const Color(0xFF00FF88),
-                              fontSize: 9,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 1.5),
+                            color: const Color(0xFF00FF88),
+                            fontSize: 9,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 1.5,
+                          ),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -326,32 +366,43 @@ class _Header extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              Text('$completed/$total',
-                  style: GoogleFonts.jetBrainsMono(
-                      color: const Color(0xFF00FF88),
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700)),
+              Text(
+                '$completed/$total',
+                style: GoogleFonts.jetBrainsMono(
+                  color: const Color(0xFF00FF88),
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 12),
-          Text('Simulações\nde Ataque',
-              style: GoogleFonts.syne(
-                  color: Colors.white,
-                  fontSize: 28,
-                  fontWeight: FontWeight.w800,
-                  height: 1.1)),
+          Text(
+            'Simulações\nde Ataque',
+            style: GoogleFonts.syne(
+              color: Colors.white,
+              fontSize: 28,
+              fontWeight: FontWeight.w800,
+              height: 1.1,
+            ),
+          ),
           const SizedBox(height: 4),
-          Text('Treina contra ataques reais documentados',
-              style: GoogleFonts.jetBrainsMono(
-                  color: Colors.white.withValues(alpha: 0.196), fontSize: 11)),
+          Text(
+            'Treina contra ataques reais documentados',
+            style: GoogleFonts.jetBrainsMono(
+              color: Colors.white.withValues(alpha: 0.196),
+              fontSize: 11,
+            ),
+          ),
           const SizedBox(height: 16),
           Stack(
             children: [
               Container(
                 height: 6,
                 decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.039),
-                    borderRadius: BorderRadius.circular(3)),
+                  color: Colors.white.withValues(alpha: 0.039),
+                  borderRadius: BorderRadius.circular(3),
+                ),
               ),
               TweenAnimationBuilder<double>(
                 tween: Tween(begin: 0, end: progress),
@@ -363,13 +414,16 @@ class _Header extends StatelessWidget {
                     height: 6,
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
-                          colors: [Color(0xFF00FF88), Color(0xFF00BFFF)]),
+                        colors: [Color(0xFF00FF88), Color(0xFF00BFFF)],
+                      ),
                       borderRadius: BorderRadius.circular(3),
                       boxShadow: [
                         BoxShadow(
-                            color: const Color(0xFF00FF88)
-                                .withValues(alpha: 0.314),
-                            blurRadius: 8)
+                          color: const Color(
+                            0xFF00FF88,
+                          ).withValues(alpha: 0.314),
+                          blurRadius: 8,
+                        ),
                       ],
                     ),
                   ),
@@ -405,25 +459,25 @@ class _SimCardState extends State<_SimCard>
       icon: '📧',
       label: 'PHISHING POR EMAIL',
       color: Color(0xFF00FF88),
-      threat: 'Credenciais / Malware'
+      threat: 'Credenciais / Malware',
     ),
     'sms': (
       icon: '💬',
       label: 'SMISHING',
       color: Color(0xFFFF6B35),
-      threat: 'Roubo de identidade'
+      threat: 'Roubo de identidade',
     ),
     'url': (
       icon: '🔗',
       label: 'URL FALSO',
       color: Color(0xFF00BFFF),
-      threat: 'Dados bancários'
+      threat: 'Dados bancários',
     ),
     'app': (
       icon: '📱',
       label: 'APP / QR CODE',
       color: Color(0xFFB06EFF),
-      threat: 'Acesso ao dispositivo'
+      threat: 'Acesso ao dispositivo',
     ),
   };
 
@@ -431,10 +485,14 @@ class _SimCardState extends State<_SimCard>
   void initState() {
     super.initState();
     _ctrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 700));
+      vsync: this,
+      duration: const Duration(milliseconds: 700),
+    );
     _fade = CurvedAnimation(parent: _ctrl, curve: Curves.easeOut);
-    _slide = Tween<Offset>(begin: const Offset(0, 0.4), end: Offset.zero)
-        .animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOutCubic));
+    _slide = Tween<Offset>(
+      begin: const Offset(0, 0.4),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOutCubic));
     Future.delayed(Duration(milliseconds: 100 + widget.index * 120), () {
       if (mounted) {
         _ctrl.forward();
@@ -476,16 +534,17 @@ class _SimCardState extends State<_SimCard>
                   color: sim.completed
                       ? color.withValues(alpha: 0.392)
                       : _hovered
-                          ? color.withValues(alpha: 0.314)
-                          : Colors.white.withValues(alpha: 0.059),
+                      ? color.withValues(alpha: 0.314)
+                      : Colors.white.withValues(alpha: 0.059),
                   width: sim.completed ? 1.5 : 1,
                 ),
                 boxShadow: [
                   if (sim.completed || _hovered)
                     BoxShadow(
-                        color: color.withValues(alpha: 0.078),
-                        blurRadius: 20,
-                        spreadRadius: -4),
+                      color: color.withValues(alpha: 0.078),
+                      blurRadius: 20,
+                      spreadRadius: -4,
+                    ),
                 ],
               ),
               child: Column(
@@ -499,41 +558,54 @@ class _SimCardState extends State<_SimCard>
                           width: 52,
                           height: 52,
                           decoration: BoxDecoration(
-                              color: color.withValues(alpha: 0.059),
-                              borderRadius: BorderRadius.circular(14),
-                              border: Border.all(
-                                  color: color.withValues(alpha: 0.157))),
+                            color: color.withValues(alpha: 0.059),
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(
+                              color: color.withValues(alpha: 0.157),
+                            ),
+                          ),
                           child: Center(
-                              child: Text(data.icon,
-                                  style: const TextStyle(fontSize: 22))),
+                            child: Text(
+                              data.icon,
+                              style: const TextStyle(fontSize: 22),
+                            ),
+                          ),
                         ),
                         const SizedBox(width: 14),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(data.label,
-                                  style: GoogleFonts.jetBrainsMono(
-                                      color: color,
-                                      fontSize: 9,
-                                      fontWeight: FontWeight.w700,
-                                      letterSpacing: 1.5),
-                                  overflow: TextOverflow.ellipsis),
+                              Text(
+                                data.label,
+                                style: GoogleFonts.jetBrainsMono(
+                                  color: color,
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 1.5,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
                               const SizedBox(height: 4),
-                              Text(sim.title,
-                                  style: GoogleFonts.syne(
-                                      color: Colors.white,
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w700),
-                                  overflow: TextOverflow.ellipsis),
+                              Text(
+                                sim.title,
+                                style: GoogleFonts.syne(
+                                  color: Colors.white,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
                               const SizedBox(height: 2),
-                              Text(sim.description,
-                                  style: GoogleFonts.jetBrainsMono(
-                                      color:
-                                          Colors.white.withValues(alpha: 0.196),
-                                      fontSize: 10),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis),
+                              Text(
+                                sim.description,
+                                style: GoogleFonts.jetBrainsMono(
+                                  color: Colors.white.withValues(alpha: 0.196),
+                                  fontSize: 10,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ],
                           ),
                         ),
@@ -542,25 +614,38 @@ class _SimCardState extends State<_SimCard>
                             ? Container(
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: const Color(0xFF00FF88)
-                                        .withValues(alpha: 0.078),
-                                    border: Border.all(
-                                        color: const Color(0xFF00FF88)
-                                            .withValues(alpha: 0.235))),
-                                child: const Icon(Icons.check,
-                                    color: Color(0xFF00FF88), size: 16),
+                                  shape: BoxShape.circle,
+                                  color: const Color(
+                                    0xFF00FF88,
+                                  ).withValues(alpha: 0.078),
+                                  border: Border.all(
+                                    color: const Color(
+                                      0xFF00FF88,
+                                    ).withValues(alpha: 0.235),
+                                  ),
+                                ),
+                                child: const Icon(
+                                  Icons.check,
+                                  color: Color(0xFF00FF88),
+                                  size: 16,
+                                ),
                               )
                             : Container(
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: Colors.white.withValues(alpha: 0.02),
-                                    border: Border.all(
-                                        color: Colors.white
-                                            .withValues(alpha: 0.059))),
-                                child: const Icon(Icons.play_arrow,
-                                    color: Colors.white, size: 16),
+                                  shape: BoxShape.circle,
+                                  color: Colors.white.withValues(alpha: 0.02),
+                                  border: Border.all(
+                                    color: Colors.white.withValues(
+                                      alpha: 0.059,
+                                    ),
+                                  ),
+                                ),
+                                child: const Icon(
+                                  Icons.play_arrow,
+                                  color: Colors.white,
+                                  size: 16,
+                                ),
                               ),
                       ],
                     ),
@@ -572,19 +657,22 @@ class _SimCardState extends State<_SimCard>
                       runSpacing: 6,
                       children: [
                         _InfoChip(
-                            icon: '⚡',
-                            label: sim.difficulty,
-                            color: sim.difficultyColor),
+                          icon: '⚡',
+                          label: sim.difficulty,
+                          color: sim.difficultyColor,
+                        ),
                         _InfoChip(
-                            icon: '🎯',
-                            label: '${sim.xp} XP',
-                            color: const Color(0xFFFFCC00)),
+                          icon: '🎯',
+                          label: '${sim.xp} XP',
+                          color: const Color(0xFFFFCC00),
+                        ),
                         _InfoChip(icon: '⚠️', label: data.threat, color: color),
                         if (sim.progress > 0 && !sim.completed)
                           _InfoChip(
-                              icon: '▶',
-                              label: '${sim.progress}%',
-                              color: const Color(0xFF00BFFF)),
+                            icon: '▶',
+                            label: '${sim.progress}%',
+                            color: const Color(0xFF00BFFF),
+                          ),
                       ],
                     ),
                   ),
@@ -601,55 +689,69 @@ class _SimCardState extends State<_SimCard>
 class _InfoChip extends StatelessWidget {
   final String icon, label;
   final Color color;
-  const _InfoChip(
-      {required this.icon, required this.label, required this.color});
+  const _InfoChip({
+    required this.icon,
+    required this.label,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.039),
-          borderRadius: BorderRadius.circular(6),
-          border: Border.all(color: color.withValues(alpha: 0.118)),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(icon, style: const TextStyle(fontSize: 10)),
-            const SizedBox(width: 4),
-            Flexible(
-              child: Text(label,
-                  style: GoogleFonts.jetBrainsMono(
-                      color: color, fontSize: 9, fontWeight: FontWeight.w600),
-                  overflow: TextOverflow.ellipsis),
+    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+    decoration: BoxDecoration(
+      color: color.withValues(alpha: 0.039),
+      borderRadius: BorderRadius.circular(6),
+      border: Border.all(color: color.withValues(alpha: 0.118)),
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(icon, style: const TextStyle(fontSize: 10)),
+        const SizedBox(width: 4),
+        Flexible(
+          child: Text(
+            label,
+            style: GoogleFonts.jetBrainsMono(
+              color: color,
+              fontSize: 9,
+              fontWeight: FontWeight.w600,
             ),
-          ],
+            overflow: TextOverflow.ellipsis,
+          ),
         ),
-      );
+      ],
+    ),
+  );
 }
 
 class _EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('📡', style: TextStyle(fontSize: 48)),
-            const SizedBox(height: 16),
-            Text('SEM SINAL',
-                style: GoogleFonts.jetBrainsMono(
-                    color: const Color(0xFF00FF88),
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 3)),
-            const SizedBox(height: 8),
-            Text('Sem ligação ao servidor',
-                style: GoogleFonts.jetBrainsMono(
-                    color: Colors.white.withValues(alpha: 0.157),
-                    fontSize: 11)),
-          ],
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Text('📡', style: TextStyle(fontSize: 48)),
+        const SizedBox(height: 16),
+        Text(
+          'SEM SINAL',
+          style: GoogleFonts.jetBrainsMono(
+            color: const Color(0xFF00FF88),
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 3,
+          ),
         ),
-      );
+        const SizedBox(height: 8),
+        Text(
+          'Sem ligação ao servidor',
+          style: GoogleFonts.jetBrainsMono(
+            color: Colors.white.withValues(alpha: 0.157),
+            fontSize: 11,
+          ),
+        ),
+      ],
+    ),
+  );
 }
 
 class _AssistantFab extends StatefulWidget {
@@ -665,8 +767,9 @@ class _AssistantFabState extends State<_AssistantFab>
   void initState() {
     super.initState();
     _pulse = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 1500))
-      ..repeat(reverse: true);
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    )..repeat(reverse: true);
   }
 
   @override
@@ -687,8 +790,9 @@ class _AssistantFabState extends State<_AssistantFab>
             height: 60 + _pulse.value * 10,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: const Color(0xFF00FF88)
-                  .withValues(alpha: (20 * (1 - _pulse.value)) / 255.0),
+              color: const Color(
+                0xFF00FF88,
+              ).withValues(alpha: (20 * (1 - _pulse.value)) / 255.0),
             ),
           ),
           child!,
@@ -711,13 +815,17 @@ class _AssistantFabState extends State<_AssistantFab>
             ),
             boxShadow: [
               BoxShadow(
-                  color: const Color(0xFF00FF88).withValues(alpha: 0.314),
-                  blurRadius: 20,
-                  spreadRadius: -4),
+                color: const Color(0xFF00FF88).withValues(alpha: 0.314),
+                blurRadius: 20,
+                spreadRadius: -4,
+              ),
             ],
           ),
-          child: const Icon(Icons.smart_toy_outlined,
-              color: Colors.black, size: 24),
+          child: const Icon(
+            Icons.smart_toy_outlined,
+            color: Colors.black,
+            size: 24,
+          ),
         ),
       ),
     );
@@ -762,15 +870,22 @@ class _SimulationDetailScreenState extends State<SimulationDetailScreen>
   @override
   void initState() {
     super.initState();
-    _typewriter =
-        AnimationController(vsync: this, duration: const Duration(seconds: 2));
+    _typewriter = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    );
     _shakeController = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 500));
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
     _successController = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 800));
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
     _timerPulse = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 600))
-      ..repeat(reverse: true);
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    )..repeat(reverse: true);
 
     _steps = _buildSteps(widget.sim);
     _startTypewriter(_steps[0].content);
@@ -821,17 +936,28 @@ class _SimulationDetailScreenState extends State<SimulationDetailScreen>
   }
 
   Future<void> _safeAddXp(
-      int xp, bool correct, String? category, String scenario) async {
+    int xp,
+    bool correct,
+    String? category,
+    String scenario,
+  ) async {
     try {
-      await ApiService.addXp(xp, correct, category ?? 'email',
-          scenario: scenario);
+      await ApiService.addXp(
+        xp,
+        correct,
+        category ?? 'email',
+        scenario: scenario,
+      );
     } catch (e) {
       debugPrint('[SimDetail] addXp erro: \$e');
     }
   }
 
   Future<void> _safeUpdateProgress(
-      String id, int progress, bool completed) async {
+    String id,
+    int progress,
+    bool completed,
+  ) async {
     try {
       await ApiService.updateSimulationProgress(id, progress, completed);
     } catch (e) {
@@ -847,8 +973,8 @@ class _SimulationDetailScreenState extends State<SimulationDetailScreen>
         return variant == 0
             ? _emailSteps(sim)
             : variant == 1
-                ? _emailSteps2(sim)
-                : _emailSteps3(sim);
+            ? _emailSteps2(sim)
+            : _emailSteps3(sim);
       case 'sms':
         return variant == 0 ? _smsSteps(sim) : _smsSteps2(sim);
       case 'url':
@@ -859,11 +985,11 @@ class _SimulationDetailScreenState extends State<SimulationDetailScreen>
   }
 
   List<_SimStep> _emailSteps(PhishSimulation sim) => [
-        _SimStep(
-          type: StepType.email,
-          title: '📧 Email Recebido',
-          subtitle: 'Analisa este email — toca nas partes suspeitas',
-          content: '''De: seguranca@bankportugal-alerta.com
+    _SimStep(
+      type: StepType.email,
+      title: '📧 Email Recebido',
+      subtitle: 'Analisa este email — toca nas partes suspeitas',
+      content: '''De: seguranca@bankportugal-alerta.com
 Para: tu@email.com
 Assunto: ⚠️ URGENTE: A tua conta foi suspensa
 
@@ -879,186 +1005,185 @@ Este processo deve ser concluído nas próximas 2 HORAS ou a tua conta será ENC
 
 Serviço de Segurança
 Banco de Portugal''',
-          suspiciousWords: [
-            'bankportugal-alerta.com',
-            'URGENTE',
-            'IMEDIATAMENTE',
-            '.xyz/reactivar',
-            '2 HORAS',
-            'ENCERRADA'
-          ],
-          question: 'Este email é legítimo ou phishing?',
-          options: ['✅ É legítimo, vou clicar', '🚨 É phishing, não clico'],
-          correctIndex: 1,
-          explanation:
-              'PHISHING DETECTADO! Pistas: domínio falso "bankportugal-alerta.com", urgência artificial, ameaças de encerramento, URL suspeito ".xyz". O Banco de Portugal nunca pede dados por email.',
-          audioCorrect:
-              '🎵 Excelente análise! Identificaste os sinais de phishing.',
-          audioWrong: '⚠️ Atenção! Nunca cliques em links de emails suspeitos.',
-        ),
-        _SimStep(
-          type: StepType.analysis,
-          title: '🔍 Análise do URL',
-          subtitle: 'Examina o link com atenção',
-          content: 'http://bankportugal-secure-login.xyz/reactivar?token=a7f2k',
-          suspiciousWords: ['.xyz', 'http://', 'bankportugal-secure-login'],
-          question: 'O que é mais suspeito neste URL?',
-          options: [
-            'O protocolo http://',
-            'O domínio .xyz e "bankportugal" junto',
-            'O parâmetro token=',
-            'Tudo parece normal'
-          ],
-          correctIndex: 1,
-          explanation:
-              'Correcto! ".xyz" é um domínio barato frequentemente usado em phishing. O banco verdadeiro seria "bancoportugal.pt". O http:// sem "s" também é suspeito.',
-          audioCorrect:
-              '🎵 Bem visto! Domínios falsos são uma técnica clássica.',
-          audioWrong:
-              '⚠️ O domínio .xyz combinado com nome de banco é sinal vermelho.',
-        ),
-        _SimStep(
-          type: StepType.decision,
-          title: '🎯 Decisão Final',
-          subtitle: 'O que fazes agora?',
-          content:
-              'Recebeste este email. A tua conta aparentemente está suspensa. Tens 2 horas para agir.',
-          suspiciousWords: [],
-          question: 'Qual é a acção mais segura?',
-          options: [
-            'Clicar no link e verificar rapidamente',
-            'Ignorar o email completamente',
-            'Ir directamente ao site do banco pelo browser',
-            'Reencaminhar para amigos para eles verem'
-          ],
-          correctIndex: 2,
-          explanation:
-              'Perfeito! Nunca cliques em links de emails. Vai sempre directamente ao site oficial digitando o endereço.',
-          audioCorrect:
-              '🎵 Atitude correcta! Acessa sempre os serviços directamente.',
-          audioWrong:
-              '⚠️ Nunca uses links de emails para aceder a contas bancárias.',
-        ),
-      ];
+      suspiciousWords: [
+        'bankportugal-alerta.com',
+        'URGENTE',
+        'IMEDIATAMENTE',
+        '.xyz/reactivar',
+        '2 HORAS',
+        'ENCERRADA',
+      ],
+      question: 'Este email é legítimo ou phishing?',
+      options: ['✅ É legítimo, vou clicar', '🚨 É phishing, não clico'],
+      correctIndex: 1,
+      explanation:
+          'PHISHING DETECTADO! Pistas: domínio falso "bankportugal-alerta.com", urgência artificial, ameaças de encerramento, URL suspeito ".xyz". O Banco de Portugal nunca pede dados por email.',
+      audioCorrect:
+          '🎵 Excelente análise! Identificaste os sinais de phishing.',
+      audioWrong: '⚠️ Atenção! Nunca cliques em links de emails suspeitos.',
+    ),
+    _SimStep(
+      type: StepType.analysis,
+      title: '🔍 Análise do URL',
+      subtitle: 'Examina o link com atenção',
+      content: 'http://bankportugal-secure-login.xyz/reactivar?token=a7f2k',
+      suspiciousWords: ['.xyz', 'http://', 'bankportugal-secure-login'],
+      question: 'O que é mais suspeito neste URL?',
+      options: [
+        'O protocolo http://',
+        'O domínio .xyz e "bankportugal" junto',
+        'O parâmetro token=',
+        'Tudo parece normal',
+      ],
+      correctIndex: 1,
+      explanation:
+          'Correcto! ".xyz" é um domínio barato frequentemente usado em phishing. O banco verdadeiro seria "bancoportugal.pt". O http:// sem "s" também é suspeito.',
+      audioCorrect: '🎵 Bem visto! Domínios falsos são uma técnica clássica.',
+      audioWrong:
+          '⚠️ O domínio .xyz combinado com nome de banco é sinal vermelho.',
+    ),
+    _SimStep(
+      type: StepType.decision,
+      title: '🎯 Decisão Final',
+      subtitle: 'O que fazes agora?',
+      content:
+          'Recebeste este email. A tua conta aparentemente está suspensa. Tens 2 horas para agir.',
+      suspiciousWords: [],
+      question: 'Qual é a acção mais segura?',
+      options: [
+        'Clicar no link e verificar rapidamente',
+        'Ignorar o email completamente',
+        'Ir directamente ao site do banco pelo browser',
+        'Reencaminhar para amigos para eles verem',
+      ],
+      correctIndex: 2,
+      explanation:
+          'Perfeito! Nunca cliques em links de emails. Vai sempre directamente ao site oficial digitando o endereço.',
+      audioCorrect:
+          '🎵 Atitude correcta! Acessa sempre os serviços directamente.',
+      audioWrong:
+          '⚠️ Nunca uses links de emails para aceder a contas bancárias.',
+    ),
+  ];
 
   List<_SimStep> _smsSteps(PhishSimulation sim) => [
-        _SimStep(
-          type: StepType.sms,
-          title: '💬 SMS Recebido',
-          subtitle: 'Mensagem no teu telemóvel',
-          content:
-              'CTT: O teu pacote #PT7823 está retido. Taxa aduaneira: 2.99€. Paga aqui: ctt-entrega.online/pagar ou o pacote será devolvido.',
-          suspiciousWords: ['ctt-entrega.online', '2.99€', 'Paga aqui'],
-          question: 'Esta mensagem é legítima?',
-          options: ['✅ Parece real, vou pagar', '🚨 É smishing, não pago'],
-          correctIndex: 1,
-          explanation:
-              'SMISHING! Os CTT nunca pedem pagamentos por SMS. O domínio "ctt-entrega.online" é falso. O site oficial é ctt.pt.',
-          audioCorrect:
-              '🎵 Bem detectado! SMS de cobrança são quase sempre fraude.',
-          audioWrong: '⚠️ Nunca pages por SMS. Vai ao site oficial verificar.',
-        ),
-        _SimStep(
-          type: StepType.analysis,
-          title: '🔍 Inspecionar o Link',
-          subtitle: 'Analisa o domínio',
-          content:
-              'ctt-entrega.online  vs  ctt.pt\n\n⚠️ O domínio à esquerda tem hífen e TLD .online — não é oficial.',
-          suspiciousWords: ['ctt-entrega.online', '.online'],
-          question: 'Qual é o domínio oficial dos CTT?',
-          options: [
-            'ctt-entrega.online',
-            'ctt.pt',
-            'ctt-portugal.com',
-            'entrega-ctt.pt'
-          ],
-          correctIndex: 1,
-          explanation:
-              'Os CTT usam sempre "ctt.pt". Qualquer variação é falsa. Empresas legítimas têm domínios simples e reconhecíveis.',
-          audioCorrect:
-              '🎵 Correcto! Domínios oficiais são sempre simples e directos.',
-          audioWrong: '⚠️ Verifica sempre o domínio antes de clicar.',
-        ),
-      ];
+    _SimStep(
+      type: StepType.sms,
+      title: '💬 SMS Recebido',
+      subtitle: 'Mensagem no teu telemóvel',
+      content:
+          'CTT: O teu pacote #PT7823 está retido. Taxa aduaneira: 2.99€. Paga aqui: ctt-entrega.online/pagar ou o pacote será devolvido.',
+      suspiciousWords: ['ctt-entrega.online', '2.99€', 'Paga aqui'],
+      question: 'Esta mensagem é legítima?',
+      options: ['✅ Parece real, vou pagar', '🚨 É smishing, não pago'],
+      correctIndex: 1,
+      explanation:
+          'SMISHING! Os CTT nunca pedem pagamentos por SMS. O domínio "ctt-entrega.online" é falso. O site oficial é ctt.pt.',
+      audioCorrect:
+          '🎵 Bem detectado! SMS de cobrança são quase sempre fraude.',
+      audioWrong: '⚠️ Nunca pages por SMS. Vai ao site oficial verificar.',
+    ),
+    _SimStep(
+      type: StepType.analysis,
+      title: '🔍 Inspecionar o Link',
+      subtitle: 'Analisa o domínio',
+      content:
+          'ctt-entrega.online  vs  ctt.pt\n\n⚠️ O domínio à esquerda tem hífen e TLD .online — não é oficial.',
+      suspiciousWords: ['ctt-entrega.online', '.online'],
+      question: 'Qual é o domínio oficial dos CTT?',
+      options: [
+        'ctt-entrega.online',
+        'ctt.pt',
+        'ctt-portugal.com',
+        'entrega-ctt.pt',
+      ],
+      correctIndex: 1,
+      explanation:
+          'Os CTT usam sempre "ctt.pt". Qualquer variação é falsa. Empresas legítimas têm domínios simples e reconhecíveis.',
+      audioCorrect:
+          '🎵 Correcto! Domínios oficiais são sempre simples e directos.',
+      audioWrong: '⚠️ Verifica sempre o domínio antes de clicar.',
+    ),
+  ];
 
   List<_SimStep> _urlSteps(PhishSimulation sim) => [
-        _SimStep(
-          type: StepType.browser,
-          title: '🌐 Página Suspeita',
-          subtitle: 'Examina esta URL com atenção',
-          content:
-              'https://paypa1.com/signin\n\n🔎 Dica: Compara cada carácter com "paypal.com".\nO número "1" e a letra "l" são visualmente semelhantes.',
-          suspiciousWords: ['paypa1', '1'],
-          question: 'O que está errado nesta URL?',
-          options: [
-            'Nada, parece o PayPal',
-            'O "1" em vez de "l" em paypa1',
-            'O https://',
-            'O /signin'
-          ],
-          correctIndex: 1,
-          explanation:
-              'Typosquatting! "paypa1.com" usa o número "1" em vez da letra "l". O site real é paypal.com.',
-          audioCorrect:
-              '🎵 Excelente! Atenção aos caracteres substituídos nos URLs.',
-          audioWrong:
-              '⚠️ "paypa1" com número 1 é diferente de "paypal" com letra l.',
-        ),
-        _SimStep(
-          type: StepType.decision,
-          title: '🔐 Certificado SSL',
-          subtitle: 'O https:// garante segurança?',
-          content:
-              'O site paypa1.com tem cadeado verde 🔒 e https://.\nMuitos pensam que isso significa que o site é legítimo.',
-          suspiciousWords: ['paypa1.com'],
-          question: 'O https:// significa que o site é legítimo?',
-          options: [
-            'Sim, https:// garante que é seguro',
-            'Não, apenas encripta a ligação',
-            'Só sites do governo têm https://',
-            'Sim, o cadeado prova autenticidade'
-          ],
-          correctIndex: 1,
-          explanation:
-              'MITO COMUM! https:// apenas encripta a comunicação. Sites falsos também podem ter certificado SSL.',
-          audioCorrect:
-              '🎵 Correcto! https:// não garante que o site seja legítimo.',
-          audioWrong:
-              '⚠️ Sites falsos também têm https://. Verifica sempre o domínio!',
-        ),
-      ];
+    _SimStep(
+      type: StepType.browser,
+      title: '🌐 Página Suspeita',
+      subtitle: 'Examina esta URL com atenção',
+      content:
+          'https://paypa1.com/signin\n\n🔎 Dica: Compara cada carácter com "paypal.com".\nO número "1" e a letra "l" são visualmente semelhantes.',
+      suspiciousWords: ['paypa1', '1'],
+      question: 'O que está errado nesta URL?',
+      options: [
+        'Nada, parece o PayPal',
+        'O "1" em vez de "l" em paypa1',
+        'O https://',
+        'O /signin',
+      ],
+      correctIndex: 1,
+      explanation:
+          'Typosquatting! "paypa1.com" usa o número "1" em vez da letra "l". O site real é paypal.com.',
+      audioCorrect:
+          '🎵 Excelente! Atenção aos caracteres substituídos nos URLs.',
+      audioWrong:
+          '⚠️ "paypa1" com número 1 é diferente de "paypal" com letra l.',
+    ),
+    _SimStep(
+      type: StepType.decision,
+      title: '🔐 Certificado SSL',
+      subtitle: 'O https:// garante segurança?',
+      content:
+          'O site paypa1.com tem cadeado verde 🔒 e https://.\nMuitos pensam que isso significa que o site é legítimo.',
+      suspiciousWords: ['paypa1.com'],
+      question: 'O https:// significa que o site é legítimo?',
+      options: [
+        'Sim, https:// garante que é seguro',
+        'Não, apenas encripta a ligação',
+        'Só sites do governo têm https://',
+        'Sim, o cadeado prova autenticidade',
+      ],
+      correctIndex: 1,
+      explanation:
+          'MITO COMUM! https:// apenas encripta a comunicação. Sites falsos também podem ter certificado SSL.',
+      audioCorrect:
+          '🎵 Correcto! https:// não garante que o site seja legítimo.',
+      audioWrong:
+          '⚠️ Sites falsos também têm https://. Verifica sempre o domínio!',
+    ),
+  ];
 
   List<_SimStep> _appSteps(PhishSimulation sim) => [
-        _SimStep(
-          type: StepType.qr,
-          title: '📱 QR Code Suspeito',
-          subtitle: 'Encontraste este QR em local público',
-          content:
-              'QR Code colado sobre o menu de um restaurante.\n\nURL detectado:\nhttp://menu-restaurante-lisboa.xyz/cardapio\n\n⚠️ Toca nos elementos suspeitos antes de decidir.',
-          suspiciousWords: ['.xyz', 'http://', 'menu-restaurante-lisboa'],
-          question: 'O que fazes com este QR Code?',
-          options: [
-            'Acedo normalmente, parece o menu',
-            'Verifico o URL antes de abrir qualquer página',
-            'Introduzo os meus dados para ver o menu',
-            'Partilho com amigos para verem'
-          ],
-          correctIndex: 1,
-          explanation:
-              'QR Jacking! QR codes falsos são colados sobre os originais em locais públicos. Verifica sempre o URL.',
-          audioCorrect:
-              '🎵 Prudente! Verifica sempre URLs de QR codes desconhecidos.',
-          audioWrong:
-              '⚠️ QR codes em locais públicos podem ser substituídos por falsos.',
-        ),
-      ];
+    _SimStep(
+      type: StepType.qr,
+      title: '📱 QR Code Suspeito',
+      subtitle: 'Encontraste este QR em local público',
+      content:
+          'QR Code colado sobre o menu de um restaurante.\n\nURL detectado:\nhttp://menu-restaurante-lisboa.xyz/cardapio\n\n⚠️ Toca nos elementos suspeitos antes de decidir.',
+      suspiciousWords: ['.xyz', 'http://', 'menu-restaurante-lisboa'],
+      question: 'O que fazes com este QR Code?',
+      options: [
+        'Acedo normalmente, parece o menu',
+        'Verifico o URL antes de abrir qualquer página',
+        'Introduzo os meus dados para ver o menu',
+        'Partilho com amigos para verem',
+      ],
+      correctIndex: 1,
+      explanation:
+          'QR Jacking! QR codes falsos são colados sobre os originais em locais públicos. Verifica sempre o URL.',
+      audioCorrect:
+          '🎵 Prudente! Verifica sempre URLs de QR codes desconhecidos.',
+      audioWrong:
+          '⚠️ QR codes em locais públicos podem ser substituídos por falsos.',
+    ),
+  ];
 
   List<_SimStep> _emailSteps2(PhishSimulation sim) => [
-        _SimStep(
-          type: StepType.email,
-          title: '📧 Email Corporativo Falso',
-          subtitle: 'Email no teu trabalho',
-          content: '''De: ti-suporte@empresa-helpdesk.net
+    _SimStep(
+      type: StepType.email,
+      title: '📧 Email Corporativo Falso',
+      subtitle: 'Email no teu trabalho',
+      content: '''De: ti-suporte@empresa-helpdesk.net
 Para: colaborador@empresa.pt
 Assunto: 🔧 Actualização obrigatória da senha – Acção imediata
 
@@ -1071,75 +1196,72 @@ O nosso sistema detectou que a tua senha expirou há 3 dias. Para evitar o bloqu
 Se não actualizares nas próximas 24H, o acesso será bloqueado.
 
 Departamento de TI''',
-          suspiciousWords: ['empresa-helpdesk.net', '24H', 'bloqueado'],
-          question: 'Deves clicar no link para actualizar a senha?',
-          options: [
-            '✅ Sim, o IT enviou o email',
-            '🚨 Não, contacto o IT directamente'
-          ],
-          correctIndex: 1,
-          explanation:
-              'BEC (Business Email Compromise)! O domínio "empresa-helpdesk.net" não é o domínio da empresa. O IT nunca pede reset de senha por email com link externo.',
-          audioCorrect:
-              '🎵 Correcto! Sempre verifica com o IT por canal oficial.',
-          audioWrong:
-              '⚠️ Nunca cliques em links de reset de senha sem confirmar com o IT.',
-        ),
-        _SimStep(
-          type: StepType.analysis,
-          title: '🔍 Cabeçalho do Email',
-          subtitle: 'Analisa os metadados',
-          content:
-              'De: ti-suporte@empresa-helpdesk.net\nReply-To: scammer2024@protonmail.com\nServidor: mail.digitalocean.xyz',
-          suspiciousWords: [
-            'empresa-helpdesk.net',
-            'scammer2024',
-            'protonmail.com',
-            'digitalocean.xyz'
-          ],
-          question: 'Qual pista revela que este email é falso?',
-          options: [
-            'O Reply-To diferente do remetente',
-            'O servidor DigitalOcean',
-            'O endereço Protonmail',
-            'Todas as opções acima'
-          ],
-          correctIndex: 3,
-          explanation:
-              'Correcto! Um Reply-To diferente, servidor desconhecido e email anónimo são todos red flags.',
-          audioCorrect: '🎵 Análise completa! Identificaste todos os sinais.',
-          audioWrong: '⚠️ Cada um destes elementos é suspeito individualmente.',
-        ),
-        _SimStep(
-          type: StepType.decision,
-          title: '🎯 Protocolo de Resposta',
-          subtitle: 'Qual é o procedimento correcto?',
-          content:
-              'Recebeste este email suspeito no trabalho. O que deves fazer?',
-          suspiciousWords: [],
-          question: 'Qual é a melhor acção?',
-          options: [
-            'Apagar o email e ignorar',
-            'Reportar ao departamento de segurança',
-            'Abrir o link em modo privado para verificar',
-            'Perguntar a um colega se recebeu o mesmo'
-          ],
-          correctIndex: 1,
-          explanation:
-              'Reportar é crucial! O departamento de segurança pode alertar outros colaboradores e investigar.',
-          audioCorrect:
-              '🎵 Perfeito! Reportar phishing ajuda a proteger toda a empresa.',
-          audioWrong:
-              '⚠️ Reportar ao departamento de IT é sempre a melhor opção.',
-        ),
-      ];
+      suspiciousWords: ['empresa-helpdesk.net', '24H', 'bloqueado'],
+      question: 'Deves clicar no link para actualizar a senha?',
+      options: [
+        '✅ Sim, o IT enviou o email',
+        '🚨 Não, contacto o IT directamente',
+      ],
+      correctIndex: 1,
+      explanation:
+          'BEC (Business Email Compromise)! O domínio "empresa-helpdesk.net" não é o domínio da empresa. O IT nunca pede reset de senha por email com link externo.',
+      audioCorrect: '🎵 Correcto! Sempre verifica com o IT por canal oficial.',
+      audioWrong:
+          '⚠️ Nunca cliques em links de reset de senha sem confirmar com o IT.',
+    ),
+    _SimStep(
+      type: StepType.analysis,
+      title: '🔍 Cabeçalho do Email',
+      subtitle: 'Analisa os metadados',
+      content:
+          'De: ti-suporte@empresa-helpdesk.net\nReply-To: scammer2024@protonmail.com\nServidor: mail.digitalocean.xyz',
+      suspiciousWords: [
+        'empresa-helpdesk.net',
+        'scammer2024',
+        'protonmail.com',
+        'digitalocean.xyz',
+      ],
+      question: 'Qual pista revela que este email é falso?',
+      options: [
+        'O Reply-To diferente do remetente',
+        'O servidor DigitalOcean',
+        'O endereço Protonmail',
+        'Todas as opções acima',
+      ],
+      correctIndex: 3,
+      explanation:
+          'Correcto! Um Reply-To diferente, servidor desconhecido e email anónimo são todos red flags.',
+      audioCorrect: '🎵 Análise completa! Identificaste todos os sinais.',
+      audioWrong: '⚠️ Cada um destes elementos é suspeito individualmente.',
+    ),
+    _SimStep(
+      type: StepType.decision,
+      title: '🎯 Protocolo de Resposta',
+      subtitle: 'Qual é o procedimento correcto?',
+      content: 'Recebeste este email suspeito no trabalho. O que deves fazer?',
+      suspiciousWords: [],
+      question: 'Qual é a melhor acção?',
+      options: [
+        'Apagar o email e ignorar',
+        'Reportar ao departamento de segurança',
+        'Abrir o link em modo privado para verificar',
+        'Perguntar a um colega se recebeu o mesmo',
+      ],
+      correctIndex: 1,
+      explanation:
+          'Reportar é crucial! O departamento de segurança pode alertar outros colaboradores e investigar.',
+      audioCorrect:
+          '🎵 Perfeito! Reportar phishing ajuda a proteger toda a empresa.',
+      audioWrong: '⚠️ Reportar ao departamento de IT é sempre a melhor opção.',
+    ),
+  ];
 
   List<_SimStep> _emailSteps3(PhishSimulation sim) => [
-        _SimStep(
-          type: StepType.email,
-          title: '📧 Falso Prémio / Sorteio',
-          subtitle: 'Email sobre uma suposta vitória',
-          content: '''De: premios@mbway-oficial-sorteio.com
+    _SimStep(
+      type: StepType.email,
+      title: '📧 Falso Prémio / Sorteio',
+      subtitle: 'Email sobre uma suposta vitória',
+      content: '''De: premios@mbway-oficial-sorteio.com
 Para: tu@email.com
 Assunto: 🏆 PARABÉNS! Ganhaste 500€ no sorteio MB WAY!
 
@@ -1155,198 +1277,193 @@ Para receber o teu prémio, segue estes passos:
 O prémio expira em 48H!
 
 MB WAY Premiações''',
-          suspiciousWords: [
-            'mbway-oficial-sorteio.com',
-            '500€',
-            '.xyz/receber',
-            'código de segurança',
-            '48H'
-          ],
-          question: 'Este email de prémio é legítimo?',
-          options: [
-            '✅ Sim, o MB WAY faz sorteios',
-            '🚨 É uma fraude de engenharia social'
-          ],
-          correctIndex: 1,
-          explanation:
-              'Fraude clássica! O MB WAY nunca faz sorteios por email. Pedir o código SMS é tentar roubar acesso à tua conta.',
-          audioCorrect:
-              '🎵 Bem identificado! Ofertas não solicitadas são quase sempre fraude.',
-          audioWrong:
-              '⚠️ Nunca existe prémio real sem participação prévia num sorteio.',
-        ),
-        _SimStep(
-          type: StepType.analysis,
-          title: '🔍 A Armadilha do Código SMS',
-          subtitle: 'Percebe a técnica de roubo',
-          content:
-              'O atacante pede o código SMS que recebes.\nEste código é o OTP (One-Time Password) da tua conta MB WAY.\n\n⚠️ Nunca partilhes este código com ninguém.',
-          suspiciousWords: ['OTP', 'código SMS', 'One-Time Password'],
-          question: 'Para que serve o código SMS neste contexto?',
-          options: [
-            'Para verificar a tua identidade',
-            'Para o atacante aceder à tua conta',
-            'Para confirmar o endereço de entrega',
-            'Para activar o prémio'
-          ],
-          correctIndex: 1,
-          explanation:
-              'O código OTP é a chave da tua conta! O atacante iniciou login na tua conta real e precisa do código SMS.',
-          audioCorrect: '🎵 Exacto! Nunca partilhes códigos SMS com ninguém.',
-          audioWrong:
-              '⚠️ Códigos SMS são senhas temporárias — nunca os partilhes.',
-        ),
-      ];
+      suspiciousWords: [
+        'mbway-oficial-sorteio.com',
+        '500€',
+        '.xyz/receber',
+        'código de segurança',
+        '48H',
+      ],
+      question: 'Este email de prémio é legítimo?',
+      options: [
+        '✅ Sim, o MB WAY faz sorteios',
+        '🚨 É uma fraude de engenharia social',
+      ],
+      correctIndex: 1,
+      explanation:
+          'Fraude clássica! O MB WAY nunca faz sorteios por email. Pedir o código SMS é tentar roubar acesso à tua conta.',
+      audioCorrect:
+          '🎵 Bem identificado! Ofertas não solicitadas são quase sempre fraude.',
+      audioWrong:
+          '⚠️ Nunca existe prémio real sem participação prévia num sorteio.',
+    ),
+    _SimStep(
+      type: StepType.analysis,
+      title: '🔍 A Armadilha do Código SMS',
+      subtitle: 'Percebe a técnica de roubo',
+      content:
+          'O atacante pede o código SMS que recebes.\nEste código é o OTP (One-Time Password) da tua conta MB WAY.\n\n⚠️ Nunca partilhes este código com ninguém.',
+      suspiciousWords: ['OTP', 'código SMS', 'One-Time Password'],
+      question: 'Para que serve o código SMS neste contexto?',
+      options: [
+        'Para verificar a tua identidade',
+        'Para o atacante aceder à tua conta',
+        'Para confirmar o endereço de entrega',
+        'Para activar o prémio',
+      ],
+      correctIndex: 1,
+      explanation:
+          'O código OTP é a chave da tua conta! O atacante iniciou login na tua conta real e precisa do código SMS.',
+      audioCorrect: '🎵 Exacto! Nunca partilhes códigos SMS com ninguém.',
+      audioWrong: '⚠️ Códigos SMS são senhas temporárias — nunca os partilhes.',
+    ),
+  ];
 
   List<_SimStep> _smsSteps2(PhishSimulation sim) => [
-        _SimStep(
-          type: StepType.sms,
-          title: '💬 SMS Bancário Falso',
-          subtitle: 'Mensagem urgente do banco',
-          content:
-              'CGDPT: Detectámos acesso nao autorizado. Bloqueamos o cartao. Clica para desbloquear: cgd-seguranca.online/desbloquear | Codigo: 4821',
-          suspiciousWords: [
-            'cgd-seguranca.online',
-            'Codigo: 4821',
-            'nao autorizado'
-          ],
-          question: 'O que está suspeito nesta mensagem?',
-          options: [
-            'O código 4821 no final',
-            'O domínio cgd-seguranca.online e a urgência',
-            'A palavra "bloqueamos"',
-            'Nada, a CGD envia mensagens assim'
-          ],
-          correctIndex: 1,
-          explanation:
-              'Smishing bancário! A CGD usa "cgd.pt" não "cgd-seguranca.online". Bancos nunca incluem links de desbloqueio por SMS.',
-          audioCorrect: '🎵 Correcto! Domínio falso + urgência = smishing.',
-          audioWrong:
-              '⚠️ Nenhum banco real envia links de desbloqueio por SMS.',
-        ),
-        _SimStep(
-          type: StepType.decision,
-          title: '🎯 Acção Imediata',
-          subtitle: 'O teu cartão pode estar em risco',
-          content:
-              'Recebes este SMS. Ficas preocupado com o teu cartão. O que fazes?',
-          suspiciousWords: [],
-          question: 'Qual é a resposta mais segura?',
-          options: [
-            'Clico no link para verificar a situação',
-            'Ligo para o número no verso do cartão',
-            'Respondo ao SMS para saber mais',
-            'Envio o código 4821 para verificar'
-          ],
-          correctIndex: 1,
-          explanation:
-              'Liga sempre para o número oficial no verso do cartão! Nunca cliques em links de SMS bancários.',
-          audioCorrect:
-              '🎵 Excelente! O verso do cartão tem o número oficial do banco.',
-          audioWrong:
-              '⚠️ O número no verso do cartão é o canal correcto para o banco.',
-        ),
-      ];
+    _SimStep(
+      type: StepType.sms,
+      title: '💬 SMS Bancário Falso',
+      subtitle: 'Mensagem urgente do banco',
+      content:
+          'CGDPT: Detectámos acesso nao autorizado. Bloqueamos o cartao. Clica para desbloquear: cgd-seguranca.online/desbloquear | Codigo: 4821',
+      suspiciousWords: [
+        'cgd-seguranca.online',
+        'Codigo: 4821',
+        'nao autorizado',
+      ],
+      question: 'O que está suspeito nesta mensagem?',
+      options: [
+        'O código 4821 no final',
+        'O domínio cgd-seguranca.online e a urgência',
+        'A palavra "bloqueamos"',
+        'Nada, a CGD envia mensagens assim',
+      ],
+      correctIndex: 1,
+      explanation:
+          'Smishing bancário! A CGD usa "cgd.pt" não "cgd-seguranca.online". Bancos nunca incluem links de desbloqueio por SMS.',
+      audioCorrect: '🎵 Correcto! Domínio falso + urgência = smishing.',
+      audioWrong: '⚠️ Nenhum banco real envia links de desbloqueio por SMS.',
+    ),
+    _SimStep(
+      type: StepType.decision,
+      title: '🎯 Acção Imediata',
+      subtitle: 'O teu cartão pode estar em risco',
+      content:
+          'Recebes este SMS. Ficas preocupado com o teu cartão. O que fazes?',
+      suspiciousWords: [],
+      question: 'Qual é a resposta mais segura?',
+      options: [
+        'Clico no link para verificar a situação',
+        'Ligo para o número no verso do cartão',
+        'Respondo ao SMS para saber mais',
+        'Envio o código 4821 para verificar',
+      ],
+      correctIndex: 1,
+      explanation:
+          'Liga sempre para o número oficial no verso do cartão! Nunca cliques em links de SMS bancários.',
+      audioCorrect:
+          '🎵 Excelente! O verso do cartão tem o número oficial do banco.',
+      audioWrong:
+          '⚠️ O número no verso do cartão é o canal correcto para o banco.',
+    ),
+  ];
 
   List<_SimStep> _urlSteps2(PhishSimulation sim) => [
-        _SimStep(
-          type: StepType.browser,
-          title: '🌐 Homograph Attack',
-          subtitle: 'URL com caracteres internacionais',
-          content:
-              'https://аpple.com/account\n\n⚠️ Aviso: O "а" no início é o Cirílico А (U+0430), não o latino "a".\nVisualmente idêntico, mas domínio completamente diferente.',
-          suspiciousWords: ['аpple', 'Cirílico'],
-          question: 'Este URL é o site oficial da Apple?',
-          options: [
-            'Sim, tem https:// e parece correcto',
-            'Não, usa caracteres Cirílicos invisíveis',
-            'Só é suspeito se não tiver cadeado',
-            'Sim, o domínio apple.com é oficial'
-          ],
-          correctIndex: 1,
-          explanation:
-              'Homograph Attack! Caracteres de outros alfabetos parecem idênticos ao olho humano mas são domínios completamente diferentes.',
-          audioCorrect:
-              '🎵 Impressionante! Homograph attacks são muito difíceis de detectar.',
-          audioWrong:
-              '⚠️ Caracteres visualmente idênticos de outros alfabetos são uma técnica avançada de phishing.',
-        ),
-        _SimStep(
-          type: StepType.analysis,
-          title: '🔍 URL Shortener',
-          subtitle: 'Link encurtado suspeito',
-          content:
-              'Recebes: bit.ly/3xK9mPq\n\nNão consegues ver o destino real sem clicar.\n🔒 Usa ferramentas de expansão de links antes de abrir.',
-          suspiciousWords: ['bit.ly/3xK9mPq'],
-          question: 'Como verificas um link encurtado com segurança?',
-          options: [
-            'Clico directamente para ver',
-            'Uso um serviço como checkshorturl.com para expandir',
-            'Se o remetente é de confiança, clico',
-            'Espero que o antivírus bloqueie se for mau'
-          ],
-          correctIndex: 1,
-          explanation:
-              'Links encurtados escondem o destino real. Usa ferramentas como checkshorturl.com ou unshorten.it antes de clicar.',
-          audioCorrect:
-              '🎵 Correcto! Sempre expande links encurtados antes de clicar.',
-          audioWrong:
-              '⚠️ Nunca cliques em links encurtados sem expandir primeiro.',
-        ),
-      ];
+    _SimStep(
+      type: StepType.browser,
+      title: '🌐 Homograph Attack',
+      subtitle: 'URL com caracteres internacionais',
+      content:
+          'https://аpple.com/account\n\n⚠️ Aviso: O "а" no início é o Cirílico А (U+0430), não o latino "a".\nVisualmente idêntico, mas domínio completamente diferente.',
+      suspiciousWords: ['аpple', 'Cirílico'],
+      question: 'Este URL é o site oficial da Apple?',
+      options: [
+        'Sim, tem https:// e parece correcto',
+        'Não, usa caracteres Cirílicos invisíveis',
+        'Só é suspeito se não tiver cadeado',
+        'Sim, o domínio apple.com é oficial',
+      ],
+      correctIndex: 1,
+      explanation:
+          'Homograph Attack! Caracteres de outros alfabetos parecem idênticos ao olho humano mas são domínios completamente diferentes.',
+      audioCorrect:
+          '🎵 Impressionante! Homograph attacks são muito difíceis de detectar.',
+      audioWrong:
+          '⚠️ Caracteres visualmente idênticos de outros alfabetos são uma técnica avançada de phishing.',
+    ),
+    _SimStep(
+      type: StepType.analysis,
+      title: '🔍 URL Shortener',
+      subtitle: 'Link encurtado suspeito',
+      content:
+          'Recebes: bit.ly/3xK9mPq\n\nNão consegues ver o destino real sem clicar.\n🔒 Usa ferramentas de expansão de links antes de abrir.',
+      suspiciousWords: ['bit.ly/3xK9mPq'],
+      question: 'Como verificas um link encurtado com segurança?',
+      options: [
+        'Clico directamente para ver',
+        'Uso um serviço como checkshorturl.com para expandir',
+        'Se o remetente é de confiança, clico',
+        'Espero que o antivírus bloqueie se for mau',
+      ],
+      correctIndex: 1,
+      explanation:
+          'Links encurtados escondem o destino real. Usa ferramentas como checkshorturl.com ou unshorten.it antes de clicar.',
+      audioCorrect:
+          '🎵 Correcto! Sempre expande links encurtados antes de clicar.',
+      audioWrong: '⚠️ Nunca cliques em links encurtados sem expandir primeiro.',
+    ),
+  ];
 
   List<_SimStep> _appSteps2(PhishSimulation sim) => [
-        _SimStep(
-          type: StepType.qr,
-          title: '📱 App Store Falsa',
-          subtitle: 'Aplicação suspeita na loja',
-          content:
-              'Vês um anúncio: "MB WAY PRO – Versão melhorada!"\n\nQR leva a:\nmbway-pro-download.xyz/app.apk\n\n⚠️ Ficheiros .apk fora da loja oficial são perigosos.',
-          suspiciousWords: ['mbway-pro-download.xyz', '.apk', '.xyz'],
-          question: 'O que está errado nesta situação?',
-          options: [
-            'Nada, as apps também existem fora das lojas',
-            'O APK fora da loja oficial pode ser malware',
-            'Só é suspeito se pedir dados bancários',
-            'O QR code garante que é seguro'
-          ],
-          correctIndex: 1,
-          explanation:
-              'APK de fonte desconhecida! Apps legítimas estão na Google Play ou App Store. Instalar APKs externos pode instalar malware.',
-          audioCorrect:
-              '🎵 Correcto! Nunca instales APKs fora das lojas oficiais.',
-          audioWrong:
-              '⚠️ Aplicações de fontes externas são o principal vector de malware mobile.',
-        ),
-        _SimStep(
-          type: StepType.decision,
-          title: '🎯 Permissões Excessivas',
-          subtitle: 'A app pede demasiado',
-          content:
-              'Instalas uma app de lanterna. Ela pede acesso a:\n• Contactos\n• SMS\n• Câmara\n• Microfone\n• Localização\n• Histórico de chamadas\n\n❓ Uma lanterna precisa de tudo isto?',
-          suspiciousWords: [
-            'Contactos',
-            'SMS',
-            'Microfone',
-            'Localização',
-            'Histórico de chamadas'
-          ],
-          question: 'O que deves fazer?',
-          options: [
-            'Aceitar tudo, as apps precisam de permissões',
-            'Desinstalar — uma lanterna não precisa dessas permissões',
-            'Aceitar só câmara e localização',
-            'Perguntar ao amigo que recomendou'
-          ],
-          correctIndex: 1,
-          explanation:
-              'Malware disfarçado! Uma lanterna só precisa da câmara (flash). Permissões excessivas são sinal de app maliciosa.',
-          audioCorrect:
-              '🎵 Excelente! Permissões excessivas são sempre red flag.',
-          audioWrong:
-              '⚠️ Questiona sempre se as permissões fazem sentido para a função da app.',
-        ),
-      ];
+    _SimStep(
+      type: StepType.qr,
+      title: '📱 App Store Falsa',
+      subtitle: 'Aplicação suspeita na loja',
+      content:
+          'Vês um anúncio: "MB WAY PRO – Versão melhorada!"\n\nQR leva a:\nmbway-pro-download.xyz/app.apk\n\n⚠️ Ficheiros .apk fora da loja oficial são perigosos.',
+      suspiciousWords: ['mbway-pro-download.xyz', '.apk', '.xyz'],
+      question: 'O que está errado nesta situação?',
+      options: [
+        'Nada, as apps também existem fora das lojas',
+        'O APK fora da loja oficial pode ser malware',
+        'Só é suspeito se pedir dados bancários',
+        'O QR code garante que é seguro',
+      ],
+      correctIndex: 1,
+      explanation:
+          'APK de fonte desconhecida! Apps legítimas estão na Google Play ou App Store. Instalar APKs externos pode instalar malware.',
+      audioCorrect: '🎵 Correcto! Nunca instales APKs fora das lojas oficiais.',
+      audioWrong:
+          '⚠️ Aplicações de fontes externas são o principal vector de malware mobile.',
+    ),
+    _SimStep(
+      type: StepType.decision,
+      title: '🎯 Permissões Excessivas',
+      subtitle: 'A app pede demasiado',
+      content:
+          'Instalas uma app de lanterna. Ela pede acesso a:\n• Contactos\n• SMS\n• Câmara\n• Microfone\n• Localização\n• Histórico de chamadas\n\n❓ Uma lanterna precisa de tudo isto?',
+      suspiciousWords: [
+        'Contactos',
+        'SMS',
+        'Microfone',
+        'Localização',
+        'Histórico de chamadas',
+      ],
+      question: 'O que deves fazer?',
+      options: [
+        'Aceitar tudo, as apps precisam de permissões',
+        'Desinstalar — uma lanterna não precisa dessas permissões',
+        'Aceitar só câmara e localização',
+        'Perguntar ao amigo que recomendou',
+      ],
+      correctIndex: 1,
+      explanation:
+          'Malware disfarçado! Uma lanterna só precisa da câmara (flash). Permissões excessivas são sinal de app maliciosa.',
+      audioCorrect: '🎵 Excelente! Permissões excessivas são sempre red flag.',
+      audioWrong:
+          '⚠️ Questiona sempre se as permissões fazem sentido para a função da app.',
+    ),
+  ];
 
   void _startTypewriter(String text) {
     _typeTimer?.cancel();
@@ -1421,7 +1538,10 @@ MB WAY Premiações''',
   Widget build(BuildContext context) {
     if (_showResult) {
       return _ResultView(
-          score: _score, total: _steps.length * 100, maxStreak: _maxStreak);
+        score: _score,
+        total: _steps.length * 100,
+        maxStreak: _maxStreak,
+      );
     }
 
     final step = _steps[_step];
@@ -1447,15 +1567,21 @@ MB WAY Premiações''',
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(step.title,
-                        style: GoogleFonts.syne(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.w800)),
-                    Text(step.subtitle,
-                        style: GoogleFonts.jetBrainsMono(
-                            color: Colors.white.withValues(alpha: 0.196),
-                            fontSize: 11)),
+                    Text(
+                      step.title,
+                      style: GoogleFonts.syne(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    Text(
+                      step.subtitle,
+                      style: GoogleFonts.jetBrainsMono(
+                        color: Colors.white.withValues(alpha: 0.196),
+                        fontSize: 11,
+                      ),
+                    ),
                     const SizedBox(height: 16),
                     _InteractiveContentCard(
                       step: step,
@@ -1471,28 +1597,36 @@ MB WAY Premiações''',
                         padding: const EdgeInsets.only(top: 8),
                         child: Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 6),
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFFFCC00)
-                                .withValues(alpha: 0.059),
+                            color: const Color(
+                              0xFFFFCC00,
+                            ).withValues(alpha: 0.059),
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                                color: const Color(0xFFFFCC00)
-                                    .withValues(alpha: 0.157)),
-                          ),
-                          child: Row(children: [
-                            const Text('🔍', style: TextStyle(fontSize: 12)),
-                            const SizedBox(width: 6),
-                            Flexible(
-                              child: Text(
-                                '${_highlightedWords.length} elemento(s) suspeito(s) marcado(s)',
-                                style: GoogleFonts.jetBrainsMono(
-                                    color: const Color(0xFFFFCC00),
-                                    fontSize: 10),
-                                overflow: TextOverflow.ellipsis,
-                              ),
+                              color: const Color(
+                                0xFFFFCC00,
+                              ).withValues(alpha: 0.157),
                             ),
-                          ]),
+                          ),
+                          child: Row(
+                            children: [
+                              const Text('🔍', style: TextStyle(fontSize: 12)),
+                              const SizedBox(width: 6),
+                              Flexible(
+                                child: Text(
+                                  '${_highlightedWords.length} elemento(s) suspeito(s) marcado(s)',
+                                  style: GoogleFonts.jetBrainsMono(
+                                    color: const Color(0xFFFFCC00),
+                                    fontSize: 10,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     const SizedBox(height: 20),
@@ -1502,7 +1636,8 @@ MB WAY Premiações''',
                         color: const Color(0xFF0D1520),
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.059)),
+                          color: Colors.white.withValues(alpha: 0.059),
+                        ),
                       ),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1510,38 +1645,46 @@ MB WAY Premiações''',
                           const Text('❓', style: TextStyle(fontSize: 16)),
                           const SizedBox(width: 10),
                           Expanded(
-                            child: Text(step.question,
-                                style: GoogleFonts.syne(
-                                    color: Colors.white,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w700)),
+                            child: Text(
+                              step.question,
+                              style: GoogleFonts.syne(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
                           ),
                         ],
                       ),
                     ),
                     const SizedBox(height: 14),
-                    ...step.options.asMap().entries.map((e) => _OptionButton(
-                          label: e.value,
-                          index: e.key,
-                          answered: _answered,
-                          isCorrect: e.key == step.correctIndex,
-                          isSelected: e.key == _selectedIndex,
-                          onTap: () => _answer(e.key),
-                        )),
+                    ...step.options.asMap().entries.map(
+                      (e) => _OptionButton(
+                        label: e.value,
+                        index: e.key,
+                        answered: _answered,
+                        isCorrect: e.key == step.correctIndex,
+                        isSelected: e.key == _selectedIndex,
+                        onTap: () => _answer(e.key),
+                      ),
+                    ),
                     const SizedBox(height: 16),
                     if (_answered)
                       AnimatedBuilder(
-                        animation:
-                            _correct! ? _successController : _shakeController,
+                        animation: _correct!
+                            ? _successController
+                            : _shakeController,
                         builder: (_, child) {
                           double dx = 0;
                           if (!_correct!) {
                             dx =
                                 math.sin(_shakeController.value * math.pi * 6) *
-                                    8;
+                                8;
                           }
                           return Transform.translate(
-                              offset: Offset(dx, 0), child: child);
+                            offset: Offset(dx, 0),
+                            child: child,
+                          );
                         },
                         child: _FeedbackCard(
                           correct: _correct!,
@@ -1593,7 +1736,8 @@ class _TopBar extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFF0D1520),
         border: Border(
-            bottom: BorderSide(color: Colors.white.withValues(alpha: 0.039))),
+          bottom: BorderSide(color: Colors.white.withValues(alpha: 0.039)),
+        ),
       ),
       child: Row(
         children: [
@@ -1602,8 +1746,9 @@ class _TopBar extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.039),
-                  borderRadius: BorderRadius.circular(10)),
+                color: Colors.white.withValues(alpha: 0.039),
+                borderRadius: BorderRadius.circular(10),
+              ),
               child: const Icon(Icons.close, color: Colors.white, size: 18),
             ),
           ),
@@ -1615,39 +1760,53 @@ class _TopBar extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('ETAPA $current/$total',
-                        style: GoogleFonts.jetBrainsMono(
-                            color: Colors.white.withValues(alpha: 0.235),
-                            fontSize: 10,
-                            letterSpacing: 1)),
+                    Text(
+                      'ETAPA $current/$total',
+                      style: GoogleFonts.jetBrainsMono(
+                        color: Colors.white.withValues(alpha: 0.235),
+                        fontSize: 10,
+                        letterSpacing: 1,
+                      ),
+                    ),
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         if (streak >= 2) ...[
                           Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 6, vertical: 2),
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFFF6B35)
-                                  .withValues(alpha: 0.118),
+                              color: const Color(
+                                0xFFFF6B35,
+                              ).withValues(alpha: 0.118),
                               borderRadius: BorderRadius.circular(6),
                               border: Border.all(
-                                  color: const Color(0xFFFF6B35)
-                                      .withValues(alpha: 0.314)),
+                                color: const Color(
+                                  0xFFFF6B35,
+                                ).withValues(alpha: 0.314),
+                              ),
                             ),
-                            child: Text('🔥 x$streak',
-                                style: GoogleFonts.jetBrainsMono(
-                                    color: const Color(0xFFFF6B35),
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w700)),
+                            child: Text(
+                              '🔥 x$streak',
+                              style: GoogleFonts.jetBrainsMono(
+                                color: const Color(0xFFFF6B35),
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
                           ),
                           const SizedBox(width: 6),
                         ],
-                        Text('$score pts',
-                            style: GoogleFonts.jetBrainsMono(
-                                color: const Color(0xFF00FF88),
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700)),
+                        Text(
+                          '$score pts',
+                          style: GoogleFonts.jetBrainsMono(
+                            color: const Color(0xFF00FF88),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
                       ],
                     ),
                   ],
@@ -1676,23 +1835,27 @@ class _TopBar extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: _timerColor.withValues(
-                      alpha: shouldPulse
-                          ? (10 + timerPulse.value * 20) / 255.0
-                          : 10 / 255.0),
+                    alpha: shouldPulse
+                        ? (10 + timerPulse.value * 20) / 255.0
+                        : 10 / 255.0,
+                  ),
                   border: Border.all(
-                      color: _timerColor.withValues(
-                          alpha: shouldPulse
-                              ? (80 + timerPulse.value * 80) / 255.0
-                              : 60 / 255.0),
-                      width: 1.5),
+                    color: _timerColor.withValues(
+                      alpha: shouldPulse
+                          ? (80 + timerPulse.value * 80) / 255.0
+                          : 60 / 255.0,
+                    ),
+                    width: 1.5,
+                  ),
                 ),
                 child: Center(
                   child: Text(
                     timerExpired ? '⏱' : '$timeLeft',
                     style: GoogleFonts.jetBrainsMono(
-                        color: _timerColor,
-                        fontSize: timerExpired ? 16 : 13,
-                        fontWeight: FontWeight.w700),
+                      color: _timerColor,
+                      fontSize: timerExpired ? 16 : 13,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
               );
@@ -1778,9 +1941,10 @@ class _InteractiveContentCard extends StatelessWidget {
         border: Border.all(color: color.withValues(alpha: 0.235)),
         boxShadow: [
           BoxShadow(
-              color: color.withValues(alpha: 0.059),
-              blurRadius: 20,
-              spreadRadius: -4)
+            color: color.withValues(alpha: 0.059),
+            blurRadius: 20,
+            spreadRadius: -4,
+          ),
         ],
       ),
       child: Column(
@@ -1790,10 +1954,12 @@ class _InteractiveContentCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             decoration: BoxDecoration(
               color: color.withValues(alpha: 0.059),
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(18)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(18),
+              ),
               border: Border(
-                  bottom: BorderSide(color: color.withValues(alpha: 0.157))),
+                bottom: BorderSide(color: color.withValues(alpha: 0.157)),
+              ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1806,29 +1972,32 @@ class _InteractiveContentCard extends StatelessWidget {
                       child: Text(
                         _headerLabel,
                         style: GoogleFonts.jetBrainsMono(
-                            color: color,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 1.5),
+                          color: color,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 1.5,
+                        ),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: ['red', 'yellow', 'green']
-                          .map((c) => Container(
-                                width: 8,
-                                height: 8,
-                                margin: const EdgeInsets.only(left: 4),
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: c == 'red'
-                                      ? const Color(0xFFFF5F57)
-                                      : c == 'yellow'
-                                          ? const Color(0xFFFFBD2E)
-                                          : const Color(0xFF28CA41),
-                                ),
-                              ))
+                          .map(
+                            (c) => Container(
+                              width: 8,
+                              height: 8,
+                              margin: const EdgeInsets.only(left: 4),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: c == 'red'
+                                    ? const Color(0xFFFF5F57)
+                                    : c == 'yellow'
+                                    ? const Color(0xFFFFBD2E)
+                                    : const Color(0xFF28CA41),
+                              ),
+                            ),
+                          )
                           .toList(),
                     ),
                   ],
@@ -1838,9 +2007,10 @@ class _InteractiveContentCard extends StatelessWidget {
                   Text(
                     'toca nos elementos suspeitos',
                     style: GoogleFonts.jetBrainsMono(
-                        color: color.withValues(alpha: 0.392),
-                        fontSize: 9,
-                        fontStyle: FontStyle.italic),
+                      color: color.withValues(alpha: 0.392),
+                      fontSize: 9,
+                      fontStyle: FontStyle.italic,
+                    ),
                   ),
                 ],
               ],
@@ -1861,9 +2031,10 @@ class _InteractiveContentCard extends StatelessWidget {
     return RichText(
       text: TextSpan(
         style: GoogleFonts.jetBrainsMono(
-            color: Colors.white.withValues(alpha: 0.784),
-            fontSize: 12,
-            height: 1.8),
+          color: Colors.white.withValues(alpha: 0.784),
+          fontSize: 12,
+          height: 1.8,
+        ),
         children: [
           TextSpan(text: text),
           WidgetSpan(child: _BlinkingCursor()),
@@ -1898,35 +2069,39 @@ class _InteractiveContentCard extends StatelessWidget {
       }
 
       final isHighlighted = highlightedWords.contains(foundWord.hashCode);
-      spans.add(WidgetSpan(
-        child: GestureDetector(
-          onTap: () => onWordTap(foundWord!),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 1),
-            decoration: BoxDecoration(
-              color: isHighlighted
-                  ? const Color(0xFFFFCC00).withValues(alpha: 0.157)
-                  : accentColor.withValues(alpha: 0.039),
-              borderRadius: BorderRadius.circular(4),
-              border: Border.all(
+      spans.add(
+        WidgetSpan(
+          child: GestureDetector(
+            onTap: () => onWordTap(foundWord!),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 1),
+              decoration: BoxDecoration(
                 color: isHighlighted
-                    ? const Color(0xFFFFCC00).withValues(alpha: 0.588)
-                    : accentColor.withValues(alpha: 0.157),
+                    ? const Color(0xFFFFCC00).withValues(alpha: 0.157)
+                    : accentColor.withValues(alpha: 0.039),
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(
+                  color: isHighlighted
+                      ? const Color(0xFFFFCC00).withValues(alpha: 0.588)
+                      : accentColor.withValues(alpha: 0.157),
+                ),
               ),
-            ),
-            child: Text(
-              foundWord,
-              style: GoogleFonts.jetBrainsMono(
-                color: isHighlighted ? const Color(0xFFFFCC00) : accentColor,
-                fontSize: 12,
-                height: 1.8,
-                fontWeight: isHighlighted ? FontWeight.w700 : FontWeight.normal,
+              child: Text(
+                foundWord,
+                style: GoogleFonts.jetBrainsMono(
+                  color: isHighlighted ? const Color(0xFFFFCC00) : accentColor,
+                  fontSize: 12,
+                  height: 1.8,
+                  fontWeight: isHighlighted
+                      ? FontWeight.w700
+                      : FontWeight.normal,
+                ),
               ),
             ),
           ),
         ),
-      ));
+      );
 
       remaining = remaining.substring(earliestIndex + foundWord.length);
     }
@@ -1936,9 +2111,10 @@ class _InteractiveContentCard extends StatelessWidget {
     return RichText(
       text: TextSpan(
         style: GoogleFonts.jetBrainsMono(
-            color: Colors.white.withValues(alpha: 0.784),
-            fontSize: 12,
-            height: 1.8),
+          color: Colors.white.withValues(alpha: 0.784),
+          fontSize: 12,
+          height: 1.8,
+        ),
         children: spans,
       ),
     );
@@ -1973,7 +2149,9 @@ class _OptionButtonState extends State<_OptionButton>
   void initState() {
     super.initState();
     _ctrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 150));
+      vsync: this,
+      duration: const Duration(milliseconds: 150),
+    );
   }
 
   @override
@@ -2015,7 +2193,10 @@ class _OptionButtonState extends State<_OptionButton>
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         transform: Matrix4.diagonal3Values(
-            _pressed ? 0.97 : 1.0, _pressed ? 0.97 : 1.0, 1.0),
+          _pressed ? 0.97 : 1.0,
+          _pressed ? 0.97 : 1.0,
+          1.0,
+        ),
         decoration: BoxDecoration(
           color: bgColor,
           borderRadius: BorderRadius.circular(14),
@@ -2031,44 +2212,52 @@ class _OptionButtonState extends State<_OptionButton>
                 color: widget.answered && widget.isCorrect
                     ? const Color(0xFF00FF88).withValues(alpha: 0.118)
                     : widget.answered && widget.isSelected
-                        ? const Color(0xFFFF4444).withValues(alpha: 0.078)
-                        : Colors.white.withValues(alpha: 0.039),
+                    ? const Color(0xFFFF4444).withValues(alpha: 0.078)
+                    : Colors.white.withValues(alpha: 0.039),
                 border: Border.all(
-                    color: widget.answered && widget.isCorrect
-                        ? const Color(0xFF00FF88)
-                        : widget.answered && widget.isSelected
-                            ? const Color(0xFFFF4444)
-                            : Colors.white.withValues(alpha: 0.118)),
+                  color: widget.answered && widget.isCorrect
+                      ? const Color(0xFF00FF88)
+                      : widget.answered && widget.isSelected
+                      ? const Color(0xFFFF4444)
+                      : Colors.white.withValues(alpha: 0.118),
+                ),
               ),
               child: Center(
                 child:
                     widget.answered && (widget.isCorrect || widget.isSelected)
-                        ? Icon(widget.isCorrect ? Icons.check : Icons.close,
-                            size: 14,
-                            color: widget.isCorrect
-                                ? const Color(0xFF00FF88)
-                                : const Color(0xFFFF4444))
-                        : Text(String.fromCharCode(65 + widget.index),
-                            style: GoogleFonts.jetBrainsMono(
-                                color: Colors.white.withValues(alpha: 0.235),
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700)),
+                    ? Icon(
+                        widget.isCorrect ? Icons.check : Icons.close,
+                        size: 14,
+                        color: widget.isCorrect
+                            ? const Color(0xFF00FF88)
+                            : const Color(0xFFFF4444),
+                      )
+                    : Text(
+                        String.fromCharCode(65 + widget.index),
+                        style: GoogleFonts.jetBrainsMono(
+                          color: Colors.white.withValues(alpha: 0.235),
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
               ),
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: Text(widget.label,
-                  style: GoogleFonts.syne(
-                    color: widget.answered && widget.isCorrect
-                        ? const Color(0xFF00FF88)
-                        : widget.answered &&
-                                widget.isSelected &&
-                                !widget.isCorrect
-                            ? const Color(0xFFFF4444)
-                            : Colors.white,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                  )),
+              child: Text(
+                widget.label,
+                style: GoogleFonts.syne(
+                  color: widget.answered && widget.isCorrect
+                      ? const Color(0xFF00FF88)
+                      : widget.answered &&
+                            widget.isSelected &&
+                            !widget.isCorrect
+                      ? const Color(0xFFFF4444)
+                      : Colors.white,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ),
           ],
         ),
@@ -2105,9 +2294,13 @@ class _FeedbackCardState extends State<_FeedbackCard>
   void initState() {
     super.initState();
     _ctrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 500));
-    _scale = Tween<double>(begin: 0.8, end: 1.0)
-        .animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOutBack));
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+    _scale = Tween<double>(
+      begin: 0.8,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOutBack));
     _fade = CurvedAnimation(parent: _ctrl, curve: Curves.easeOut);
     _ctrl.forward();
   }
@@ -2120,8 +2313,9 @@ class _FeedbackCardState extends State<_FeedbackCard>
 
   @override
   Widget build(BuildContext context) {
-    final color =
-        widget.correct ? const Color(0xFF00FF88) : const Color(0xFFFF4444);
+    final color = widget.correct
+        ? const Color(0xFF00FF88)
+        : const Color(0xFFFF4444);
 
     String headerTitle;
     String headerEmoji;
@@ -2150,9 +2344,10 @@ class _FeedbackCardState extends State<_FeedbackCard>
             border: Border.all(color: color.withValues(alpha: 0.314)),
             boxShadow: [
               BoxShadow(
-                  color: color.withValues(alpha: 0.078),
-                  blurRadius: 20,
-                  spreadRadius: -4)
+                color: color.withValues(alpha: 0.078),
+                blurRadius: 20,
+                spreadRadius: -4,
+              ),
             ],
           ),
           child: Column(
@@ -2167,20 +2362,25 @@ class _FeedbackCardState extends State<_FeedbackCard>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(headerTitle,
-                            style: GoogleFonts.jetBrainsMono(
-                                color: color,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 1),
-                            overflow: TextOverflow.ellipsis),
                         Text(
-                            widget.correct
-                                ? widget.step.audioCorrect
-                                : widget.step.audioWrong,
-                            style: GoogleFonts.jetBrainsMono(
-                                color: color.withValues(alpha: 0.588),
-                                fontSize: 10)),
+                          headerTitle,
+                          style: GoogleFonts.jetBrainsMono(
+                            color: color,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 1,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Text(
+                          widget.correct
+                              ? widget.step.audioCorrect
+                              : widget.step.audioWrong,
+                          style: GoogleFonts.jetBrainsMono(
+                            color: color.withValues(alpha: 0.588),
+                            fontSize: 10,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -2189,11 +2389,14 @@ class _FeedbackCardState extends State<_FeedbackCard>
               const SizedBox(height: 12),
               Container(height: 1, color: color.withValues(alpha: 0.157)),
               const SizedBox(height: 12),
-              Text(widget.step.explanation,
-                  style: GoogleFonts.jetBrainsMono(
-                      color: Colors.white.withValues(alpha: 0.706),
-                      fontSize: 11,
-                      height: 1.7)),
+              Text(
+                widget.step.explanation,
+                style: GoogleFonts.jetBrainsMono(
+                  color: Colors.white.withValues(alpha: 0.706),
+                  fontSize: 11,
+                  height: 1.7,
+                ),
+              ),
               const SizedBox(height: 16),
               SizedBox(
                 width: double.infinity,
@@ -2205,14 +2408,16 @@ class _FeedbackCardState extends State<_FeedbackCard>
                     foregroundColor: Colors.black,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                   child: Text(
                     widget.isLast ? 'VER RESULTADO FINAL →' : 'PRÓXIMA ETAPA →',
                     style: GoogleFonts.jetBrainsMono(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 1),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1,
+                    ),
                   ),
                 ),
               ),
@@ -2226,8 +2431,11 @@ class _FeedbackCardState extends State<_FeedbackCard>
 
 class _ResultView extends StatefulWidget {
   final int score, total, maxStreak;
-  const _ResultView(
-      {required this.score, required this.total, required this.maxStreak});
+  const _ResultView({
+    required this.score,
+    required this.total,
+    required this.maxStreak,
+  });
 
   @override
   State<_ResultView> createState() => _ResultViewState();
@@ -2243,14 +2451,22 @@ class _ResultViewState extends State<_ResultView>
   void initState() {
     super.initState();
     _ctrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 800));
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
     _countCtrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 1500));
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    );
     _fade = CurvedAnimation(parent: _ctrl, curve: Curves.easeOut);
-    _scale = Tween<double>(begin: 0.5, end: 1.0)
-        .animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOutBack));
-    _count = IntTween(begin: 0, end: widget.score).animate(
-        CurvedAnimation(parent: _countCtrl, curve: Curves.easeOutCubic));
+    _scale = Tween<double>(
+      begin: 0.5,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOutBack));
+    _count = IntTween(
+      begin: 0,
+      end: widget.score,
+    ).animate(CurvedAnimation(parent: _countCtrl, curve: Curves.easeOutCubic));
     _ctrl.forward().then((_) => _countCtrl.forward());
     HapticFeedback.heavyImpact();
   }
@@ -2308,80 +2524,109 @@ class _ResultViewState extends State<_ResultView>
                         shape: BoxShape.circle,
                         color: _gradeColor.withValues(alpha: 0.078),
                         border: Border.all(
-                            color: _gradeColor.withValues(alpha: 0.392),
-                            width: 3),
+                          color: _gradeColor.withValues(alpha: 0.392),
+                          width: 3,
+                        ),
                         boxShadow: [
                           BoxShadow(
-                              color: _gradeColor.withValues(alpha: 0.235),
-                              blurRadius: 40,
-                              spreadRadius: -5)
+                            color: _gradeColor.withValues(alpha: 0.235),
+                            blurRadius: 40,
+                            spreadRadius: -5,
+                          ),
                         ],
                       ),
                       child: Center(
-                        child: Text(_grade,
-                            style: GoogleFonts.syne(
-                                color: _gradeColor,
-                                fontSize: 56,
-                                fontWeight: FontWeight.w900)),
+                        child: Text(
+                          _grade,
+                          style: GoogleFonts.syne(
+                            color: _gradeColor,
+                            fontSize: 56,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
                       ),
                     ),
                   ),
                   const SizedBox(height: 24),
-                  Text('MISSÃO CONCLUÍDA',
-                      style: GoogleFonts.jetBrainsMono(
-                          color: Colors.white.withValues(alpha: 0.235),
-                          fontSize: 11,
-                          letterSpacing: 3)),
+                  Text(
+                    'MISSÃO CONCLUÍDA',
+                    style: GoogleFonts.jetBrainsMono(
+                      color: Colors.white.withValues(alpha: 0.235),
+                      fontSize: 11,
+                      letterSpacing: 3,
+                    ),
+                  ),
                   const SizedBox(height: 8),
-                  Text(_gradeLabel,
-                      style: GoogleFonts.syne(
-                          color: Colors.white,
-                          fontSize: 22,
-                          fontWeight: FontWeight.w800),
-                      textAlign: TextAlign.center),
+                  Text(
+                    _gradeLabel,
+                    style: GoogleFonts.syne(
+                      color: Colors.white,
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
                   const SizedBox(height: 32),
                   AnimatedBuilder(
                     animation: _count,
                     builder: (_, __) => Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 32, vertical: 20),
+                        horizontal: 32,
+                        vertical: 20,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFF0D1520),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
-                            color: _gradeColor.withValues(alpha: 0.235)),
+                          color: _gradeColor.withValues(alpha: 0.235),
+                        ),
                       ),
-                      child: Column(children: [
-                        Text('${_count.value}',
+                      child: Column(
+                        children: [
+                          Text(
+                            '${_count.value}',
                             style: GoogleFonts.syne(
-                                color: _gradeColor,
-                                fontSize: 48,
-                                fontWeight: FontWeight.w900)),
-                        Text('de ${widget.total} pontos',
-                            style: GoogleFonts.jetBrainsMono(
-                                color: Colors.white.withValues(alpha: 0.235),
-                                fontSize: 12)),
-                        if (widget.maxStreak >= 2) ...[
-                          const SizedBox(height: 12),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFFF6B35)
-                                  .withValues(alpha: 0.078),
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                  color: const Color(0xFFFF6B35)
-                                      .withValues(alpha: 0.235)),
+                              color: _gradeColor,
+                              fontSize: 48,
+                              fontWeight: FontWeight.w900,
                             ),
-                            child: Text(
+                          ),
+                          Text(
+                            'de ${widget.total} pontos',
+                            style: GoogleFonts.jetBrainsMono(
+                              color: Colors.white.withValues(alpha: 0.235),
+                              fontSize: 12,
+                            ),
+                          ),
+                          if (widget.maxStreak >= 2) ...[
+                            const SizedBox(height: 12),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(
+                                  0xFFFF6B35,
+                                ).withValues(alpha: 0.078),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: const Color(
+                                    0xFFFF6B35,
+                                  ).withValues(alpha: 0.235),
+                                ),
+                              ),
+                              child: Text(
                                 '🔥 Melhor sequência: ${widget.maxStreak}x acertos',
                                 style: GoogleFonts.jetBrainsMono(
-                                    color: const Color(0xFFFF6B35),
-                                    fontSize: 11)),
-                          ),
+                                  color: const Color(0xFFFF6B35),
+                                  fontSize: 11,
+                                ),
+                              ),
+                            ),
+                          ],
                         ],
-                      ]),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 32),
@@ -2398,13 +2643,17 @@ class _ResultViewState extends State<_ResultView>
                         foregroundColor: Colors.black,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16)),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
                       ),
-                      child: Text('VOLTAR ÀS MISSÕES',
-                          style: GoogleFonts.jetBrainsMono(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 1)),
+                      child: Text(
+                        'VOLTAR ÀS MISSÕES',
+                        style: GoogleFonts.jetBrainsMono(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 1,
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -2430,8 +2679,9 @@ class _BlinkingCursorState extends State<_BlinkingCursor>
   void initState() {
     super.initState();
     _ctrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 600))
-      ..repeat(reverse: true);
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    )..repeat(reverse: true);
   }
 
   @override
@@ -2442,16 +2692,17 @@ class _BlinkingCursorState extends State<_BlinkingCursor>
 
   @override
   Widget build(BuildContext context) => AnimatedBuilder(
-        animation: _ctrl,
-        builder: (_, __) => Opacity(
-          opacity: _ctrl.value,
-          child: Container(
-              width: 2,
-              height: 14,
-              margin: const EdgeInsets.only(left: 2),
-              color: const Color(0xFF00FF88)),
-        ),
-      );
+    animation: _ctrl,
+    builder: (_, __) => Opacity(
+      opacity: _ctrl.value,
+      child: Container(
+        width: 2,
+        height: 14,
+        margin: const EdgeInsets.only(left: 2),
+        color: const Color(0xFF00FF88),
+      ),
+    ),
+  );
 }
 
 enum StepType { email, sms, browser, qr, analysis, decision }
